@@ -1,0 +1,18 @@
+{
+  "name": "placementos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Campus recruitment operations platform",
+  "scripts": {
+    "dev": "pnpm --filter @placementos/web dev",
+    "dev:all": "pnpm --filter @placementos/web dev",
+    "build": "pnpm --filter @placementos/api-client build && pnpm --filter @placementos/web build",
+    "lint": "pnpm --recursive run lint",
+    "typecheck": "pnpm --recursive run typecheck",
+    "test": "pnpm --recursive run test",
+    "codegen": "pnpm --filter @placementos/api-client generate"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

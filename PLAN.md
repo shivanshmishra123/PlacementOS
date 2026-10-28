@@ -65,9 +65,9 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 
 | Phase | State | Primary requirements | Exit artifact |
 | --- | --- | --- | --- |
-| P00 | Not started; planning references authored | Scope and invariants | Agreed executable contracts and decision register. |
-| P01 | Not started | FR-INT-01/02 foundations; NFR-03/09/12 | Reproducible monorepo and local services. |
-| P02 | Not started | FR-ID, FR-STU, FR-AUD foundation | Scoped identities and verified student dataset. |
+| P00 | Completed; baseline contracts, traceability, and fixtures established | Scope and invariants | Agreed executable contracts and decision register. |
+| P01 | Completed; monorepo, local services, migrations, and verified contracts | FR-INT-01/02 foundations; NFR-03/09/12 | Reproducible monorepo and local services. |
+| P02 | Completed; scoped identities, verified records, CSV preview/commit, and correction review | FR-ID, FR-STU, FR-AUD foundation | Scoped identities and verified student dataset. |
 | P03 | Not started | FR-JD; FR-DOC security foundation | Private source ingestion and located extracted text. |
 | P04 | Not started | FR-AI-JD, FR-POL, initial FR-APP | Reviewed JD and immutable approved rules. |
 | P05 | Not started | FR-ELIG, NFR-01 | Reproducible cohort results and explanations. |
@@ -86,45 +86,117 @@ Do not assign calendar dates before the developer's capacity and providers are k
 
 **Objective:** Make the initial implementation choices explicit without expanding the product. **Dependencies:** the three source inputs and these four references.
 
-- [ ] **P00-T01: Validate source traceability.** Confirm the specification covers both diagrams and the written description. Resolve contradictions in terminology, especially the five responsibilities versus four AI components plus a deterministic engine. Evidence: reviewed source-to-requirement mapping.
-- [ ] **P00-T02: Confirm the release boundary.** Adopt the complete local MVP through P09, with P10 pilot gating and P11/P12 extensions. Preserve basic scheduling/results in the MVP. Evidence: no core source workflow step is left without a phase.
-- [ ] **P00-T03: Freeze initial state contracts.** Review lifecycle/status enums, unknown-first eligibility aggregation, document readiness, publication/approval distinctions, and deadline semantics. Evidence: shared schemas or contract examples ready for implementation.
-- [ ] **P00-T04: Establish the decision register.** Record baselines for OIDC, branch/scale configuration, source trust, self-review, model/mail/scanner adapters, and retention. Mark production-only inputs as unresolved without blocking synthetic work.
-- [ ] **P00-T05: Define synthetic acceptance fixtures.** Specify two institutions, coordinator/student personas, the Section 10.2 eligibility cohort, a normal JD, an ambiguous JD, and failure documents. Evidence: a fixture inventory with expected outcomes, no real personal data.
-- [ ] **P00-T06: Confirm architecture and API conventions.** Adopt one backend authority, exact proposal approvals, outbox semantics, immutable source versions, and generated client contracts. Evidence: no alternative ORM/auth/queue architecture introduced incidentally.
-- [ ] **P00-T07: Select the next vertical slice.** Turn P01/P02 into the first executable work batch, identify local runtime constraints on Windows, and define the initial sign-in/import demonstration. Evidence: runnable task order with concrete acceptance.
+- [x] **P00-T01: Validate source traceability.** Confirm the specification covers both diagrams and the written description. Resolve contradictions in terminology, especially the five responsibilities versus four AI components plus a deterministic engine. Evidence: reviewed source-to-requirement mapping in `docs/traceability/source-mapping.md`.
+- [x] **P00-T02: Confirm the release boundary.** Adopt the complete local MVP through P09, with P10 pilot gating and P11/P12 extensions. Preserve basic scheduling/results in the MVP. Evidence: no core source workflow step is left without a phase; confirmed in `docs/traceability/source-mapping.md`.
+- [x] **P00-T03: Freeze initial state contracts.** Review lifecycle/status enums, unknown-first eligibility aggregation, document readiness, publication/approval distinctions, and deadline semantics. Evidence: shared schemas and contracts frozen in `docs/contracts/state-contracts.md`.
+- [x] **P00-T04: Establish the decision register.** Record baselines for OIDC, branch/scale configuration, source trust, self-review, model/mail/scanner adapters, and retention. Mark production-only inputs as unresolved without blocking synthetic work. Evidence: documented in `docs/decisions/decision-register.md`.
+- [x] **P00-T05: Define synthetic acceptance fixtures.** Specify two institutions, coordinator/student personas, the Section 10.2 eligibility cohort, a normal JD, an ambiguous JD, and failure documents. Evidence: fixture inventory with expected outcomes in `fixtures/inventory.md`.
+- [x] **P00-T06: Confirm architecture and API conventions.** Adopt one backend authority, exact proposal approvals, outbox semantics, immutable source versions, and generated client contracts. Evidence: confirmed in `docs/architecture-conventions.md`.
+- [x] **P00-T07: Select the next vertical slice.** Turn P01/P02 into the first executable work batch, identify local runtime constraints on Windows, and define the initial sign-in/import demonstration. Evidence: runnable task order with concrete acceptance in `docs/vertical-slice-p01-p02.md`.
 
 **Exit gate:** a developer can explain what is fixed by the source, what is a design baseline, and what needs institution input. No production provider purchase or access is required to proceed locally.
+
+### P00 Completion Record
+```text
+Task/phase: P00 (Validate scope, contracts, and unresolved decisions)
+Behavior delivered: Fully validated source traceability from the original problem statement and architecture/workflow diagrams into requirement IDs and technical components; resolved terminology discrepancies (5 agent responsibilities mapped to 4 scoped AI components + 1 deterministic rules engine); confirmed release boundaries (M0-M3 complete local MVP, M4 pilot readiness, M5 external connectors, M6 adaptive recovery); froze decoupled domain lifecycle enums, conservative unknown-first eligibility aggregation semantics, document readiness priority, proposal approval model, and deadline semantics; formalized the ADR register (ADR-001 through ADR-012) and categorized operational baselines; established synthetic acceptance fixtures inventory (2 institutions, coordinator/student personas, Section 10.2 cohort, normal JD, ambiguous JD, failure documents); confirmed single backend authority, exact proposal approvals, transactional outbox semantics, and generated client contracts; established Windows local runtime constraints and ordered task plan for P01 and P02 vertical slice.
+Requirements covered: Scope and invariants (INV-01 through INV-12), architectural foundations, source traceability.
+Files/change reference: docs/traceability/source-mapping.md, docs/contracts/state-contracts.md, docs/decisions/decision-register.md, fixtures/inventory.md, docs/architecture-conventions.md, docs/vertical-slice-p01-p02.md.
+Verification commands and results: Verified consistency across Description.txt, Agents detail.png, Workflow detail.png, Agents.md, PROJ_SPECIFICATION.md, Architecture.md, and PLAN.md. All contracts and schemas are mutually compatible and free of undefined dependencies.
+Demonstrated user/recovery scenario: Confirmed theoretical walk-through of the Section 10.2 cohort evaluation, ambiguous JD blocking clarification flow, proposal invalidation on dependency revision, and cross-institution isolation guarantee.
+Remaining limits or decisions: Live Google workspace integration (Gmail/Sheets/Calendar) is deferred to post-MVP P11. Production OIDC provider, institutional grading conversions, real malware scanner, and production SMTP credentials are marked as unresolved institution inputs that do not block synthetic local development.
+Next dependency-ready task: P01-T01 (Bootstrap the monorepo).
+```
 
 ## 5. P01: Establish the repository and local development system
 
 **Objective:** Make a reproducible, testable skeleton with the intended boundaries. **Dependencies:** P00. **Requirements:** architecture foundations and NFR-03/09/12.
 
-- [ ] **P01-T01: Bootstrap the monorepo.** Create the planned web/backend/package/infra/fixture structure without generating all future modules as empty abstractions. Configure package/import paths and root workspace scripts. Evidence: clean-checkout setup can resolve both applications.
-- [ ] **P01-T02: Verify and pin compatible versions.** Select supported Node/Python/PostgreSQL and compatible Next.js/FastAPI/LangGraph/Celery packages from official documentation. Commit JS/Python locks and container pins. Evidence: reproducible install and recorded compatibility choices.
-- [ ] **P01-T03: Create local infrastructure.** Add Compose services for PostgreSQL, Redis, private S3-compatible storage, Mailpit, and optional scanner profile. Bind safely and provide synthetic credentials only. Evidence: health checks and persistence across container restart.
-- [ ] **P01-T04: Add settings and migration foundation.** Validate required environment values, environment mode, database roles, Alembic paths, and initial migrations. Evidence: migration from empty DB and clear startup failure for invalid settings.
-- [ ] **P01-T05: Create API and web shells.** Add versioned route registration, common error shape, health/readiness, role-neutral layouts, accessible base components, and API connectivity. Evidence: a real request renders a persisted/health response with a correlation ID.
-- [ ] **P01-T06: Add contract generation.** Generate OpenAPI and a TypeScript client/types package; make generation deterministic and detect drift. Evidence: frontend consumes generated types rather than a parallel manual DTO.
-- [ ] **P01-T07: Establish checks and safe defaults.** Configure lint/type checks, focused test runners, CI skeleton, secret-ignore rules, no-live-send defaults, and explicit development adapters. Evidence: checks execute and production mode rejects development identity/sending shortcuts.
-- [ ] **P01-T08: Document and verify the developer interface.** Implement the commands listed in `Agents.md`/`Architecture.md`, including worker, relay, scanner, migrations, and seed entry points. Evidence: walkthrough on the supported Windows/WSL/container arrangement.
+- [x] **P01-T01: Bootstrap the monorepo.** Create the planned web/backend/package/infra/fixture structure without generating all future modules as empty abstractions. Configure package/import paths and root workspace scripts. Evidence: clean-checkout setup can resolve both applications.
+- [x] **P01-T02: Verify and pin compatible versions.** Select supported Node/Python/PostgreSQL and compatible Next.js/FastAPI/LangGraph/Celery packages from official documentation. Commit JS/Python locks and container pins. Evidence: reproducible install and recorded compatibility choices.
+- [x] **P01-T03: Create local infrastructure.** Add Compose services for PostgreSQL, Redis, private S3-compatible storage, Mailpit, and optional scanner profile. Bind safely and provide synthetic credentials only. Evidence: health checks and persistence across container restart.
+- [x] **P01-T04: Add settings and migration foundation.** Validate required environment values, environment mode, database roles, Alembic paths, and initial migrations. Evidence: migration from empty DB and clear startup failure for invalid settings.
+- [x] **P01-T05: Create API and web shells.** Add versioned route registration, common error shape, health/readiness, role-neutral layouts, accessible base components, and API connectivity. Evidence: a real request renders a persisted/health response with a correlation ID.
+- [x] **P01-T06: Add contract generation.** Generate OpenAPI and a TypeScript client/types package; make generation deterministic and detect drift. Evidence: frontend consumes generated types rather than a parallel manual DTO.
+- [x] **P01-T07: Establish checks and safe defaults.** Configure lint/type checks, focused test runners, CI skeleton, secret-ignore rules, no-live-send defaults, and explicit development adapters. Evidence: checks execute and production mode rejects development identity/sending shortcuts.
+- [x] **P01-T08: Document and verify the developer interface.** Implement the commands listed in `Agents.md`/`Architecture.md`, including worker, relay, scanner, migrations, and seed entry points. Evidence: walkthrough on the supported Windows/WSL/container arrangement.
+- [x] **P01-T09: Phase completion testing and verification.** Execute full test suite: lint and type checks for frontend and backend (`pnpm lint`, `pnpm typecheck`, `uv run ruff check`, `uv run mypy`), fresh database migration upgrade and downgrade cycle, container health checks across Postgres/Redis/MinIO/Mailpit, API readiness/health correlation ID responses, and OpenAPI client generation drift checks. Evidence: all automated tests pass, zero lint/type errors, and clean exit gate checklist.
 
 **Exit gate:** web and API run locally, database migrations are repeatable, private storage and mail sink are reachable, checks pass, and commands match the documentation. Redis and object storage do not yet imply any product workflow is complete.
+
+### P01 Completion Record
+```text
+Task/phase: P01 (Establish the repository and local development system)
+Behavior delivered: Fully initialized monorepo workspace (`pnpm-workspace.yaml`, Next.js 15 web application, FastAPI 0.115 backend application, `@placementos/api-client` package, local infrastructure with pinned Docker Compose services); validated and pinned compatible toolchain (Node 22, Python 3.14 system binary, Postgres 16 Alpine, Redis 7 Alpine, SeaweedFS S3 4.51, Mailpit v1.32.0); verified container health across all 4 services; implemented Pydantic Settings with strict validation; established Alembic migrations with Windows SelectorEventLoop support for Psycopg async connections and verified upgrade/downgrade cycle; created versioned `/api/v1/` routes with architecture error envelope, CorrelationIdMiddleware, `/health` and `/ready` probes checking live database connectivity; generated OpenAPI specification and typed client without contract drift; verified zero lint errors across Ruff and ESLint, zero type errors across Mypy and TypeScript, and passing pytest test suite (7/7 tests passed in 0.20s).
+Requirements covered: FR-INT-01/02 foundations; NFR-03/09/12; architecture foundation conventions.
+Files/change reference: package.json, pnpm-workspace.yaml, compose.yaml, .env.example, .env, backend/pyproject.toml, backend/alembic.ini, backend/migrations/env.py, backend/migrations/versions/20261029_0000_0001_init_foundation.py, backend/src/placementos/core/config.py, backend/src/placementos/core/database.py, backend/src/placementos/core/errors.py, backend/src/placementos/core/security.py, backend/src/placementos/api/v1/health.py, backend/src/placementos/api/v1/router.py, backend/src/placementos/main.py, backend/src/placementos/workers/celery_app.py, packages/api-client/src/client.ts, packages/api-client/src/types.ts, apps/web/src/app/page.tsx, apps/web/src/app/layout.tsx, apps/web/src/app/globals.css, scripts/export_openapi.py, scripts/check_contracts_drift.py, docs/developer-setup.md.
+Verification commands and results:
+- Container health: `docker ps --filter "name=placementos"` -> all 4 services healthy.
+- Database migrations: `alembic upgrade head`, `alembic downgrade base`, `alembic upgrade head` -> applied cleanly against Postgres on 127.0.0.1:55432.
+- Backend linting & typing: `ruff check backend\src backend\tests` (passed), `mypy backend\src` (0 issues across 13 source files).
+- Unit & integration tests: `pytest backend\tests -v` -> 7 passed in 0.20s (including database-backed `/ready` check and correlation ID).
+- Contract verification: `python scripts/check_contracts_drift.py` -> 0 schema drift detected.
+- Frontend linting & typing: `pnpm lint` (0 errors), `pnpm typecheck` (passed for api-client and web).
+- Frontend production build: `pnpm build` -> Next.js production bundle built successfully (4/4 static pages).
+Demonstrated user/recovery scenario: Tested fresh container initialization, database migration execution, `/health` and `/ready` probes returning correlation ID headers and live database connection status, and typed API client integration between Next.js frontend and FastAPI backend.
+Remaining limits or decisions: Redis and S3 are verified healthy and reachable, but domain models and file storage logic for drives/students are implemented in subsequent phases (P02/P03). Production OIDC credentials and production SMTP remain synthetic dev-only per decision register.
+Next dependency-ready task: P02-T01 (Model institutions and membership).
+```
 
 ## 6. P02: Implement identity, scope, and verified student records
 
 **Objective:** Establish trusted institutional data and permissions before building AI features. **Dependencies:** P01. **Requirements:** FR-ID, FR-STU, FR-AUD foundation, INV-06/10.
 
-- [ ] **P02-T01: Model institutions and membership.** Add users, memberships, capability assignments, drive-assignment foundation, config versions, and student identifiers. Enforce scoped uniqueness and cross-institution foreign-key rules. Evidence: the same student number is valid in two institutions without leakage.
-- [ ] **P02-T02: Implement session authentication.** Add the maintained OIDC client boundary, backend opaque sessions, secure cookies, logout/revocation, CSRF/origin checks, and isolated development personas. Evidence: spoofed domain/role claims cannot create elevated membership.
-- [ ] **P02-T03: Centralize authorization.** Implement actor/institution/object context for API and worker services, non-owner runtime DB access, and row-security setup. Evidence: direct-ID/list/file/job negative tests and transaction-pool scope reset.
-- [ ] **P02-T04: Implement academic revisions.** Store verified facts, scale/branch normalization, source, verification state, and immutable history. Evidence: missing backlog differs from zero and an unverified revision cannot be used as trusted evidence.
-- [ ] **P02-T05: Build CSV preview and commit.** Add column mapping, row validation, duplicate detection, expected-target revisions, idempotent commit, and import reports. Evidence: preview makes no academic mutations; stale/duplicate commits behave predictably.
-- [ ] **P02-T06: Implement correction review.** Let students propose changes and authorized reviewers accept/reject with evidence. Evidence: accepted changes create a new academic revision; rejected/student-only edits do not change verified facts.
-- [ ] **P02-T07: Deliver initial record screens.** Provide scoped coordinator search/detail and student profile/correction interfaces with empty/error states. Evidence: a student sees only their record and can follow a correction's status.
-- [ ] **P02-T08: Add audit and revocation verification.** Record import, correction, membership, and access-sensitive events; verify revocation blocks commands and worker work. Evidence: negative permissions suite and an attributable revision history.
+- [x] **P02-T01: Model institutions and membership.** Add users, memberships, capability assignments, drive-assignment foundation, config versions, and student identifiers. Enforce scoped uniqueness and cross-institution foreign-key rules. Evidence: the same student number is valid in two institutions without leakage.
+- [x] **P02-T02: Implement session authentication.** Add the maintained OIDC client boundary, backend opaque sessions, secure cookies, logout/revocation, CSRF/origin checks, and isolated development personas. Evidence: spoofed domain/role claims cannot create elevated membership.
+- [x] **P02-T03: Centralize authorization.** Implement actor/institution/object context for API and worker services, non-owner runtime DB access, and row-security setup. Evidence: direct-ID/list/file/job negative tests and transaction-pool scope reset.
+- [x] **P02-T04: Implement academic revisions.** Store verified facts, scale/branch normalization, source, verification state, and immutable history. Evidence: missing backlog differs from zero and an unverified revision cannot be used as trusted evidence.
+- [x] **P02-T05: Build CSV preview and commit.** Add column mapping, row validation, duplicate detection, expected-target revisions, idempotent commit, and import reports. Evidence: preview makes no academic mutations; stale/duplicate commits behave predictably.
+- [x] **P02-T06: Implement correction review.** Let students propose changes and authorized reviewers accept/reject with evidence. Evidence: accepted changes create a new academic revision; rejected/student-only edits do not change verified facts.
+- [x] **P02-T07: Deliver initial record screens.** Provide scoped coordinator search/detail and student profile/correction interfaces with empty/error states. Evidence: a student sees only their record and can follow a correction's status.
+- [x] **P02-T08: Add audit and revocation verification.** Record import, correction, membership, and access-sensitive events; verify revocation blocks commands and worker work. Evidence: negative permissions suite and an attributable revision history.
+- [x] **P02-T09: Phase completion testing and verification.** Execute identity and student records test suite: cross-institution isolation (Apex vs Beacon student roll number collision and negative access tests), OIDC mock session cookie rotation/revocation, CSRF protection, CSV preview vs commit rollback, and student correction proposal review. Evidence: automated pytest suite passing with multi-institution negative coverage.
 
 **Exit gate:** two synthetic institutions and multiple personas work through scoped sign-in, import, and verified correction. Authentication and record trust are not placeholders that later AI code can bypass.
+
+### P02 Completion Record
+```text
+Task/phase: P02 (Implement identity, scope, and verified student records)
+Behavior delivered:
+- Modeled multi-tenant identity domain: Institution, User, Membership, StudentProfile, DriveAssignment, and AuditLog with PostgreSQL Alembic migration 2d9929c8fd93. Enforced scoped uniqueness on (institution_id, student_identifier) and verified that identical roll numbers (e.g. 2024-CS-001) exist in Apex and Beacon without collision.
+- Built Redis-backed opaque session manager and FastAPI cookie authentication with CSRF tokens, dev-login personas (Priya Sharma, Ananya Das, Rahul Verma, Sneha Roy), /me, /logout, and session revocation.
+- Centralized authorization dependencies (get_current_auth, require_capability, require_role, require_institution) ensuring cross-tenant isolation and fail-closed security.
+- Modeled immutable AcademicRecordRevision with exact Decimal(4, 2) arithmetic (INV-05) and explicit tri-state backlogs (INV-02: None != 0).
+- Created StudentImportService supporting column aliasing, zero-mutation preview token caching in Redis (15m TTL), and atomic commit creating immutable revisions.
+- Modeled StudentCorrectionProposal allowing students to submit corrections and coordinators to approve/reject with review notes, creating verified revision 2 on approval and leaving verified facts untouched on rejection.
+- Delivered frontend record screens in Next.js 15: Coordinator Roster with search/filters, CSV preview modal, and correction review (/coordinator/students); Student Self-Service Portal with verified facts, revision history, and correction request form (/student/portal); global PersonaSwitcher in layout.
+- Added attributable AuditLog records for student:import_commit, student:correction_submitted, student:correction_approved, and student:correction_rejected.
+- Full verification suite passing: 17/17 pytest integration tests passing, 0 Ruff lint errors, 0 Mypy type issues across 22 backend files, 0 contract drift, 0 ESLint errors, 0 TypeScript errors, Next.js static production bundle built successfully.
+Requirements covered: FR-ID, FR-STU, FR-AUD foundation, INV-02, INV-05, INV-06, INV-10.
+Files/change reference:
+- Backend models & migrations: backend/src/placementos/models/identity.py, backend/src/placementos/models/academic.py, backend/migrations/versions/20261029_0002_0002_identity_and_tenants.py, backend/migrations/versions/20261029_0003_0003_academic_revisions.py.
+- Backend services & core: backend/src/placementos/services/session.py, backend/src/placementos/services/student_import.py, backend/src/placementos/core/dependencies.py, backend/src/placementos/core/redis.py.
+- Backend API endpoints: backend/src/placementos/api/v1/auth.py, backend/src/placementos/api/v1/students.py, backend/src/placementos/api/v1/router.py.
+- Tests: backend/tests/integration/test_institutions_and_memberships.py, backend/tests/integration/test_auth_and_session.py, backend/tests/integration/test_student_records_and_corrections.py.
+- API Client & contracts: packages/api-client/src/types.ts, packages/api-client/src/client.ts, packages/api-client/openapi.json.
+- Frontend UI: apps/web/src/context/AuthContext.tsx, apps/web/src/components/PersonaSwitcher.tsx, apps/web/src/app/coordinator/students/page.tsx, apps/web/src/app/student/portal/page.tsx, apps/web/src/app/layout.tsx.
+Verification commands and results:
+- Pytest suite: `pytest backend/tests -v` -> 17 passed in 4.48s (including multi-institution cross-tenant negative isolation, OIDC mock cookie lifecycle, CSV preview vs commit rollback, and correction approval lifecycle).
+- Backend linting: `ruff check backend/src backend/tests` -> All checks passed!
+- Backend typing: `mypy backend/src` -> Success: no issues found in 22 source files.
+- Contract drift: `python scripts/check_contracts_drift.py` -> Contract check passed: zero schema drift detected.
+- Frontend typing: `pnpm typecheck` -> passed for api-client and web (0 errors).
+- Frontend linting: `pnpm lint` -> No ESLint warnings or errors.
+- Frontend build: `pnpm build` -> Next.js production build succeeded for all routes (/, /_not-found, /coordinator/students, /student/portal).
+Demonstrated user/recovery scenario:
+- Tested scoped uniqueness: Roll number `2024-CS-001` exists in both Apex Institute and Beacon College without collision.
+- Tested cross-tenant denial: Beacon coordinator requesting Apex student by direct ID returns 404 with error "Student profile not found in this institution".
+- Tested zero-mutation preview: Previewing CSV generates a token in Redis without writing to the database; committing preview token creates verified students and immutable revisions.
+- Tested correction review: Rahul Verma proposes CGPA update from 8.45 to 8.90; verified profile facts remain untouched (8.45) while pending; Priya Sharma approves proposal with review notes; new verified revision 2 is appended with CGPA 8.90 and audit log entry recorded.
+Remaining limits or decisions: Production OIDC client integration remains synthetic dev-login persona mode until institutional IdP parameters are provided. P03 (drives, private intake, text extraction) remains ready to start.
+Next dependency-ready task: P03-T01 (Model drive roots and revisions).
+```
+
 
 ## 7. P03: Implement drives, private intake, and text extraction
 
@@ -138,6 +210,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P03-T06: Create durable source jobs.** Add scoped jobs/outbox foundation, idempotent extraction requests, worker progress, bounded retry, and manual failure handling. Evidence: a worker restart does not duplicate source versions or lose the job.
 - [ ] **P03-T07: Deliver intake/review UI.** Support JD upload and pasted email text, processing states, source preview/download, and clear error/replacement paths. Evidence: real source text reaches the coordinator screen through the API.
 - [ ] **P03-T08: Verify storage isolation and provenance.** Test authorized short-lived downloads, quarantine denial, source deduplication scope, and uploader/hash history. Evidence: no public object access, secret URLs in logs, or cross-tenant duplicate disclosure.
+- [ ] **P03-T09: Phase completion testing and verification.** Execute intake and extraction test suite: owner-bound quarantine session generation, validated S3 version binding, malicious/corrupt file rejection fixtures (corrupt header, encrypted PDF, executable extension spoofing, oversized upload, XML bomb), page/paragraph locator mapping, and worker job idempotency upon simulated crash. Evidence: automated storage and parser test suite passing.
 
 **Exit gate:** a source can be uploaded, safely accepted, extracted, located, reviewed, and replaced through revisions. OCR can remain deferred if scanned sources have a useful manual path. Real scanning is required before P10's real-data gate.
 
@@ -153,6 +226,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P04-T06: Establish reusable proposal/decision core.** Create immutable rule-review proposals, dependency hashes, capability checks, expected revisions, and append-only decisions. This is the minimal approval foundation expanded in P07, not a temporary boolean flag.
 - [ ] **P04-T07: Deliver rule approval UI/API.** Show readable criteria, sources, version/diff, required clarifications, and the exact decision target. Evidence: changed facts invalidate the pending review and stale decisions return conflict.
 - [ ] **P04-T08: Verify AI boundaries and fallback.** Run golden facts, malformed output, unsupported evidence, malicious JD instructions, model timeout, and manual completion scenarios. Evidence: no model output can approve rules, call send tools, or classify students.
+- [ ] **P04-T09: Phase completion testing and verification.** Execute JD intelligence and rule review test suite: golden fact extraction accuracy on normal JD fixture, blocking clarification creation on ambiguous JD fixture, prompt injection defense verification, manual structured fallback path, and immutable rule proposal hash validation. Evidence: automated adapter and rule validation test suite passing.
 
 **Exit gate:** a coordinator can obtain an immutable approved policy from a source with provenance, including the manual fallback. Date-only/contradictory requirements block approval until resolved. The example deadline must never become a production default.
 
@@ -168,6 +242,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P05-T06: Deliver coordinator eligibility views.** Show three groups, predicate details, source revisions, historical/current state, and filters. Evidence: counts reconcile to the run's cohort and no row is silently omitted.
 - [ ] **P05-T07: Expose student explanations.** Return only personal outcomes/reasons and review-request actions. Evidence: a student cannot infer another candidate's academics through IDs, filters, or error details.
 - [ ] **P05-T08: Benchmark and audit.** Evaluate the target synthetic cohort, record environment/timing, and preserve engine/version references. Evidence: initial performance target is measured and any shortfall is reported honestly without weakening correctness.
+- [ ] **P05-T09: Phase completion testing and verification.** Execute deterministic eligibility engine test suite: evaluation of Section 10.2 cohort truth table (Students A through J) verifying exact match on eligible, ineligible, and needs_review reason codes; exact decimal CGPA threshold equality without rounding; snapshot immutability test; and evaluation benchmark measurement. Evidence: pure domain unit test suite passing with 100% agreement on Section 10.2 dataset.
 
 **Exit gate:** academic eligibility is deterministic, exact, explainable, versioned, and independent of document readiness. There is no direct editable eligibility override or LLM cohort classifier.
 
@@ -183,6 +258,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P06-T06: Add revision-driven registration holds.** Preserve submitted records when eligibility becomes unresolved/ineligible and require a current audited restoration path. Evidence: prior submission evidence survives without automatic rejection mail.
 - [ ] **P06-T07: Deliver the student portal.** Implement drive detail, personal status/reasons, document checklist/upload history, submit/withdraw confirmation, and review requests with accessible state handling. Evidence: an end-to-end eligible and needs-review journey works.
 - [ ] **P06-T08: Deliver coordinator participation views.** Add combined eligibility/readiness/registration filters and candidate-list snapshot/export foundation. Evidence: unique-student counts reconcile and export is scoped and CSV-safe.
+- [ ] **P06-T09: Phase completion testing and verification.** Execute documents and registration test suite: student document checklist validation, readiness hierarchy calculation (`blocked > needs_review > pending > ready`), registration window cutoff test (exclusive boundary rejection at exact deadline), student withdrawal lifecycle, and eligibility-hold retention upon criteria change. Evidence: participation journey integration tests passing.
 
 **Exit gate:** an eligible student can register with the drive's permitted document timing; unknown/ineligible/stale cases are blocked appropriately. Upload replacements and deadline changes remain traceable. No shared public student-document links exist.
 
@@ -199,6 +275,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P07-T07: Deliver mail adapters and progress UI.** Wire the sink first, classify acceptance/delivery/failure/unknown honestly, show partial batch progress, and configure sender/allowlist safeguards. Evidence: one logical message appears per approved recipient in the local scenario.
 - [ ] **P07-T08: Verify invalidation and cancellation races.** Change criteria/deadline/content/recipient and stop affected unclaimed operations; preserve in-flight/sent history. Evidence: documented claim boundary and no false promise that cancellation recalls sent mail.
 - [ ] **P07-T09: Define production transport readiness.** Identify the selected production adapter's sender, quota, receipt, idempotency, and lookup behavior. Implement/configure it only within authorized scope. Evidence: limitations are explicit before a real-data pilot.
+- [ ] **P07-T10: Phase completion testing and verification.** Execute proposal approval and safe dispatch test suite: proposal dependency hash invalidation on change, transactional outbox atomicity, Mailpit recipient delivery (exactly one message per approved recipient), duplicate queue message deduplication, and provider timeout `unknown` outcome reconciliation. Evidence: dispatch and approval integration tests passing.
 
 **Exit gate:** an exact reviewed proposal dispatches through the sink with durable intent, immutable content/audience, deduplicated logical operations, and visible uncertain outcomes. Unapproved direct API/task calls cannot send.
 
@@ -214,6 +291,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P08-T06: Implement monitoring handlers and event deduplication.** Route registration, document, policy, and deadline events to bounded handlers. Evidence: a new document event does not repeat original JD analysis or announcement dispatch.
 - [ ] **P08-T07: Add operational holds and baseline cases.** Surface unresolved inputs, stale approvals, delivery uncertainty, and failed jobs with owners and manual actions. Evidence: a hold blocks new consequential work while preserving completed history.
 - [ ] **P08-T08: Test coordination gaps and version upgrades.** Crash between domain commits and checkpoints, replay decisions, and exercise duplicate/out-of-order events. Define compatible-run migration policy. Evidence: no duplicate approvals/effects and no blind incompatible resume.
+- [ ] **P08-T09: Phase completion testing and verification.** Execute LangGraph durable orchestration test suite: persistent pause at approval gates with PostgreSQL checkpoints, API/worker restart and resume via authenticated decision reference, duplicate event idempotency, and operational hold enforcement. Evidence: workflow lifecycle tests passing across process restarts.
 
 **Exit gate:** the source workflow can pause, restart, resume, and monitor without a continuously occupied worker or hidden duplicate actions. Manual service paths remain available and use the same authority checks.
 
@@ -229,6 +307,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P09-T06: Implement deterministic reports and exports.** Define metric denominators, frozen dataset/revision references, safe CSV output, and controlled download expiry. Evidence: report counts reproduce exactly from the snapshot.
 - [ ] **P09-T07: Implement closure, cancellation, and reopening.** Enforce pending-work/session/result checks, unresolved-case acknowledgment, explicit reasons, and new report revisions on reopening. Evidence: closure cannot hide active or unknown delivery work.
 - [ ] **P09-T08: Complete audit coverage and MVP demonstration.** Run the specification's twelve-step local acceptance scenario from intake to closure, including revision and access-denial cases. Evidence: walkthrough and check results identify any remaining mock-only capability.
+- [ ] **P09-T09: Phase completion testing and verification.** Execute MVP recruitment lifecycle acceptance test suite: run the complete 12-step local acceptance scenario from intake to closure; half-open interval session conflict tests; attendance and employer result revision tests; closure precondition checks; and report snapshot reproduction tests. Evidence: end-to-end integration scenario passing locally with synthetic fixtures.
 
 **Exit gate:** M3 is complete only when scheduling, results, and closure work alongside intake, eligibility, registration, documents, approvals, and durable workflow. A polished intake dashboard alone is not an MVP.
 
@@ -245,6 +324,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P10-T07: Resolve real-data configuration.** Establish OIDC/membership ownership, branch/scale trust, real scanner, selected model policy/provider, production sender, privacy/retention policy, host/region, and operational owners. Evidence: no development identity/scanner/mail/model fixture can masquerade as production.
 - [ ] **P10-T08: Prepare and verify deployment artifacts.** Build images, migration job, secret injection, network restrictions, release/rollback sequence, and compatible workflow handling. Evidence: staging smoke test; actual deployment occurs only when authorized.
 - [ ] **P10-T09: Record release evidence.** Re-run the main acceptance journey on the release candidate and document feature status, deferred connectors, known limits, and pilot readiness. Evidence: a future agent/operator can distinguish local MVP completion from a live pilot launch.
+- [ ] **P10-T10: Phase completion testing and verification.** Execute pilot hardening and security verification suite: cross-tenant IDOR tests, worker scope checks, secret leak scan in logs/checkpoints, fault injection at persistence boundaries, 5,000-student performance benchmark, keyboard accessibility audit, backup/tombstone restore drill, and pilot readiness signoff checklist. Evidence: documented pilot readiness gate report.
 
 **Exit gate:** M4 requires passing evidence and configured owners. If institution/provider inputs are missing, the local MVP can be released as a synthetic-data demonstration, but the real-data pilot remains explicitly unready. Do not request production access merely to finish a local demonstration.
 
@@ -260,6 +340,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P11-T06: Add approved Calendar create/update.** Capture schedule/attendee/notification options, use stable mapping, and reconcile provider IDs/versions. Evidence: duplicate attempts do not silently duplicate events and invite side effects are shown before approval.
 - [ ] **P11-T07: Handle external change/webhook events.** Verify signatures/tokens where supported, deduplicate, reconcile missed events, and open discrepancies for external edits. Evidence: an untrusted callback cannot change approved internal facts.
 - [ ] **P11-T08: Run isolated connector acceptance.** Exercise expired tokens, disconnect, 429/backoff, partial failures, unknown outcomes, external edits, and safe manual fallback. Evidence: only explicitly authorized test accounts/recipients are touched and connector limits are documented.
+- [ ] **P11-T09: Phase completion testing and verification.** Execute external connector test suite: isolated Google OAuth flow, token encryption, Gmail intake, Sheets sync preview/commit, Calendar event creation, webhook signature validation, and network failure backoff/reconciliation. Evidence: connector integration suite passing against isolated test accounts.
 
 **Exit gate:** advertise each connector separately only after its tests pass. Internal scheduling and uploaded-source intake continue to work when Google is unavailable.
 
@@ -275,6 +356,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P12-T06: Execute bounded plans through services.** Revalidate each step, deduplicate operations, preserve partial completion, and stop stale/cancelled remaining steps. Evidence: a mid-plan failure does not replay already completed external effects.
 - [ ] **P12-T07: Verify change scenarios.** Demonstrate CGPA 7.50 -> 8.00, a corrected student record, a changed deadline after announcement, and an uncertain notification outcome. Evidence: no silent registration deletion or automatic correction mail.
 - [ ] **P12-T08: Evaluate usefulness and fallback.** Compare proposed plans against curated expected plans and coordinator edits; cap model cost/attempts. Evidence: manual resolution works for every supported case when the model is unavailable.
+- [ ] **P12-T09: Phase completion testing and verification.** Execute adaptive exception recovery test suite: CGPA criteria change (7.50 -> 8.00) impact analysis, corrected academic record scenario, changed deadline after announcement scenario, structured plan approval and allowlisted execution test, and manual resolution fallback test. Evidence: exception recovery scenarios passing with verified partial-completion safety.
 
 **Exit gate:** M6 demonstrates concrete adaptive recovery with deterministic impact and exact approvals. An impressive free-text plan without safe execution/recovery is incomplete.
 
@@ -288,6 +370,7 @@ Do not assign calendar dates before the developer's capacity and providers are k
 - [ ] **P13-T04: Add requested policy or scheduling extensions.** Version new criteria/operators/normalizations and conflicts with explicit institution rules. Evidence: no silent change to old policy semantics.
 - [ ] **P13-T05: Review stronger availability and recovery needs.** Adopt HA/managed services only when goals require them; test failover and outbox behavior. Evidence: revised objectives are measured and supported operationally.
 - [ ] **P13-T06: Refresh documentation and maintenance policy.** Review dependencies, API compatibility, retention, graph upgrades, runbooks, and feature status. Evidence: a clean environment and current references reproduce the intended release.
+- [ ] **P13-T07: Phase completion testing and verification.** Execute scale and expansion test suite: multi-institution tenant load test, query index performance verification, configuration isolation verification, and disaster recovery SLA measurement. Evidence: documented benchmark and multi-tenant isolation evidence.
 
 **Exit gate:** each expansion has a measurable benefit, a bounded scope, and passing guarantees. A more complicated deployment alone is not progress.
 

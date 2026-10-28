@@ -1,0 +1,67 @@
+name: placementos
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: placementos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: placementos
+      POSTGRES_PASSWORD: placementos_dev_password
+      POSTGRES_DB: placementos
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U placementos -d placementos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: placementos-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  object-store:
+    image: chrislusf/seaweedfs:4.51
+    container_name: placementos-object-store
+    restart: unless-stopped
+    command: "server -s3 -dir=/data -s3.port=8333"
+    ports:
+      - "127.0.0.1:4566:8333"
+    volumes:
+      - object_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8333 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    container_name: placementos-mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8025 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  object_data:

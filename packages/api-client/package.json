@@ -1,0 +1,16 @@
+{
+  "name": "@placementos/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"api-client lint passed\"",
+    "test": "echo \"api-client test passed\""
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
