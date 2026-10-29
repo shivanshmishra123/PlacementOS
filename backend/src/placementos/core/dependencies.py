@@ -4,13 +4,20 @@ import uuid
 from collections.abc import Callable
 
 from fastapi import Depends, Request
+from sqlalchemy import select, text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from placementos.core.config import settings
+from placementos.core.database import get_db
 from placementos.core.errors import ForbiddenException, UnauthorizedException
+from placementos.models.identity import Institution, Membership, User
 from placementos.services.session import AuthContext, SessionManager
 
 
-async def get_current_auth(request: Request) -> AuthContext:
+async def get_current_auth(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> AuthContext:
     """Resolve authenticated user and active institutional context from session cookie or bearer token."""
     # 1. Check session cookie first
     raw_token = request.cookies.get(settings.SESSION_COOKIE_NAME)
@@ -27,6 +34,41 @@ async def get_current_auth(request: Request) -> AuthContext:
     auth = await SessionManager.get_session(raw_token)
     if not auth:
         raise UnauthorizedException("Invalid or expired session. Please sign in again.")
+
+    membership = (
+        await db.execute(
+            select(Membership, User, Institution)
+            .join(User, User.id == Membership.user_id)
+            .join(Institution, Institution.id == Membership.institution_id)
+            .where(
+                Membership.id == auth.membership_id,
+                Membership.user_id == auth.user_id,
+                Membership.institution_id == auth.institution_id,
+            )
+        )
+    ).one_or_none()
+    if not membership:
+        raise UnauthorizedException("Institutional membership no longer exists")
+    current_membership, current_user, institution = membership
+    if not current_membership.is_active or not current_user.is_active or not institution.is_active:
+        raise UnauthorizedException("Session membership has been revoked")
+
+    auth = AuthContext(
+        session_id=auth.session_id,
+        user_id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        institution_id=institution.id,
+        institution_slug=institution.slug,
+        membership_id=current_membership.id,
+        role=current_membership.role,
+        capabilities=list(current_membership.capabilities),
+    )
+    db.info["institution_id"] = auth.institution_id
+    await db.execute(
+        text("SELECT set_config('app.institution_id', :institution_id, true)"),
+        {"institution_id": str(auth.institution_id)},
+    )
 
     # Attach to request state for downstream handlers and audit logging
     request.state.auth = auth

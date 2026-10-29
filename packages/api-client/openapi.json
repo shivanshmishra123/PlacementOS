@@ -1283,6 +1283,490 @@
           }
         }
       }
+    },
+    "/api/v1/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "Source Intake & Extraction"
+        ],
+        "summary": "Get Domain Job",
+        "operationId": "get_domain_job_api_v1_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DomainJobResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/interpretations": {
+      "post": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "Create Interpretation",
+        "operationId": "create_interpretation_api_v1_drives__drive_id__interpretations_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterpretationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterpretationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "List Interpretations",
+        "operationId": "list_interpretations_api_v1_drives__drive_id__interpretations_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InterpretationResponse"
+                  },
+                  "title": "Response List Interpretations Api V1 Drives  Drive Id  Interpretations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interpretations/{interpretation_id}/corrections": {
+      "post": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "Correct Interpretation",
+        "operationId": "correct_interpretation_api_v1_interpretations__interpretation_id__corrections_post",
+        "parameters": [
+          {
+            "name": "interpretation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Interpretation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InterpretationCorrectionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterpretationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/clarifications/{clarification_id}/resolve": {
+      "post": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "Resolve Clarification",
+        "operationId": "resolve_clarification_api_v1_clarifications__clarification_id__resolve_post",
+        "parameters": [
+          {
+            "name": "clarification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Clarification Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClarificationResolve"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterpretationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/policies": {
+      "post": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "Create Policy",
+        "operationId": "create_policy_api_v1_drives__drive_id__policies_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PolicyCompileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "List Policies",
+        "operationId": "list_policies_api_v1_drives__drive_id__policies_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PolicyResponse"
+                  },
+                  "title": "Response List Policies Api V1 Drives  Drive Id  Policies Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/policies/{policy_id}/submit-review": {
+      "post": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "Submit Policy Review",
+        "operationId": "submit_policy_review_api_v1_policies__policy_id__submit_review_post",
+        "parameters": [
+          {
+            "name": "policy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Policy Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proposals/{proposal_id}": {
+      "get": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "Get Proposal",
+        "operationId": "get_proposal_api_v1_proposals__proposal_id__get",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/proposals/{proposal_id}/decisions": {
+      "post": {
+        "tags": [
+          "JD Intelligence & Policy Review"
+        ],
+        "summary": "Decide Proposal",
+        "operationId": "decide_proposal_api_v1_proposals__proposal_id__decisions_post",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalDecisionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1412,6 +1896,84 @@
           "csv_content"
         ],
         "title": "CSVPreviewRequest"
+      },
+      "ClarificationResolve": {
+        "properties": {
+          "value": {
+            "title": "Value"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Rationale"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "rationale"
+        ],
+        "title": "ClarificationResolve"
+      },
+      "ClarificationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "field_path": {
+            "type": "string",
+            "title": "Field Path"
+          },
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "reason_code": {
+            "type": "string",
+            "title": "Reason Code"
+          },
+          "blocking": {
+            "type": "boolean",
+            "title": "Blocking"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "resolution_value": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Value"
+          },
+          "resolution_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "field_path",
+          "question",
+          "reason_code",
+          "blocking",
+          "status"
+        ],
+        "title": "ClarificationResponse"
       },
       "CompanyCreate": {
         "properties": {
@@ -1674,6 +2236,59 @@
           "created_at"
         ],
         "title": "CorrectionProposalDTO"
+      },
+      "DecisionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "proposal_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Proposal Id"
+          },
+          "decision": {
+            "type": "string",
+            "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "decided_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Decided At"
+          },
+          "proposal_state": {
+            "type": "string",
+            "title": "Proposal State"
+          },
+          "policy_status": {
+            "type": "string",
+            "title": "Policy Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "proposal_id",
+          "decision",
+          "comment",
+          "decided_at",
+          "proposal_state",
+          "policy_status"
+        ],
+        "title": "DecisionResponse"
       },
       "DevLoginRequest": {
         "properties": {
@@ -2148,7 +2763,16 @@
           "status": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "published",
+                  "registration_closed",
+                  "in_progress",
+                  "completed",
+                  "archived",
+                  "cancelled"
+                ]
               },
               {
                 "type": "null"
@@ -2159,6 +2783,86 @@
         },
         "type": "object",
         "title": "DriveUpdate"
+      },
+      "EvidenceLocator": {
+        "properties": {
+          "field_path": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Field Path"
+          },
+          "locator_type": {
+            "type": "string",
+            "enum": [
+              "page",
+              "paragraph",
+              "human_correction"
+            ],
+            "title": "Locator Type"
+          },
+          "page_number": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Number"
+          },
+          "paragraph_index": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paragraph Index"
+          },
+          "char_offset_start": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Char Offset Start"
+          },
+          "char_offset_end": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Char Offset End"
+          },
+          "excerpt": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Excerpt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field_path",
+          "locator_type",
+          "excerpt"
+        ],
+        "title": "EvidenceLocator"
       },
       "HTTPValidationError": {
         "properties": {
@@ -2212,6 +2916,198 @@
         ],
         "title": "HealthResponse",
         "description": "Liveness probe response payload."
+      },
+      "InterpretationCorrectionCreate": {
+        "properties": {
+          "field_path": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Field Path"
+          },
+          "corrected_value": {
+            "title": "Corrected Value"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Rationale"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvidenceLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "field_path",
+          "corrected_value",
+          "rationale"
+        ],
+        "title": "InterpretationCorrectionCreate"
+      },
+      "InterpretationCreate": {
+        "properties": {
+          "source_artifact_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Artifact Id"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "fixture",
+              "manual"
+            ],
+            "title": "Mode",
+            "default": "fixture"
+          },
+          "manual_facts": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Manual Facts"
+          },
+          "manual_evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceLocator"
+            },
+            "type": "array",
+            "title": "Manual Evidence"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_artifact_id"
+        ],
+        "title": "InterpretationCreate"
+      },
+      "InterpretationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "source_artifact_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Artifact Id"
+          },
+          "text_extraction_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Text Extraction Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "schema_version": {
+            "type": "integer",
+            "title": "Schema Version"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "adapter_id": {
+            "type": "string",
+            "title": "Adapter Id"
+          },
+          "candidate_facts": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Candidate Facts"
+          },
+          "reviewed_facts": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Reviewed Facts"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "validation_findings": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Validation Findings"
+          },
+          "clarifications": {
+            "items": {
+              "$ref": "#/components/schemas/ClarificationResponse"
+            },
+            "type": "array",
+            "title": "Clarifications"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "source_artifact_id",
+          "text_extraction_id",
+          "revision_number",
+          "schema_version",
+          "status",
+          "mode",
+          "adapter_id",
+          "candidate_facts",
+          "reviewed_facts",
+          "evidence",
+          "validation_findings",
+          "clarifications",
+          "created_at"
+        ],
+        "title": "InterpretationResponse"
       },
       "PastedSourceCreate": {
         "properties": {
@@ -2278,6 +3174,239 @@
         ],
         "title": "PersonaInfo"
       },
+      "PolicyCompileRequest": {
+        "properties": {
+          "interpretation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Interpretation Id"
+          },
+          "explicitly_not_required": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "branch",
+                "cgpa",
+                "graduation_year",
+                "active_backlogs"
+              ]
+            },
+            "type": "array",
+            "title": "Explicitly Not Required"
+          }
+        },
+        "type": "object",
+        "required": [
+          "interpretation_id"
+        ],
+        "title": "PolicyCompileRequest"
+      },
+      "PolicyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "interpretation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Interpretation Id"
+          },
+          "version_number": {
+            "type": "integer",
+            "title": "Version Number"
+          },
+          "schema_version": {
+            "type": "integer",
+            "title": "Schema Version"
+          },
+          "engine_contract": {
+            "type": "string",
+            "title": "Engine Contract"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "policy_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Policy Payload"
+          },
+          "human_summary": {
+            "type": "string",
+            "title": "Human Summary"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "approved_proposal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved Proposal Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "interpretation_id",
+          "version_number",
+          "schema_version",
+          "engine_contract",
+          "status",
+          "policy_payload",
+          "human_summary",
+          "canonical_hash",
+          "approved_proposal_id",
+          "created_at"
+        ],
+        "title": "PolicyResponse"
+      },
+      "ProposalDecisionCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Expected Hash"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "revision_requested"
+            ],
+            "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_hash",
+          "decision"
+        ],
+        "title": "ProposalDecisionCreate"
+      },
+      "ProposalResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "action_type": {
+            "type": "string",
+            "title": "Action Type"
+          },
+          "target_type": {
+            "type": "string",
+            "title": "Target Type"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "dependencies": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dependencies"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "action_type",
+          "target_type",
+          "target_id",
+          "revision_number",
+          "payload",
+          "dependencies",
+          "canonical_hash",
+          "state",
+          "expires_at",
+          "created_at"
+        ],
+        "title": "ProposalResponse"
+      },
       "ReadinessResponse": {
         "properties": {
           "status": {
@@ -2330,8 +3459,15 @@
             "title": "Institution Id"
           },
           "drive_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Drive Id"
           },
           "source_type": {
@@ -2359,10 +3495,6 @@
               }
             ],
             "title": "File Extension"
-          },
-          "storage_key": {
-            "type": "string",
-            "title": "Storage Key"
           },
           "hash_sha256": {
             "type": "string",
@@ -2407,7 +3539,6 @@
           "source_type",
           "original_filename",
           "file_extension",
-          "storage_key",
           "hash_sha256",
           "byte_size",
           "status",
@@ -2759,7 +3890,7 @@
           },
           "purpose": {
             "type": "string",
-            "maxLength": 50,
+            "const": "jd_intake",
             "title": "Purpose",
             "default": "jd_intake"
           },

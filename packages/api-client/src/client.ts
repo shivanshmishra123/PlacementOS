@@ -24,6 +24,11 @@ import type {
   TextExtractionResponse,
   DownloadUrlResponse,
   DomainJobResponse,
+  EvidenceLocator,
+  InterpretationResponse,
+  PolicyResponse,
+  ProposalResponse,
+  DecisionResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -53,6 +58,16 @@ export class PlacementOSClient {
     const url = `${this.baseUrl}${path}`;
     const headers = new Headers(options.headers);
     headers.set("Accept", "application/json");
+    const method = (options.method || "GET").toUpperCase();
+    if (!["GET", "HEAD", "OPTIONS", "TRACE"].includes(method) && typeof document !== "undefined") {
+      const csrf = document.cookie
+        .split("; ")
+        .find((entry) => entry.startsWith("csrf_token="))
+        ?.split("=")
+        .slice(1)
+        .join("=");
+      if (csrf) headers.set("X-CSRF-Token", decodeURIComponent(csrf));
+    }
 
     const response = await fetch(url, {
       ...options,
@@ -332,6 +347,104 @@ export class PlacementOSClient {
     return this.request<DomainJobResponse>(`/api/v1/sources/${artifactId}/extract`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  public async getJob(jobId: string): Promise<DomainJobResponse> {
+    return this.request<DomainJobResponse>(`/api/v1/jobs/${jobId}`);
+  }
+
+  // ==========================================
+  // JD Intelligence & Policy Review (Phase 4)
+  // ==========================================
+
+  public async createInterpretation(
+    driveId: string,
+    req: {
+      source_artifact_id: string;
+      mode?: "fixture" | "manual";
+      manual_facts?: Record<string, unknown>;
+      manual_evidence?: EvidenceLocator[];
+      rationale?: string;
+    }
+  ): Promise<InterpretationResponse> {
+    return this.request<InterpretationResponse>(`/api/v1/drives/${driveId}/interpretations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async listInterpretations(driveId: string): Promise<InterpretationResponse[]> {
+    return this.request<InterpretationResponse[]>(`/api/v1/drives/${driveId}/interpretations`);
+  }
+
+  public async correctInterpretation(
+    interpretationId: string,
+    req: { field_path: string; corrected_value: unknown; rationale: string; evidence?: EvidenceLocator }
+  ): Promise<InterpretationResponse> {
+    return this.request<InterpretationResponse>(`/api/v1/interpretations/${interpretationId}/corrections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async resolveClarification(
+    clarificationId: string,
+    value: unknown,
+    rationale: string
+  ): Promise<InterpretationResponse> {
+    return this.request<InterpretationResponse>(`/api/v1/clarifications/${clarificationId}/resolve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value, rationale }),
+    });
+  }
+
+  public async compilePolicy(
+    driveId: string,
+    interpretationId: string,
+    explicitlyNotRequired: string[] = []
+  ): Promise<PolicyResponse> {
+    return this.request<PolicyResponse>(`/api/v1/drives/${driveId}/policies`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        interpretation_id: interpretationId,
+        explicitly_not_required: explicitlyNotRequired,
+      }),
+    });
+  }
+
+  public async listPolicies(driveId: string): Promise<PolicyResponse[]> {
+    return this.request<PolicyResponse[]>(`/api/v1/drives/${driveId}/policies`);
+  }
+
+  public async submitPolicyReview(policyId: string): Promise<ProposalResponse> {
+    return this.request<ProposalResponse>(`/api/v1/policies/${policyId}/submit-review`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  public async getProposal(proposalId: string): Promise<ProposalResponse> {
+    return this.request<ProposalResponse>(`/api/v1/proposals/${proposalId}`);
+  }
+
+  public async decideProposal(
+    proposalId: string,
+    req: {
+      expected_revision: number;
+      expected_hash: string;
+      decision: "approved" | "rejected" | "revision_requested";
+      comment?: string;
+    }
+  ): Promise<DecisionResponse> {
+    return this.request<DecisionResponse>(`/api/v1/proposals/${proposalId}/decisions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
     });
   }
 }

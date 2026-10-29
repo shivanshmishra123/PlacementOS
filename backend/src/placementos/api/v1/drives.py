@@ -5,14 +5,16 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import desc, func, select
+from sqlalchemy import desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from placementos.core.database import get_db
 from placementos.core.dependencies import get_current_auth
 from placementos.core.errors import ConflictException, NotFoundException
+from placementos.models.identity import DriveAssignment
 from placementos.models.recruitment import Company, Drive, DriveRevision
+from placementos.models.storage import SourceArtifact
 from placementos.schemas.drives import (
     CompanyCreate,
     CompanyResponse,
@@ -24,6 +26,8 @@ from placementos.schemas.drives import (
     DriveUpdate,
     SourceArtifactSummary,
 )
+from placementos.services.audit import record_audit
+from placementos.services.authorization import load_authorized_drive
 from placementos.services.session import AuthContext
 
 router = APIRouter(tags=["Recruitment Drives"])
@@ -55,6 +59,8 @@ async def create_company(
         contact_email=payload.contact_email.strip() if payload.contact_email else None,
     )
     session.add(company)
+    await session.flush()
+    record_audit(session, auth, "company:created", "company", company.id, {"name": company.name})
     await session.commit()
     await session.refresh(company)
     return CompanyResponse.model_validate(company)
@@ -66,6 +72,7 @@ async def list_companies(
     session: AsyncSession = Depends(get_db),
 ) -> list[CompanyResponse]:
     """List all registered hiring companies for the active institution."""
+    auth.require_coordinator()
     stmt = (
         select(Company)
         .where(Company.institution_id == auth.institution_id)
@@ -100,10 +107,19 @@ async def create_drive(
         title=payload.title.strip(),
         status="draft",
         created_by_membership_id=auth.membership_id,
+        assigned_coordinator_membership_id=auth.membership_id,
         concurrency_revision=1,
     )
     session.add(drive)
     await session.flush()
+    session.add(
+        DriveAssignment(
+            institution_id=auth.institution_id,
+            membership_id=auth.membership_id,
+            drive_id=drive.id,
+            assigned_role="lead_coordinator",
+        )
+    )
 
     # Initialize Revision 1
     initial_revision = DriveRevision(
@@ -120,6 +136,7 @@ async def create_drive(
     await session.flush()
 
     drive.current_drive_revision_id = initial_revision.id
+    record_audit(session, auth, "drive:created", "drive", drive.id, {"revision": 1})
     await session.commit()
 
     return await _build_drive_response(session, drive.id, auth.institution_id)
@@ -135,7 +152,24 @@ async def list_drives(
     session: AsyncSession = Depends(get_db),
 ) -> DriveListResponse:
     """List recruitment drives with optional status filtering and pagination."""
-    query = select(Drive).where(Drive.institution_id == auth.institution_id)
+    auth.require_coordinator()
+    query = (
+        select(Drive)
+        .outerjoin(
+            DriveAssignment,
+            (DriveAssignment.drive_id == Drive.id)
+            & (DriveAssignment.institution_id == Drive.institution_id),
+        )
+        .where(
+            Drive.institution_id == auth.institution_id,
+            or_(
+                Drive.created_by_membership_id == auth.membership_id,
+                Drive.assigned_coordinator_membership_id == auth.membership_id,
+                DriveAssignment.membership_id == auth.membership_id,
+            ),
+        )
+        .distinct()
+    )
 
     if status:
         query = query.where(Drive.status == status)
@@ -155,7 +189,7 @@ async def list_drives(
         .options(
             selectinload(Drive.company),
             selectinload(Drive.revisions),
-            selectinload(Drive.source_artifacts),
+            selectinload(Drive.source_artifacts).selectinload(SourceArtifact.extractions),
         )
     )
     drives = (await session.execute(paginated_stmt)).scalars().all()
@@ -174,6 +208,7 @@ async def get_drive(
     session: AsyncSession = Depends(get_db),
 ) -> DriveResponse:
     """Fetch single drive detail with all revisions and associated source artifacts."""
+    await load_authorized_drive(session, auth, drive_id)
     return await _build_drive_response(session, drive_id, auth.institution_id)
 
 
@@ -187,19 +222,14 @@ async def update_drive(
     """Update basic metadata or lifecycle status of a drive."""
     auth.require_coordinator()
 
-    stmt = select(Drive).where(
-        Drive.id == drive_id,
-        Drive.institution_id == auth.institution_id,
-    )
-    drive = (await session.execute(stmt)).scalar_one_or_none()
-    if not drive:
-        raise NotFoundException(f"Drive '{drive_id}' not found")
+    drive = await load_authorized_drive(session, auth, drive_id, for_update=True)
 
     if payload.title is not None:
         drive.title = payload.title.strip()
     if payload.status is not None:
         drive.status = payload.status
 
+    record_audit(session, auth, "drive:updated", "drive", drive.id, {"status": drive.status})
     await session.commit()
     return await _build_drive_response(session, drive_id, auth.institution_id)
 
@@ -214,17 +244,7 @@ async def create_drive_revision(
     """Create a new versioned revision with optimistic concurrency control."""
     auth.require_coordinator()
 
-    stmt = (
-        select(Drive)
-        .where(
-            Drive.id == drive_id,
-            Drive.institution_id == auth.institution_id,
-        )
-        .with_for_update()
-    )
-    drive = (await session.execute(stmt)).scalar_one_or_none()
-    if not drive:
-        raise NotFoundException(f"Drive '{drive_id}' not found")
+    drive = await load_authorized_drive(session, auth, drive_id, for_update=True)
 
     if drive.concurrency_revision != payload.expected_revision_number:
         raise ConflictException(
@@ -246,6 +266,14 @@ async def create_drive_revision(
     drive.concurrency_revision = next_rev
     await session.flush()
     drive.current_drive_revision_id = revision.id
+    record_audit(
+        session,
+        auth,
+        "drive:revision_created",
+        "drive_revision",
+        revision.id,
+        {"drive_id": str(drive.id), "revision": next_rev},
+    )
     await session.commit()
     await session.refresh(revision)
 
@@ -287,7 +315,11 @@ def _format_drive(drive: Drive) -> DriveResponse:
             drive_id=s.drive_id,
             source_type=s.source_kind,
             original_filename=s.file_name,
-            status="extracted" if s.acceptance_status == "accepted" else ("failed" if s.acceptance_status == "rejected" else "pending"),
+            status=(
+                "extracted"
+                if any(item.status == "completed" for item in s.extractions)
+                else ("failed" if s.acceptance_status == "rejected" else "processing")
+            ),
             hash_sha256=s.hash_sha256,
             byte_size=s.file_size_bytes,
             metadata_json={"scan_status": s.scan_status, "acceptance_status": s.acceptance_status},
@@ -325,7 +357,7 @@ async def _build_drive_response(
         .options(
             selectinload(Drive.company),
             selectinload(Drive.revisions),
-            selectinload(Drive.source_artifacts),
+            selectinload(Drive.source_artifacts).selectinload(SourceArtifact.extractions),
         )
     )
     drive = (await session.execute(stmt)).scalar_one_or_none()

@@ -122,7 +122,7 @@ No vector database, Kubernetes, Kafka, service mesh, autonomous browser agent, o
 
 ## 5. Repository layout
 
-This is the target structure to establish in P01. Only the source files and four reference documents exist at the planning stage.
+This structure was established in P01 and has since been extended through P04. The source inputs and four canonical reference documents remain preserved at the repository root; current implementation status is tracked in `PLAN.md`.
 
 ```text
 PlacementOS/
@@ -780,7 +780,7 @@ uv run --project backend uvicorn placementos.main:app --reload
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
 ```
 
-These commands must be created and verified in P01. Configure Alembic's script path relative to its config and package the `backend/src` application so imports resolve. Root scripts must explicitly select the web workspace. Document the relay/scheduler and scanner startup commands alongside these; there is no functioning environment yet.
+These commands were established in P01. Alembic's script path is relative to its config and the `backend/src` application is packaged so imports resolve. Root scripts explicitly select the web workspace. The verified current interface and Windows/WSL worker boundary are documented in `docs/developer-setup.md`; relay/scheduler and production scanner commands remain later-phase work.
 
 ### 21.2 Pilot deployment
 

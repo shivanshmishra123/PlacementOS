@@ -10,7 +10,7 @@ import hashlib
 import logging
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from placementos.core.database import async_session_maker
@@ -67,7 +67,12 @@ class SourceJobService:
             return await cls._execute_extraction(session, source_artifact_id, institution_id)
 
         async with async_session_maker() as new_session:
+            new_session.info["institution_id"] = institution_id
             async with new_session.begin():
+                await new_session.execute(
+                    text("SELECT set_config('app.institution_id', :institution_id, true)"),
+                    {"institution_id": str(institution_id)},
+                )
                 return await cls._execute_extraction(new_session, source_artifact_id, institution_id)
 
     @classmethod
@@ -194,14 +199,13 @@ class SourceJobService:
                 )
                 session.add(failed_extraction)
 
-            job.status = "failed"
+            job.status = "failed_terminal"
             job.error_details = {"error_code": exc.code, "error_message": exc.message}
             await session.flush()
             raise
 
         except Exception as exc:
-            artifact.acceptance_status = "rejected"
-            job.status = "failed"
+            job.status = "failed_retryable" if job.attempts < job.max_attempts else "failed_terminal"
             job.error_details = {"error_code": "EXTRACTION_FAILED", "error_message": str(exc)}
             await session.flush()
             raise

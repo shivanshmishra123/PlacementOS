@@ -62,7 +62,7 @@ class Drive(TimestampedUUIDModel):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(
         String(50), default="draft", nullable=False, index=True
-    )  # draft, active, published, on_hold, completed, cancelled
+    )  # canonical lifecycle from PROJ_SPECIFICATION.md section 7
     operational_hold: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     hold_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 

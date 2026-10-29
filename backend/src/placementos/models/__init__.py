@@ -12,6 +12,14 @@ from placementos.models.identity import (
     StudentProfile,
     User,
 )
+from placementos.models.intelligence import (
+    ActionProposal,
+    ApprovalDecision,
+    ClarificationTask,
+    EligibilityPolicyVersion,
+    JDInterpretationRevision,
+    JDReviewCorrection,
+)
 from placementos.models.recruitment import (
     Company,
     Drive,
@@ -26,13 +34,19 @@ from placementos.models.storage import (
 
 __all__ = [
     "AcademicRecordRevision",
+    "ActionProposal",
+    "ApprovalDecision",
     "AuditLog",
     "Company",
+    "ClarificationTask",
     "DomainJob",
     "Drive",
     "DriveAssignment",
     "DriveRevision",
+    "EligibilityPolicyVersion",
     "Institution",
+    "JDInterpretationRevision",
+    "JDReviewCorrection",
     "Membership",
     "SourceArtifact",
     "StudentCorrectionProposal",

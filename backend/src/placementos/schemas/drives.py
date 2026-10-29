@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -38,7 +38,15 @@ class DriveCreate(BaseModel):
 class DriveUpdate(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=255)
     description: str | None = None
-    status: str | None = None
+    status: Literal[
+        "draft",
+        "published",
+        "registration_closed",
+        "in_progress",
+        "completed",
+        "archived",
+        "cancelled",
+    ] | None = None
 
 
 class DriveRevisionCreate(BaseModel):

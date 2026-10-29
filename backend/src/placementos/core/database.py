@@ -4,10 +4,11 @@ import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, text
+from sqlalchemy import DateTime, event, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Session as SyncSession
 
 from placementos.core.config import settings
 
@@ -34,6 +35,17 @@ async_session_maker = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
 )
+
+
+@event.listens_for(SyncSession, "after_begin")
+def apply_transaction_tenant_scope(session, transaction, connection) -> None:
+    """Reapply trusted RLS scope whenever an authenticated session starts a transaction."""
+    institution_id = session.info.get("institution_id")
+    if institution_id:
+        connection.execute(
+            text("SELECT set_config('app.institution_id', :institution_id, true)"),
+            {"institution_id": str(institution_id)},
+        )
 
 
 class Base(DeclarativeBase):

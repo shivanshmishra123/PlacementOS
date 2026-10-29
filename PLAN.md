@@ -1,6 +1,6 @@
 # PlacementOS: Implementation Plan
 
-> Baseline dated 28 October 2026. This plan describes work to perform. The repository begins with three source inputs and four planning documents; it does not yet contain an application, infrastructure, tests, or live integrations.
+> Baseline dated 28 October 2026; implementation status updated 29 October 2026. The repository now contains the verified P00-P04 application slices and local infrastructure. Live provider integrations remain deferred.
 
 ## 1. How to execute this plan
 
@@ -19,7 +19,7 @@ The current request creates these references only. Do not interpret the checklis
 - Record blocked dependencies with a concrete owner/input and continue independent authorized work.
 - Maintain concise phase evidence: change reference, commands/checks and result, demonstrated scenario, open limitations, and next task.
 
-No application task is marked complete in this baseline. The existence of these reference files does not mean P00's configuration/contract decisions or later phase gates have been satisfied.
+Checked tasks below are backed by the corresponding implementation and phase completion record. Unchecked phases remain plans and must not be presented as working behavior.
 
 ### 1.2 Global definition of done
 
@@ -68,8 +68,8 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P00 | Completed; baseline contracts, traceability, and fixtures established | Scope and invariants | Agreed executable contracts and decision register. |
 | P01 | Completed; monorepo, local services, migrations, and verified contracts | FR-INT-01/02 foundations; NFR-03/09/12 | Reproducible monorepo and local services. |
 | P02 | Completed; scoped identities, verified records, CSV preview/commit, and correction review | FR-ID, FR-STU, FR-AUD foundation | Scoped identities and verified student dataset. |
-| P03 | Not started | FR-JD; FR-DOC security foundation | Private source ingestion and located extracted text. |
-| P04 | Not started | FR-AI-JD, FR-POL, initial FR-APP | Reviewed JD and immutable approved rules. |
+| P03 | Completed; stabilized private intake, pre-acceptance validation, asynchronous extraction, and provenance | FR-JD; FR-DOC security foundation | Private source ingestion and located extracted text. |
+| P04 | Completed; source-backed review, clarification, typed policy, and exact approval | FR-AI-JD, FR-POL, initial FR-APP | Reviewed JD and immutable approved rules. |
 | P05 | Not started | FR-ELIG, NFR-01 | Reproducible cohort results and explanations. |
 | P06 | Not started | FR-DOC, FR-REG | Functional student participation journey. |
 | P07 | Not started | FR-COM, FR-APP, FR-DISP | Exact approved communications and durable dispatch. |
@@ -215,13 +215,13 @@ Next dependency-ready task: P03-T01 (Model drive roots and revisions).
 **Exit gate:** a source can be uploaded, safely accepted, extracted, located, reviewed, and replaced through revisions. OCR can remain deferred if scanned sources have a useful manual path. Real scanning is required before P10's real-data gate.
 
 ### P03 Completion Record
-`	ext
+
 Task/phase: P03 (Implement drives, private intake, and text extraction)
 Behavior delivered:
-- Modeled recruitment and drive entities (Company, Drive, DriveRevision) with optimistic concurrency revisions, drive lifecycle stages (draft, ctive, rchived), and multi-tenant scoping.
+- Modeled recruitment and drive entities (Company, Drive, DriveRevision) with optimistic concurrency revisions, drive lifecycle stages (draft, active, archived), and multi-tenant scoping.
 - Modeled private storage entities (UploadSession, SourceArtifact, TextExtraction, DomainJob) with tenant isolation, SHA256 checksums, and scan/acceptance statuses.
 - Applied Alembic database migration 20261029_0726_1eec380a58a7_create_drives_and_storage_intake_tables.py.
-- Implemented secure S3 Private Storage Service (StorageService) with quarantine isolation, byte-hashing, 15-minute presigned upload URLs, 5-minute presigned download URLs, atomic byte promotion (quarantine/ -> ccepted/), and direct text intake.
+- Implemented secure S3 Private Storage Service (StorageService) with quarantine isolation, byte-hashing, 15-minute presigned upload URLs, 5-minute presigned download URLs, atomic byte promotion (`quarantine/` to `accepted/`), and direct text intake.
 - Implemented multi-format document parser and security scanner (DocumentScanner, TextExtractor):
   - Sniffs magic bytes (%PDF-, OpenXML zip, UTF-8), rejects executables (MZ, ELF), verifies zip bomb ratios (<25:1, <30MB uncompressed), and enforces a 15MB file cap.
   - Extracts text with fine-grained locators (page_number, paragraph_index, char_start, char_end, snippet) for full provenance traceability (INV-03).
@@ -241,8 +241,7 @@ Files/change reference:
 - Frontend UI: apps/web/src/app/coordinator/drives/page.tsx, apps/web/src/app/coordinator/drives/[id]/intake/page.tsx, apps/web/src/app/layout.tsx.
 Verification commands and results:
 - Full backend pytest suite: pytest backend/tests -v -> 41 passed in 7.06s.
-- Backend linting: 
-uff check backend/src backend/tests -> All checks passed!
+- Backend linting: `ruff check backend/src backend/tests` -> all checks passed.
 - Backend typing: mypy backend/src -> Success: no issues found in 33 source files.
 - Contract drift check: python scripts/check_contracts_drift.py -> Contract check passed: zero schema drift detected.
 - Frontend linting & typing: pnpm lint and pnpm typecheck -> 0 errors.
@@ -253,26 +252,43 @@ Demonstrated user/recovery scenario:
 - Tested locator provenance: Extracted text breaks down into character offsets and page/paragraph locators so displayed UI snippets trace directly to source document bytes.
 - Tested multi-tenant isolation: Beacon coordinator cannot view, download, or re-extract Apex drive source artifacts or upload sessions.
 - Tested durable source job recovery: Retrying extraction jobs updates existing extraction records idempotently without duplicating revisions.
-Remaining limits or decisions: Text-based PDF and DOCX extraction is operational; OCR for purely image-scanned documents remains deferred per architecture specification since manual structured fallback is supported. P04 (JD Intelligence, Clarification, and Rule Review) is ready to start.
-Next dependency-ready task: P04-T01 (Define interpretation and policy schemas).
-`
+Remaining limits or decisions at the time of this record: Text-based PDF and DOCX extraction is operational; OCR for purely image-scanned documents remains deferred per architecture specification since manual structured fallback is supported. P04 was the next phase.
+Next dependency-ready task at the time of this record: P04-T01 (Define interpretation and policy schemas).
+
+Stabilization addendum (29 October 2026): P00-P03 boundaries were re-audited before P04. The follow-up added runtime-role RLS, transaction-local tenant scope, live membership/capability reload, CSRF and origin enforcement, assigned-coordinator object authorization, pre-promotion byte/signature/malware validation, owner-bound expiring upload sessions, asynchronous extraction jobs, accepted-artifact download rules, audit events, and canonical state constraints. Original source inputs were restored. See `docs/stabilization-p00-p03.md` for the detailed evidence.
 
 
 ## 8. P04: Implement JD intelligence, clarification, and rule review
 
 **Objective:** Turn source text into reviewed facts and approved policy. **Dependencies:** P03. **Requirements:** FR-AI-JD, FR-POL, initial FR-APP.
 
-- [ ] **P04-T01: Define interpretation and policy schemas.** Add typed fields, explicit unknowns, compensation structure, evidence locators, supported criteria, and schema versions. Evidence: absent fields and unsupported criteria cannot be silently accepted.
-- [ ] **P04-T02: Implement fixture/model adapters.** Add scoped structured calls, prompt/output versions, budgets, metadata, timeout and repair behavior. Evidence: fixture mode is explicit and an unavailable provider does not silently produce fake production facts.
-- [ ] **P04-T03: Validate evidence and ambiguity.** Check source locators/excerpts, conflicting values, date-only cutoffs, scale ambiguity, and missing material facts. Evidence: golden fixtures identify their labeled blocking questions.
-- [ ] **P04-T04: Build review/correction workflows.** Provide side-by-side evidence, field edits with rationale, clarification ownership/resolution, and manual structured entry. Evidence: an unsupported model claim needs correction/provenance before approval.
-- [ ] **P04-T05: Compile typed policy drafts.** Normalize reviewed rules through configured branch/scale mappings; validate ranges, explicit not-required modes, and unsupported criteria. Evidence: invalid policy cannot reach the approved state.
-- [ ] **P04-T06: Establish reusable proposal/decision core.** Create immutable rule-review proposals, dependency hashes, capability checks, expected revisions, and append-only decisions. This is the minimal approval foundation expanded in P07, not a temporary boolean flag.
-- [ ] **P04-T07: Deliver rule approval UI/API.** Show readable criteria, sources, version/diff, required clarifications, and the exact decision target. Evidence: changed facts invalidate the pending review and stale decisions return conflict.
-- [ ] **P04-T08: Verify AI boundaries and fallback.** Run golden facts, malformed output, unsupported evidence, malicious JD instructions, model timeout, and manual completion scenarios. Evidence: no model output can approve rules, call send tools, or classify students.
-- [ ] **P04-T09: Phase completion testing and verification.** Execute JD intelligence and rule review test suite: golden fact extraction accuracy on normal JD fixture, blocking clarification creation on ambiguous JD fixture, prompt injection defense verification, manual structured fallback path, and immutable rule proposal hash validation. Evidence: automated adapter and rule validation test suite passing.
+- [x] **P04-T01: Define interpretation and policy schemas.** Add typed fields, explicit unknowns, compensation structure, evidence locators, supported criteria, and schema versions. Evidence: absent fields and unsupported criteria cannot be silently accepted.
+- [x] **P04-T02: Implement fixture/model adapters.** Add scoped structured calls, prompt/output versions, budgets, metadata, timeout and repair behavior. Evidence: fixture mode is explicit and an unavailable provider does not silently produce fake production facts.
+- [x] **P04-T03: Validate evidence and ambiguity.** Check source locators/excerpts, conflicting values, date-only cutoffs, scale ambiguity, and missing material facts. Evidence: golden fixtures identify their labeled blocking questions.
+- [x] **P04-T04: Build review/correction workflows.** Provide side-by-side evidence, field edits with rationale, clarification ownership/resolution, and manual structured entry. Evidence: an unsupported model claim needs correction/provenance before approval.
+- [x] **P04-T05: Compile typed policy drafts.** Normalize reviewed rules through configured branch/scale mappings; validate ranges, explicit not-required modes, and unsupported criteria. Evidence: invalid policy cannot reach the approved state.
+- [x] **P04-T06: Establish reusable proposal/decision core.** Create immutable rule-review proposals, dependency hashes, capability checks, expected revisions, and append-only decisions. This is the minimal approval foundation expanded in P07, not a temporary boolean flag.
+- [x] **P04-T07: Deliver rule approval UI/API.** Show readable criteria, sources, version/diff, required clarifications, and the exact decision target. Evidence: changed facts invalidate the pending review and stale decisions return conflict.
+- [x] **P04-T08: Verify AI boundaries and fallback.** Run golden facts, malformed output, unsupported evidence, malicious JD instructions, model timeout, and manual completion scenarios. Evidence: no model output can approve rules, call send tools, or classify students.
+- [x] **P04-T09: Phase completion testing and verification.** Execute JD intelligence and rule review test suite: golden fact extraction accuracy on normal JD fixture, blocking clarification creation on ambiguous JD fixture, prompt injection defense verification, manual structured fallback path, and immutable rule proposal hash validation. Evidence: automated adapter and rule validation test suite passing.
 
 **Exit gate:** a coordinator can obtain an immutable approved policy from a source with provenance, including the manual fallback. Date-only/contradictory requirements block approval until resolved. The example deadline must never become a production default.
+
+### P04 Completion Record
+
+Task/phase: P04 (JD intelligence, clarification, and rule review)
+
+Behavior delivered: Added revisioned JD interpretations, exact source evidence, attributed coordinator corrections, blocking clarification tasks, manual structured fallback, typed versioned eligibility-policy compilation, immutable action proposals, dependency fingerprints, append-only decisions, stale-review rejection, and an accessible coordinator review/approval workspace. The deterministic interpreter is visibly fixture-only and production configuration rejects it. Model output remains advisory: it cannot approve policy or classify students.
+
+Requirements covered: FR-AI-JD, FR-POL, initial FR-APP; INV-01, INV-03, INV-04, INV-05, INV-09, INV-11, and INV-12.
+
+Primary change references: `backend/src/placementos/models/intelligence.py`, `backend/src/placementos/services/jd_intelligence.py`, `backend/src/placementos/api/v1/intelligence.py`, `backend/migrations/versions/20261029_1200_p04_jd_intelligence_and_policy.py`, `apps/web/src/app/coordinator/drives/[id]/review/page.tsx`, and the P04 unit/integration tests.
+
+Verification: full backend tests, Ruff, Mypy, frontend lint/type checks, production frontend build, OpenAPI contract drift check, and a fresh-database upgrade/downgrade/upgrade cycle pass. Scenarios cover normal and ambiguous JDs, source-locator validation, prompt-injection text, manual fallback, exact proposal hash/revision checks, insufficient approval capability, and immutable approved dependencies.
+
+Remaining limits or decisions: the local deterministic interpreter is a development fixture, not a live model integration. Production model-provider selection and a real malware scanner remain P10 operational decisions. OCR remains deferred with manual fallback. No P05 implementation has started.
+
+Next dependency-ready task: P05-T01, intentionally not started under the current delivery boundary.
 
 ## 9. P05: Implement the deterministic eligibility engine
 

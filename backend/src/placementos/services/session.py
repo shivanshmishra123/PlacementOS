@@ -30,7 +30,7 @@ class AuthContext:
 
     def has_capability(self, capability: str) -> bool:
         """Check if actor possesses specific capability."""
-        if self.role in ("super_admin", "institution_admin"):
+        if self.role == "super_admin":
             return True
         return capability in self.capabilities
 
@@ -44,7 +44,7 @@ class AuthContext:
 
     def require_role(self, *roles: str) -> None:
         """Enforce role check or raise 403 Forbidden."""
-        if self.role in ("super_admin", "institution_admin"):
+        if self.role == "super_admin":
             return
         if self.role not in roles:
             raise ForbiddenException(
@@ -53,8 +53,8 @@ class AuthContext:
             )
 
     def require_coordinator(self) -> None:
-        """Enforce coordinator or admin role."""
-        self.require_role("placement_coordinator", "coordinator", "institution_admin")
+        """Enforce an explicit coordinator role; administrators do not inherit it."""
+        self.require_role("placement_coordinator", "coordinator")
 
     def require_institution(self, target_institution_id: uuid.UUID) -> None:
         """Enforce tenant isolation boundary (INV-06)."""

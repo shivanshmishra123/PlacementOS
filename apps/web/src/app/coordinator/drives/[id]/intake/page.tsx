@@ -73,6 +73,12 @@ export default function DriveIntakePage() {
     fetchDriveAndSource();
   }, [fetchDriveAndSource]);
 
+  useEffect(() => {
+    if (activeArtifact?.status !== "processing") return;
+    const timer = window.setInterval(() => void fetchDriveAndSource(), 2000);
+    return () => window.clearInterval(timer);
+  }, [activeArtifact?.status, fetchDriveAndSource]);
+
   // Handle Drag & Drop / File Select
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -227,6 +233,14 @@ export default function DriveIntakePage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {extraction && (
+            <Link
+              href={`/coordinator/drives/${driveId}/review`}
+              className="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded-lg transition"
+            >
+              Review facts and rules →
+            </Link>
+          )}
           <Link
             href="/coordinator/drives"
             className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition"

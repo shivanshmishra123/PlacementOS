@@ -1,9 +1,10 @@
 """Integration tests for session authentication, dev personas, and authorization context (P02-T02 / P02-T03)."""
 
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 from placementos.core.config import settings
+from placementos.main import app
 
 
 @pytest.mark.asyncio
@@ -90,3 +91,26 @@ async def test_production_mode_rejects_dev_login(client: AsyncClient, monkeypatc
     )
     assert resp.status_code == 403
     assert resp.json()["error"]["code"] == "FORBIDDEN"
+
+
+@pytest.mark.asyncio
+async def test_cookie_authenticated_write_requires_csrf_header():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as raw_client:
+        login = await raw_client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+        assert login.status_code == 200
+        blocked = await raw_client.post("/api/v1/companies", json={"name": "CSRF blocked"})
+        assert blocked.status_code == 403
+        assert blocked.json()["error"]["code"] == "CSRF_FAILED"
+
+
+@pytest.mark.asyncio
+async def test_untrusted_browser_origin_is_rejected(client: AsyncClient):
+    await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    response = await client.post(
+        "/api/v1/companies",
+        json={"name": "Origin blocked"},
+        headers={"Origin": "https://attacker.invalid"},
+    )
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "ORIGIN_REJECTED"

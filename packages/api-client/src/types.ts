@@ -236,13 +236,95 @@ export interface SourceArtifactResponse {
   source_type: string;
   original_filename?: string | null;
   file_extension?: string | null;
-  storage_key: string;
   hash_sha256: string;
   byte_size: number;
   status: string;
   metadata_json: Record<string, unknown>;
   created_at: string;
   extracted_at?: string | null;
+}
+
+// ==========================================
+// Phase 4: JD Intelligence & Policy Review
+// ==========================================
+
+export interface EvidenceLocator {
+  field_path: string;
+  locator_type: "page" | "paragraph" | "human_correction";
+  page_number?: number | null;
+  paragraph_index?: number | null;
+  char_offset_start?: number | null;
+  char_offset_end?: number | null;
+  excerpt: string;
+}
+
+export interface ClarificationResponse {
+  id: string;
+  field_path: string;
+  question: string;
+  reason_code: string;
+  blocking: boolean;
+  status: string;
+  resolution_value?: unknown;
+  resolution_reason?: string | null;
+}
+
+export interface InterpretationResponse {
+  id: string;
+  drive_id: string;
+  source_artifact_id: string;
+  text_extraction_id: string;
+  revision_number: number;
+  schema_version: number;
+  status: string;
+  mode: string;
+  adapter_id: string;
+  candidate_facts: Record<string, unknown>;
+  reviewed_facts: Record<string, unknown>;
+  evidence: Record<string, unknown>[];
+  validation_findings: Record<string, unknown>[];
+  clarifications: ClarificationResponse[];
+  created_at: string;
+}
+
+export interface PolicyResponse {
+  id: string;
+  drive_id: string;
+  interpretation_id: string;
+  version_number: number;
+  schema_version: number;
+  engine_contract: string;
+  status: string;
+  policy_payload: Record<string, unknown>;
+  human_summary: string;
+  canonical_hash: string;
+  approved_proposal_id?: string | null;
+  created_at: string;
+}
+
+export interface ProposalResponse {
+  id: string;
+  drive_id: string;
+  action_type: string;
+  target_type: string;
+  target_id: string;
+  revision_number: number;
+  payload: Record<string, unknown>;
+  dependencies: Record<string, unknown>;
+  canonical_hash: string;
+  state: string;
+  expires_at?: string | null;
+  created_at: string;
+}
+
+export interface DecisionResponse {
+  id: string;
+  proposal_id: string;
+  decision: string;
+  comment?: string | null;
+  decided_at: string;
+  proposal_state: string;
+  policy_status: string;
 }
 
 export interface TextLocator {

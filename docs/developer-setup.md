@@ -1,13 +1,13 @@
 # PlacementOS: Local Developer Setup Guide
 
-> Comprehensive instructions for setting up and running PlacementOS on Windows and Linux/macOS.
+> Verified local interface for PlacementOS on Windows with Docker Desktop and on Linux/macOS with Docker Compose. Run Celery in a Linux container or WSL on Windows.
 
 ---
 
 ## 1. Prerequisites
 
-- **Node.js:** v20+ LTS
-- **Package Manager:** `pnpm` (v9+)
+- **Node.js:** v22 LTS
+- **Package Manager:** `pnpm` v9+
 - **Python:** 3.12+
 - **Python Tooling:** `uv`
 - **Container Engine:** Docker Desktop with Compose v2+
@@ -20,8 +20,8 @@
 # 1. Clone repository and copy environment configuration
 copy .env.example .env
 
-# 2. Start local infrastructure containers (PostgreSQL, Redis, MinIO, Mailpit)
-docker compose up -d
+# 2. Start local infrastructure (PostgreSQL, Redis, SeaweedFS S3, Mailpit)
+docker compose up -d postgres redis object-store mailpit
 
 # 3. Install JavaScript monorepo dependencies
 pnpm install
@@ -38,9 +38,13 @@ pnpm dev
 # 7. Start the FastAPI backend server (http://localhost:8000)
 uv run --project backend uvicorn placementos.main:app --reload --port 8000
 
-# 8. Start Celery worker (Windows requires -P solo or -P threads)
-uv run --project backend celery -A placementos.workers.celery_app worker -P solo --loglevel=info
+# 8. Start the Celery worker from Linux or WSL
+uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
 ```
+
+On Windows, run step 8 inside WSL or a Linux worker container. Native Windows Celery pools are not a supported PlacementOS runtime. The web/API commands may run in PowerShell while the shared infrastructure remains in Docker Desktop.
+
+All backend environment variables use the `PLACEMENTOS_` prefix. `PLACEMENTOS_DATABASE_URL` is the restricted runtime role; only Alembic and administrative migration checks use `PLACEMENTOS_MIGRATION_DATABASE_URL`. The local `development_fixture` scanner and `fixture` interpreter are visibly synthetic and configuration validation rejects them in production.
 
 ---
 
@@ -52,11 +56,13 @@ pnpm lint
 pnpm typecheck
 
 # Backend lint, typecheck, and test suite
-uv run --project backend ruff check src tests
-uv run --project backend pytest
+uv run --project backend ruff check backend/src backend/tests
+uv run --project backend mypy backend/src
+uv run --project backend pytest backend/tests
 
 # Export OpenAPI schema
 uv run --project backend python scripts/export_openapi.py
+uv run --project backend python scripts/check_contracts_drift.py
 ```
 
 ---
@@ -67,7 +73,9 @@ uv run --project backend python scripts/export_openapi.py
 | :--- | :--- | :--- | :--- |
 | **PostgreSQL** | `55432` | `5432` | `psql -h localhost -p 55432 -U placementos -d placementos` |
 | **Redis** | `6379` | `6379` | `redis-cli -p 6379` |
-| **MinIO (S3)** | `4566` (API), `9001` (UI) | `9000`, `9001` | http://localhost:9001 (`dev_access_key` / `dev_secret_key`) |
+| **SeaweedFS (S3-compatible)** | `4566` | `8333` | Private API endpoint; no local console is exposed. |
 | **Mailpit** | `1025` (SMTP), `8025` (UI) | `1025`, `8025` | http://localhost:8025 |
 | **FastAPI** | `8000` | `8000` | http://localhost:8000/docs |
 | **Next.js Web** | `3000` | `3000` | http://localhost:3000 |
+
+The credentials in `.env.example` are local synthetic defaults. They are not production credentials. The object store is private and application downloads are issued only after authorization through short-lived signed URLs.

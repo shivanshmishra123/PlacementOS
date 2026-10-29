@@ -80,7 +80,8 @@ async def test_csv_preview_makes_no_mutations_and_validates_rows(client: AsyncCl
 async def test_csv_commit_and_revisions_lifecycle(client: AsyncClient):
     """Verify P02-T05: commit creates verified profiles, revisions, and attributable audit log."""
     # 1. Dev login as Apex coordinator
-    await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    login = await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    institution_id = login.json()["user"]["institution_id"]
 
     # 2. Preview
     prefix = f"COMM-{uuid.uuid4().hex[:6].upper()}"
@@ -122,6 +123,7 @@ async def test_csv_commit_and_revisions_lifecycle(client: AsyncClient):
 
     # 5. Check AuditLog entry was recorded
     async with async_session_maker() as session:
+        session.info["institution_id"] = institution_id
         audit_res = await session.execute(
             select(AuditLog).where(AuditLog.action == "student:import_commit")
         )

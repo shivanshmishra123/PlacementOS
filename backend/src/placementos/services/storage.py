@@ -123,6 +123,7 @@ class StorageService:
         purpose: str,
         extension: str,
         content_type: str | None = None,
+        validated_data: bytes | None = None,
     ) -> tuple[str, str, int, bytes]:
         """Read quarantine bytes, verify tenant scope, compute hash, copy to accepted key, and purge quarantine."""
         expected_prefix = f"quarantine/{institution_id}/"
@@ -131,12 +132,9 @@ class StorageService:
                 f"Quarantine key '{quarantine_key}' does not match tenant prefix '{expected_prefix}'"
             )
 
-        # Retrieve bytes from quarantine
-        try:
-            response = self._client.get_object(Bucket=self.bucket_name, Key=quarantine_key)
-            data: bytes = response["Body"].read()
-        except ClientError as e:
-            raise FileNotFoundError(f"Quarantine file not found at key '{quarantine_key}': {e}") from e
+        data = validated_data if validated_data is not None else self.inspect_quarantine_object(
+            quarantine_key, institution_id
+        )[0]
 
         byte_size = len(data)
         hash_sha256 = hashlib.sha256(data).hexdigest()
@@ -170,6 +168,21 @@ class StorageService:
             pass
 
         return accepted_key, hash_sha256, byte_size, data
+
+    def inspect_quarantine_object(
+        self, quarantine_key: str, institution_id: uuid.UUID
+    ) -> tuple[bytes, str | None, int]:
+        """Read exact quarantine bytes and provider metadata without accepting them."""
+        expected_prefix = f"quarantine/{institution_id}/"
+        if not quarantine_key.startswith(expected_prefix):
+            raise StorageSecurityError("Quarantine object is outside the institution namespace")
+        try:
+            response = self._client.get_object(Bucket=self.bucket_name, Key=quarantine_key)
+            data: bytes = response["Body"].read()
+        except ClientError as exc:
+            raise FileNotFoundError(f"Quarantine file not found at key '{quarantine_key}'") from exc
+        content_type = response.get("ContentType")
+        return data, content_type, len(data)
 
     def store_accepted_bytes(
         self,

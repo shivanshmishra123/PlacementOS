@@ -32,12 +32,13 @@ async def db_session():
 
 
 @pytest.mark.asyncio
-async def test_scoped_student_identifier_uniqueness_across_institutions(db_session: AsyncSession):
+async def test_scoped_student_identifier_uniqueness_across_institutions(admin_db_session: AsyncSession):
     """Verify INV-06: The exact same student identifier (e.g.
 
     2024-CS-001) is valid in two different institutions without leakage,
     while duplicate identifiers within the SAME institution are rejected.
     """
+    db_session = admin_db_session
     # 1. Create two distinct institutions
     inst_apex = Institution(
         slug=f"apex-{uuid.uuid4().hex[:6]}",
@@ -122,8 +123,9 @@ async def test_scoped_student_identifier_uniqueness_across_institutions(db_sessi
 
 
 @pytest.mark.asyncio
-async def test_institutional_membership_and_capabilities(db_session: AsyncSession):
+async def test_institutional_membership_and_capabilities(admin_db_session: AsyncSession):
     """Verify membership binding, role assignments, and capabilities."""
+    db_session = admin_db_session
     institution = Institution(
         slug=f"apex-members-{uuid.uuid4().hex[:6]}",
         name="Apex Tech",
@@ -162,11 +164,10 @@ async def test_institutional_membership_and_capabilities(db_session: AsyncSessio
     assert loaded_membership.is_active is True
 
     # Test DriveAssignment linking
-    drive_id = uuid.uuid4()
     assignment = DriveAssignment(
         institution_id=institution.id,
         membership_id=loaded_membership.id,
-        drive_id=drive_id,
+        drive_id=None,
         assigned_role="lead_coordinator",
     )
     db_session.add(assignment)
@@ -175,7 +176,7 @@ async def test_institutional_membership_and_capabilities(db_session: AsyncSessio
     res_assign = await db_session.execute(
         select(DriveAssignment).where(
             DriveAssignment.membership_id == loaded_membership.id,
-            DriveAssignment.drive_id == drive_id,
+            DriveAssignment.drive_id.is_(None),
         )
     )
     loaded_assign = res_assign.scalar_one()

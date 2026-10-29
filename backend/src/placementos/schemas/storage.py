@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class UploadSessionCreate(BaseModel):
     drive_id: uuid.UUID
-    purpose: str = Field(default="jd_intake", max_length=50)
+    purpose: Literal["jd_intake"] = "jd_intake"
     original_filename: str = Field(..., min_length=1, max_length=255)
     content_type: str = Field(..., min_length=1, max_length=100)
     byte_size: int = Field(..., gt=0, le=15 * 1024 * 1024, description="File size up to 15MB")
@@ -39,11 +39,10 @@ class PastedSourceCreate(BaseModel):
 class SourceArtifactResponse(BaseModel):
     id: uuid.UUID
     institution_id: uuid.UUID
-    drive_id: uuid.UUID
+    drive_id: uuid.UUID | None
     source_type: str
     original_filename: str | None
     file_extension: str | None
-    storage_key: str
     hash_sha256: str
     byte_size: int
     status: str

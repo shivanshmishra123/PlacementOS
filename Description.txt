@@ -1,0 +1,123 @@
+I am planning to build a project called placementOS. What it will do is that i am myself a placement coordinator and I have personally felt this need :
+
+Problem: Placement coordinators manually handle job descriptions, eligibility criteria, spreadsheets, student communications, scheduling, and candidate documentation.
+
+PlacementOS is a platform that automates the operational lifecycle of campus recruitment drives, from receiving a company's Job Description to managing student eligibility, documents, communications, interviews, and final results.
+
+A company sends its Job Description (JD) and eligibility criteria to the placement cell. The coordinators must then:
+Read the JD and manually extract the company details, job role, CTC, eligibility criteria, important dates, and selection process.
+Check hundreds of students against the eligibility criteria.
+Identify missing or incorrectly formatted documents.
+Prepare an eligible-student list or registration form.
+Compose and distribute announcements.
+Track registrations and document submissions.
+Coordinate aptitude tests, interviews, venues, and changes.
+Inform students of updates and record results.
+
+Much of this involves manual checking across emails, PDFs, Google Sheets, forms, and messages.
+
+You upload the company's PDF or select the email containing the JD.
+PlacementOS then performs the following workflow.
+The JD agent interprets the document.
+It extracts all relevant fields into structured data, identifies ambiguity, and shows a source-backed summary for review.
+The eligibility engine checks student records.
+Instead of an LLM guessing who is eligible, deterministic rules evaluate branch, CGPA, graduation year, and backlog status.
+The document agent reviews required files.
+It identifies missing resumes, invalid filenames, unreadable PDFs, and incorrect document formats.
+The communication agent prepares announcements.
+It generates relevant emails for approved audiences, with registration details and deadline information.
+The coordinator approves the proposed actions.
+PlacementOS pauses until an authorized coordinator verifies the drive details, recipient lists, and outgoing communications.
+The system executes and monitors the drive.
+It sends approved communications, tracks submissions, and follows up on missing documents or schedule changes.
+That makes LangGraph useful: a workflow can pause for approval, persist its state, and resume after the coordinator responds.
+
+
+I would not create one massive AI agent with access to the entire database, Gmail, Google Sheets, and Calendar. That would be difficult to test, expensive, and potentially unsafe.
+Instead, use LangGraph as the orchestration layer, with specialized LangChain agents and deterministic backend services.
+
+5. Detailed responsibilities of every agent
+Agent 1 — JD Intelligence Agent
+Purpose: Convert unstructured recruitment requirements into structured, verifiable data.
+Input: PDF, DOCX, or email containing the job description.
+
+{
+  "company": "Nexora Technologies",
+  "role": "Software Development Engineer",
+  "eligibility": {
+    "min_cgpa": 7.5,
+    "branches": ["CSE", "IT"],
+    "graduation_year": 2027,
+    "active_backlogs_allowed": false
+  },
+  "registration_deadline": "2026-11-05",
+  "requires_clarification": false
+}
+
+Agent 2 — Eligibility and Policy Engine
+This is the most sensitive module.
+
+I would deliberately implement it as a deterministic rules engine, supported by an AI agent that interprets requirements and diagnoses exceptions.
+
+For example, imagine these fictional records:
+Student	Branch	CGPA	Active backlog	Result
+A	CSE	8.2	No	Eligible
+B	ECE	8.8	No	Ineligible
+C	IT	7.2	No	Ineligible
+D	CSE	8.0	Yes	Ineligible
+E	IT	7.9	Unknown	Needs review
+
+The engine should evaluate a transparent logical expression:
+\[
+E(s) = B(s) \land C(s) \land G(s) \land N(s)
+\]
+
+Where:
+- \(B(s)\): Student belongs to an allowed branch.
+- \(C(s)\): Student satisfies the CGPA threshold.
+- \(G(s)\): Graduation year matches.
+- \(N(s)\): No active backlog, as required.
+A student is eligible only when all required conditions are verified as true.
+
+When required information is missing, the result should be Needs Review, not automatically eligible or ineligible.
+
+
+Agent 3 — Document Verification and Triage Agent
+This module checks whether students have submitted the correct documents for a drive.
+Example: A company requests a resume, semester marksheets, and a college ID.
+The system finds:
+Student document audit
+Example
+Resume.pdf
+PDF readable · Filename valid
+Passed
+Semester_6_Marksheet.pdf
+Required document not submitted
+Missing
+College_ID.pdf
+File format verified
+Passed
+The module can perform several levels of verification:
+Level 1 — Deterministic checks: File extension, MIME type, size, filename format, PDF integrity, document presence, and duplicate detection.
+
+Agent 4 — Communication and Outreach Agent
+Placement coordinators need to send multiple kinds of messages.
+Examples include drive announcements, missing-document reminders, registration deadline warnings, interview schedules, and updates when interview timings change.
+The agent receives structured drive information and the intended recipient audience.
+It drafts a communication, verifies that required fields are present, and sends it to an approval queue.
+It should never decide independently to send sensitive or bulk communications without authorization.
+
+Agent 5 — Exception Resolution Agent
+Advanced feature
+This is what could make PlacementOS substantially more interesting than a conventional workflow automation tool.
+Real placement operations rarely follow a perfectly predictable sequence.
+Imagine these situations:
+A company revises the minimum CGPA from 7.5 to 8.0.
+A student corrects an outdated academic record.
+An approved announcement contains a deadline that subsequently changes.
+The email provider fails while delivering notifications.
+A company updates its eligible branches halfway through registration.
+Your Exception Resolution Agent would identify the type of problem, retrieve the relevant records, propose a recovery plan, and request approval before taking consequential actions.
+For the CGPA change, it could propose to version the eligibility policy, recompute affected students, identify previously notified candidates, and prepare a correction announcement.
+The actual changes would be executed by controlled backend services.
+This provides a genuinely interesting engineering challenge: event-driven workflows that adapt to changing information without silently corrupting their state.

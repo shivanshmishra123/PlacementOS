@@ -97,7 +97,7 @@ To avoid scope creep while ensuring a complete, testable recruitment lifecycle, 
 ```
 
 ### Confirmation Checklist:
-1. **Full Local MVP Scope (P00 - P09):** Covers every operational phase of a recruitment drive (from raw JD upload to student registration, interview scheduling, employer results recording, and final report generation) completely offline/locally using synthetic data, Dockerized services (Postgres, Redis, MinIO, Mailpit), and deterministic adapters.
+1. **Full Local MVP Scope (P00 - P09):** Covers every operational phase of a recruitment drive (from raw JD upload to student registration, interview scheduling, employer results recording, and final report generation) completely offline/locally using synthetic data, Dockerized services (Postgres, Redis, SeaweedFS S3, Mailpit), and deterministic adapters.
 2. **No Orphaned Workflow Steps:** No step from `Workflow detail.png` or `Description.txt` is missing from the local MVP. Basic scheduling and results are intentionally retained in P09 rather than deferred.
 3. **Pilot Hardening Gate (P10):** Real student records, live email providers, real OIDC identity providers, and live ClamAV scanner integration are gated behind P10 verification.
 4. **Connector Independence (P11):** Live Google Workspace connections (Gmail, Sheets, Calendar) are strictly post-MVP extensions. The system operates fully via manual uploads, exports, and internal calendars when Google is unavailable.

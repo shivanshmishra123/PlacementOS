@@ -16,6 +16,7 @@ from botocore.exceptions import ClientError
 from docx import Document
 from httpx import AsyncClient
 
+from placementos.services.source_jobs import SourceJobService
 from placementos.services.storage import storage_service
 
 
@@ -105,7 +106,8 @@ async def test_company_and_drive_lifecycle_and_concurrency(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_pasted_source_intake_and_locators(client: AsyncClient):
     """Test raw pasted job description intake, storage, and precise locator extraction."""
-    await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    login = await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    institution_id = login.json()["user"]["institution_id"]
 
     # Create company and drive
     unique_suffix = uuid.uuid4().hex[:6]
@@ -141,9 +143,11 @@ async def test_pasted_source_intake_and_locators(client: AsyncClient):
     assert paste_resp.status_code == 201
     artifact_data = paste_resp.json()
     artifact_id = artifact_data["id"]
-    assert artifact_data["status"] == "extracted"
+    assert artifact_data["status"] == "processing"
     assert artifact_data["source_type"] == "pasted_text"
     assert artifact_data["hash_sha256"] is not None
+
+    await SourceJobService.run_extraction(uuid.UUID(artifact_id), uuid.UUID(institution_id))
 
     # Retrieve extracted text and locators
     ext_resp = await client.get(f"/api/v1/sources/{artifact_id}/extractions")
@@ -168,7 +172,8 @@ async def test_pasted_source_intake_and_locators(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_quarantine_upload_and_promotion_flow(client: AsyncClient):
     """Test quarantine upload session generation, direct S3 upload, and completion promotion."""
-    await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    login = await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    institution_id = login.json()["user"]["institution_id"]
 
     # Setup drive
     comp_resp = await client.post("/api/v1/companies", json={"name": f"Microsoft IDC - {uuid.uuid4().hex[:6]}"})
@@ -209,18 +214,20 @@ async def test_quarantine_upload_and_promotion_flow(client: AsyncClient):
         Bucket=storage_service.bucket_name,
         Key=storage_key,
         Body=docx_bytes,
+        ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
 
     # 3. Call complete endpoint
     complete_resp = await client.post(f"/api/v1/uploads/sessions/{session_id}/complete")
     assert complete_resp.status_code == 201
     artifact_data = complete_resp.json()
-    assert artifact_data["status"] == "extracted"
-    assert "accepted/" in artifact_data["storage_key"]
+    assert artifact_data["status"] == "processing"
 
     # 4. Verify quarantine file was purged from S3
     with pytest.raises(ClientError):
         storage_service._client.head_object(Bucket=storage_service.bucket_name, Key=storage_key)
+
+    await SourceJobService.run_extraction(uuid.UUID(artifact_data["id"]), uuid.UUID(institution_id))
 
     # 5. Check extraction
     ext_resp = await client.get(f"/api/v1/sources/{artifact_data['id']}/extractions")
@@ -261,12 +268,9 @@ async def test_corrupt_file_handling_in_upload_complete(client: AsyncClient):
         Body=b"GARBAGE_PAYLOAD_NOT_DOCX_OR_ZIP",
     )
 
-    # Complete upload: should record failure on artifact
+    # Complete upload: validation fails before bytes enter accepted storage
     complete_resp = await client.post(f"/api/v1/uploads/sessions/{session_data['id']}/complete")
-    assert complete_resp.status_code == 201
-    artifact_data = complete_resp.json()
-    assert artifact_data["status"] == "failed"
-    assert artifact_data["metadata_json"]["error_code"] == "MIMETYPE_MISMATCH"
+    assert complete_resp.status_code == 400
 
 
 @pytest.mark.asyncio
@@ -312,7 +316,8 @@ async def test_cross_tenant_isolation_for_drives_and_sources(client: AsyncClient
 @pytest.mark.asyncio
 async def test_extraction_idempotency_and_retry(client: AsyncClient):
     """Verify INV-08: Re-triggering text extraction is idempotent and does not duplicate state."""
-    await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    login = await client.post("/api/v1/auth/dev-login", json={"persona": "coord_apex"})
+    institution_id = login.json()["user"]["institution_id"]
 
     comp_resp = await client.post("/api/v1/companies", json={"name": f"Uber - {uuid.uuid4().hex[:6]}"})
     drive_resp = await client.post(
@@ -326,6 +331,7 @@ async def test_extraction_idempotency_and_retry(client: AsyncClient):
         json={"title": "Uber JD", "raw_text": "Uber Technologies campus hiring.\n\nRequired CGPA: 8.5"},
     )
     artifact_id = source_resp.json()["id"]
+    await SourceJobService.run_extraction(uuid.UUID(artifact_id), uuid.UUID(institution_id))
 
     # Re-trigger extraction
     retry_resp = await client.post(f"/api/v1/sources/{artifact_id}/extract")

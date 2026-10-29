@@ -19,7 +19,7 @@ import placementos.models  # noqa: F401
 target_metadata = Base.metadata
 
 # Override URL dynamically from application settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.MIGRATION_DATABASE_URL)
 
 
 def run_migrations_offline() -> None:
@@ -57,16 +57,9 @@ async def run_async_migrations() -> None:
     await connectable.dispose()
 
 
-import sys
-
-
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    loop_factory = asyncio.SelectorEventLoop if sys.platform == "win32" else None
-    if loop_factory:
-        asyncio.run(run_async_migrations(), loop_factory=loop_factory)
-    else:
-        asyncio.run(run_async_migrations())
+    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():

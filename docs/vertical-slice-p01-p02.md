@@ -39,7 +39,7 @@ The development workstation runs **Windows (PowerShell)**. The following technic
 │ **Docker Compose** │ Port collisions on default  │ Pinned port configuration:          │
 │                    │ ports (e.g. existing local  │   - PostgreSQL: `5432`              │
 │                    │ Postgres).                  │   - Redis: `6379`                   │
-│                    │                             │   - MinIO (S3): `9000` (API),       │
+│                    │                             │   - S3-compatible store: `4566`,    │
 │                    │                             │                 `9001` (Console)    │
 │                    │                             │   - Mailpit: `1025` (SMTP),         │
 │                    │                             │              `8025` (Web UI)        │
@@ -59,7 +59,7 @@ The development workstation runs **Windows (PowerShell)**. The following technic
 - [ ] **P01-T02: Pin dependencies & lockfiles.**  
   Initialize Python 3.12 with `uv` (`pyproject.toml`) and Node 20 LTS with `pnpm`. Configure linters (`ruff`, `eslint`) and test frameworks (`pytest`, `vitest`).
 - [ ] **P01-T03: Docker Compose local infrastructure.**  
-  Provide `compose.yaml` with PostgreSQL 16, Redis 7, MinIO, and Mailpit with automated health checks.
+  Provide `compose.yaml` with PostgreSQL 16, Redis 7, SeaweedFS S3, and Mailpit with automated health checks.
 - [ ] **P01-T04: Settings, database connection, & Alembic setup.**  
   Implement typed configuration (`pydantic-settings`), PostgreSQL connection pool (`SQLAlchemy 2.0`), and Alembic migration directory (`backend/migrations`).
 - [ ] **P01-T05: FastAPI & Next.js skeleton shells.**  
@@ -96,7 +96,7 @@ The development workstation runs **Windows (PowerShell)**. The following technic
 
 The completion of P01 and P02 will be demonstrated by the following verifiable end-to-end user scenario:
 
-1. **Service Verification:** Docker Compose starts healthy Postgres, Redis, MinIO, and Mailpit services.
+1. **Service Verification:** Docker Compose starts healthy Postgres, Redis, SeaweedFS S3, and Mailpit services.
 2. **Session Sign-in:** Coordinator Priya Sharma logs into Apex Institute of Technology using the development identity adapter; receives an opaque session cookie.
 3. **Tenant-Safe CSV Import:** Priya uploads a CSV containing the Section 10.2 student cohort (10 students). The API returns a validation preview report. Upon confirmation, the 10 students and their initial verified academic revisions are transactionally committed.
 4. **Negative Scope Check:** Coordinator Ananya Das (Beacon State University) attempts to fetch student records from Apex Institute of Technology via ID and roster endpoints. All requests are strictly rejected with HTTP 404 / 403.

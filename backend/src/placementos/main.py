@@ -13,7 +13,7 @@ from placementos.core.errors import (
     app_exception_handler,
     unhandled_exception_handler,
 )
-from placementos.core.security import CorrelationIdMiddleware
+from placementos.core.security import BrowserWriteProtectionMiddleware, CorrelationIdMiddleware
 
 
 @asynccontextmanager
@@ -38,6 +38,7 @@ def create_app() -> FastAPI:
 
     # 1. Register Core Security & Observability Middlewares
     app.add_middleware(CorrelationIdMiddleware)
+    app.add_middleware(BrowserWriteProtectionMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.ALLOWED_ORIGINS,

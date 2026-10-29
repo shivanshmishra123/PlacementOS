@@ -15,6 +15,8 @@ from typing import Any
 import pypdf
 from docx import Document
 
+from placementos.core.config import settings
+
 
 class ParseError(Exception):
     """Base error for document parsing failures."""
@@ -53,6 +55,25 @@ class DecompressionBombError(ParseError):
 class EmptyOrScannedError(ParseError):
     def __init__(self, message: str = "Document contains no extractable text (likely an image-only scan)") -> None:
         super().__init__("EMPTY_OR_SCANNED", message)
+
+
+class MalwareDetectedError(ParseError):
+    def __init__(self, message: str = "Malware signature detected") -> None:
+        super().__init__("MALWARE_DETECTED", message)
+
+
+class MalwareScanner:
+    """Narrow malware scanner boundary with an explicit development fixture."""
+
+    EICAR_MARKER = b"EICAR-STANDARD-ANTIVIRUS-TEST-FILE"
+
+    @classmethod
+    def scan(cls, data: bytes) -> str:
+        if cls.EICAR_MARKER in data:
+            raise MalwareDetectedError()
+        if settings.MALWARE_SCANNER_MODE == "development_fixture":
+            return "development_fixture"
+        raise ParseError("SCANNER_UNAVAILABLE", "Configured malware scanner adapter is unavailable")
 
 
 @dataclass

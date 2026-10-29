@@ -52,7 +52,7 @@ class UploadSession(TimestampedUUIDModel):
     checksum_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
     status: Mapped[str] = mapped_column(
         String(50), default="pending", nullable=False, index=True
-    )  # pending, uploaded, accepted, rejected, expired
+    )  # pending, validating, completed, rejected, expired
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
@@ -87,11 +87,11 @@ class SourceArtifact(TimestampedUUIDModel):
     file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     hash_sha256: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     scan_status: Mapped[str] = mapped_column(
-        String(50), default="clean", nullable=False
-    )  # clean, infected, suspicious, skipped
+        String(50), default="pending", nullable=False
+    )  # pending, clean, infected, suspicious, unavailable, development_fixture
     acceptance_status: Mapped[str] = mapped_column(
-        String(50), default="accepted", nullable=False
-    )  # quarantined, accepted, rejected
+        String(50), default="validating", nullable=False
+    )  # quarantined, validating, accepted, rejected
 
     created_by_membership_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -159,7 +159,7 @@ class DomainJob(TimestampedUUIDModel):
     operation_key: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(
         String(50), default="queued", nullable=False, index=True
-    )  # queued, processing, completed, failed
+    )  # queued, processing, completed, failed_retryable, failed_terminal, cancelled
     attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     max_attempts: Mapped[int] = mapped_column(Integer, default=3, nullable=False)
     error_details: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)

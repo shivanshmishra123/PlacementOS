@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from placementos.api.v1.auth import router as auth_router
 from placementos.api.v1.drives import router as drives_router
 from placementos.api.v1.health import router as health_router
+from placementos.api.v1.intelligence import router as intelligence_router
 from placementos.api.v1.sources import router as sources_router
 from placementos.api.v1.students import router as students_router
 
@@ -20,3 +21,5 @@ api_v1_router.include_router(students_router)
 api_v1_router.include_router(drives_router)
 # Mount source intake, upload sessions & extractions endpoints
 api_v1_router.include_router(sources_router)
+# Mount P04 JD interpretation, clarification, policy, and approval routes
+api_v1_router.include_router(intelligence_router)
