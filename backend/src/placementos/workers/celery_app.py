@@ -8,6 +8,7 @@ celery_app = Celery(
     "placementos",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
+    include=["placementos.workers.source_tasks"],
 )
 
 celery_app.conf.update(
