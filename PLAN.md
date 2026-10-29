@@ -202,17 +202,61 @@ Next dependency-ready task: P03-T01 (Model drive roots and revisions).
 
 **Objective:** Persist sources securely and expose located text before interpreting it. **Dependencies:** P02. **Requirements:** FR-JD and FR-DOC security foundation.
 
-- [ ] **P03-T01: Model drive roots and revisions.** Add companies, draft drives, revision pointers, lifecycle/hold fields, source associations, and concurrency control. Evidence: assigned coordinators can create/edit drafts; unauthorized identities cannot.
-- [ ] **P03-T02: Implement owner-bound upload sessions.** Issue random quarantine keys with short-lived signed instructions and backend limits. Evidence: another student/institution cannot reuse or complete the session for a different owner/purpose.
-- [ ] **P03-T03: Bind immutable accepted bytes.** Validate actual metadata/checksum, pin object version or server-copy accepted bytes to a protected final key. Evidence: replaying an unexpired upload URL cannot change the accepted source/document unnoticed.
-- [ ] **P03-T04: Add scanning and bounded parsing.** Implement signature/MIME/container checks, scanner adapter, parser resource limits, and typed failure categories. Evidence: corrupt, encrypted, mismatched, oversized, and decompression-bomb fixtures fail safely.
-- [ ] **P03-T05: Extract PDF/DOCX/text with locators.** Persist parser/method version, text object/hash, page/paragraph map, and empty/scanned outcomes. Evidence: displayed evidence can be traced to the correct original page/paragraph.
-- [ ] **P03-T06: Create durable source jobs.** Add scoped jobs/outbox foundation, idempotent extraction requests, worker progress, bounded retry, and manual failure handling. Evidence: a worker restart does not duplicate source versions or lose the job.
-- [ ] **P03-T07: Deliver intake/review UI.** Support JD upload and pasted email text, processing states, source preview/download, and clear error/replacement paths. Evidence: real source text reaches the coordinator screen through the API.
-- [ ] **P03-T08: Verify storage isolation and provenance.** Test authorized short-lived downloads, quarantine denial, source deduplication scope, and uploader/hash history. Evidence: no public object access, secret URLs in logs, or cross-tenant duplicate disclosure.
-- [ ] **P03-T09: Phase completion testing and verification.** Execute intake and extraction test suite: owner-bound quarantine session generation, validated S3 version binding, malicious/corrupt file rejection fixtures (corrupt header, encrypted PDF, executable extension spoofing, oversized upload, XML bomb), page/paragraph locator mapping, and worker job idempotency upon simulated crash. Evidence: automated storage and parser test suite passing.
+- [x] **P03-T01: Model drive roots and revisions.** Add companies, draft drives, revision pointers, lifecycle/hold fields, source associations, and concurrency control. Evidence: assigned coordinators can create/edit drafts; unauthorized identities cannot.
+- [x] **P03-T02: Implement owner-bound upload sessions.** Issue random quarantine keys with short-lived signed instructions and backend limits. Evidence: another student/institution cannot reuse or complete the session for a different owner/purpose.
+- [x] **P03-T03: Bind immutable accepted bytes.** Validate actual metadata/checksum, pin object version or server-copy accepted bytes to a protected final key. Evidence: replaying an unexpired upload URL cannot change the accepted source/document unnoticed.
+- [x] **P03-T04: Add scanning and bounded parsing.** Implement signature/MIME/container checks, scanner adapter, parser resource limits, and typed failure categories. Evidence: corrupt, encrypted, mismatched, oversized, and decompression-bomb fixtures fail safely.
+- [x] **P03-T05: Extract PDF/DOCX/text with locators.** Persist parser/method version, text object/hash, page/paragraph map, and empty/scanned outcomes. Evidence: displayed evidence can be traced to the correct original page/paragraph.
+- [x] **P03-T06: Create durable source jobs.** Add scoped jobs/outbox foundation, idempotent extraction requests, worker progress, bounded retry, and manual failure handling. Evidence: a worker restart does not duplicate source versions or lose the job.
+- [x] **P03-T07: Deliver intake/review UI.** Support JD upload and pasted email text, processing states, source preview/download, and clear error/replacement paths. Evidence: real source text reaches the coordinator screen through the API.
+- [x] **P03-T08: Verify storage isolation and provenance.** Test authorized short-lived downloads, quarantine denial, source deduplication scope, and uploader/hash history. Evidence: no public object access, secret URLs in logs, or cross-tenant duplicate disclosure.
+- [x] **P03-T09: Phase completion testing and verification.** Execute intake and extraction test suite: owner-bound quarantine session generation, validated S3 version binding, malicious/corrupt file rejection fixtures (corrupt header, encrypted PDF, executable extension spoofing, oversized upload, XML bomb), page/paragraph locator mapping, and worker job idempotency upon simulated crash. Evidence: automated storage and parser test suite passing.
 
 **Exit gate:** a source can be uploaded, safely accepted, extracted, located, reviewed, and replaced through revisions. OCR can remain deferred if scanned sources have a useful manual path. Real scanning is required before P10's real-data gate.
+
+### P03 Completion Record
+`	ext
+Task/phase: P03 (Implement drives, private intake, and text extraction)
+Behavior delivered:
+- Modeled recruitment and drive entities (Company, Drive, DriveRevision) with optimistic concurrency revisions, drive lifecycle stages (draft, ctive, rchived), and multi-tenant scoping.
+- Modeled private storage entities (UploadSession, SourceArtifact, TextExtraction, DomainJob) with tenant isolation, SHA256 checksums, and scan/acceptance statuses.
+- Applied Alembic database migration 20261029_0726_1eec380a58a7_create_drives_and_storage_intake_tables.py.
+- Implemented secure S3 Private Storage Service (StorageService) with quarantine isolation, byte-hashing, 15-minute presigned upload URLs, 5-minute presigned download URLs, atomic byte promotion (quarantine/ -> ccepted/), and direct text intake.
+- Implemented multi-format document parser and security scanner (DocumentScanner, TextExtractor):
+  - Sniffs magic bytes (%PDF-, OpenXML zip, UTF-8), rejects executables (MZ, ELF), verifies zip bomb ratios (<25:1, <30MB uncompressed), and enforces a 15MB file cap.
+  - Extracts text with fine-grained locators (page_number, paragraph_index, char_start, char_end, snippet) for full provenance traceability (INV-03).
+  - Detects scanned/empty documents (is_empty_or_scanned=True).
+- Built durable domain job service (SourceJobService) with optimistic concurrency, row-level locking (with_for_update), worker progress updates, and Celery asynchronous task (extract_source_artifact_task).
+- Implemented RESTful FastAPI endpoints: /companies, /drives, /uploads/sessions, /sources, /sources/{id}/download, and /sources/{id}/re-extract.
+- Synchronized monorepo API contracts: exported OpenAPI specification, generated TypeScript client types and methods, and confirmed zero contract drift.
+- Delivered Next.js 15 Coordinator UI: Drives management roster (/coordinator/drives) with company creation modal, and Intake & Extraction Workspace (/coordinator/drives/[id]/intake) featuring drag-and-drop file upload to presigned S3 URL, pasted text intake, document info card with download/replacement, and interactive source preview with clickable traceable locators panel.
+- Verification: 41/41 backend tests passing (unit and integration), 0 Ruff lint errors, 0 Mypy type issues across 33 files, 0 contract drift, 0 ESLint errors, 0 TypeScript errors, Next.js static production build succeeded.
+Requirements covered: FR-JD, FR-DOC foundation, INV-03, INV-06, INV-07, INV-08, INV-12.
+Files/change reference:
+- Backend models & migrations: backend/src/placementos/models/recruitment.py, backend/src/placementos/models/storage.py, backend/migrations/versions/20261029_0726_1eec380a58a7_create_drives_and_storage_intake_tables.py.
+- Backend services & workers: backend/src/placementos/services/storage.py, backend/src/placementos/services/parsers.py, backend/src/placementos/services/source_jobs.py, backend/src/placementos/workers/source_tasks.py.
+- Backend schemas & endpoints: backend/src/placementos/schemas/drives.py, backend/src/placementos/schemas/storage.py, backend/src/placementos/api/v1/drives.py, backend/src/placementos/api/v1/sources.py, backend/src/placementos/api/v1/router.py.
+- Tests: backend/tests/unit/test_parsers.py, backend/tests/unit/test_storage_service.py, backend/tests/integration/test_drives_and_intake.py.
+- API Client & contracts: packages/api-client/openapi.json, packages/api-client/src/types.ts, packages/api-client/src/client.ts.
+- Frontend UI: apps/web/src/app/coordinator/drives/page.tsx, apps/web/src/app/coordinator/drives/[id]/intake/page.tsx, apps/web/src/app/layout.tsx.
+Verification commands and results:
+- Full backend pytest suite: pytest backend/tests -v -> 41 passed in 7.06s.
+- Backend linting: 
+uff check backend/src backend/tests -> All checks passed!
+- Backend typing: mypy backend/src -> Success: no issues found in 33 source files.
+- Contract drift check: python scripts/check_contracts_drift.py -> Contract check passed: zero schema drift detected.
+- Frontend linting & typing: pnpm lint and pnpm typecheck -> 0 errors.
+- Frontend build: pnpm build -> Next.js production build succeeded for all routes (/, /coordinator/students, /coordinator/drives, /coordinator/drives/[id]/intake, /student/portal).
+Demonstrated user/recovery scenario:
+- Tested owner-bound upload session: S3 presigned PUT URL issued for quarantine key; completed upload validates SHA256 checksum and promotes bytes to accepted immutable storage key.
+- Tested security rejection: Corrupt PDF headers, password-encrypted PDFs, executable files with spoofed .pdf extensions, decompression bombs, and files exceeding 15MB are rejected with typed failure codes without crashing the server.
+- Tested locator provenance: Extracted text breaks down into character offsets and page/paragraph locators so displayed UI snippets trace directly to source document bytes.
+- Tested multi-tenant isolation: Beacon coordinator cannot view, download, or re-extract Apex drive source artifacts or upload sessions.
+- Tested durable source job recovery: Retrying extraction jobs updates existing extraction records idempotently without duplicating revisions.
+Remaining limits or decisions: Text-based PDF and DOCX extraction is operational; OCR for purely image-scanned documents remains deferred per architecture specification since manual structured fallback is supported. P04 (JD Intelligence, Clarification, and Rule Review) is ready to start.
+Next dependency-ready task: P04-T01 (Define interpretation and policy schemas).
+`
+
 
 ## 8. P04: Implement JD intelligence, clarification, and rule review
 

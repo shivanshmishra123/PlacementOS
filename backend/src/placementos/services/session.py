@@ -42,6 +42,20 @@ class AuthContext:
                 details={"required_capability": capability, "role": self.role},
             )
 
+    def require_role(self, *roles: str) -> None:
+        """Enforce role check or raise 403 Forbidden."""
+        if self.role in ("super_admin", "institution_admin"):
+            return
+        if self.role not in roles:
+            raise ForbiddenException(
+                message=f"Access restricted to roles: {', '.join(roles)}",
+                details={"allowed_roles": list(roles), "user_role": self.role},
+            )
+
+    def require_coordinator(self) -> None:
+        """Enforce coordinator or admin role."""
+        self.require_role("placement_coordinator", "coordinator", "institution_admin")
+
     def require_institution(self, target_institution_id: uuid.UUID) -> None:
         """Enforce tenant isolation boundary (INV-06)."""
         if self.role == "super_admin":

@@ -55,13 +55,13 @@ class ForbiddenError(AppException):
 
 
 class ConflictError(AppException):
-    def __init__(self, code: str = "CONFLICT", message: str = "Resource conflict", details: dict[str, Any] | None = None):
+    def __init__(self, message: str = "Resource conflict", code: str = "CONFLICT", details: dict[str, Any] | None = None):
         super().__init__(code=code, message=message, status_code=status.HTTP_409_CONFLICT, details=details)
 
 
 class ProposalStaleError(ConflictError):
     def __init__(self, message: str = "Action proposal is stale due to changed dependencies", details: dict[str, Any] | None = None):
-        super().__init__(code="PROPOSAL_STALE", message=message, details=details)
+        super().__init__(message=message, code="PROPOSAL_STALE", details=details)
 
 
 class BadRequestError(AppException):

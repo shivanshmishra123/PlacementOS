@@ -114,3 +114,177 @@ export interface CorrectionProposalDTO {
   decided_at?: string | null;
   created_at: string;
 }
+
+// ==========================================
+// Phase 3: Recruitment Drives & Companies
+// ==========================================
+
+export interface CompanyCreate {
+  name: string;
+  industry?: string | null;
+  website?: string | null;
+  description?: string | null;
+}
+
+export interface CompanyResponse {
+  id: string;
+  institution_id: string;
+  name: string;
+  industry?: string | null;
+  website?: string | null;
+  description?: string | null;
+  created_at: string;
+}
+
+export interface DriveCreate {
+  company_id: string;
+  academic_year: string;
+  title: string;
+  description?: string | null;
+}
+
+export interface DriveUpdate {
+  title?: string | null;
+  description?: string | null;
+  status?: string | null;
+}
+
+export interface DriveRevisionCreate {
+  expected_revision_number: number;
+  change_summary: string;
+  proposed_changes?: Record<string, unknown>;
+}
+
+export interface DriveRevisionResponse {
+  id: string;
+  drive_id: string;
+  revision_number: number;
+  change_summary: string;
+  proposed_changes: Record<string, unknown>;
+  created_by_user_id?: string | null;
+  created_at: string;
+}
+
+export interface SourceArtifactSummary {
+  id: string;
+  drive_id: string;
+  source_type: string;
+  original_filename?: string | null;
+  status: string;
+  hash_sha256: string;
+  byte_size: number;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface DriveResponse {
+  id: string;
+  institution_id: string;
+  company_id: string;
+  company_name: string;
+  academic_year: string;
+  status: string;
+  title: string;
+  description?: string | null;
+  current_revision_number: number;
+  revisions: DriveRevisionResponse[];
+  source_artifacts: SourceArtifactSummary[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DriveListResponse {
+  items: DriveResponse[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// ==========================================
+// Phase 3: Storage, Intake & Extractions
+// ==========================================
+
+export interface UploadSessionCreate {
+  drive_id: string;
+  purpose?: string;
+  original_filename: string;
+  content_type: string;
+  byte_size: number;
+}
+
+export interface UploadSessionResponse {
+  id: string;
+  drive_id: string;
+  purpose: string;
+  original_filename: string;
+  storage_key: string;
+  upload_url: string;
+  expires_at: string;
+  status: string;
+  created_at: string;
+}
+
+export interface PastedSourceCreate {
+  title?: string;
+  raw_text: string;
+}
+
+export interface SourceArtifactResponse {
+  id: string;
+  institution_id: string;
+  drive_id: string;
+  source_type: string;
+  original_filename?: string | null;
+  file_extension?: string | null;
+  storage_key: string;
+  hash_sha256: string;
+  byte_size: number;
+  status: string;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+  extracted_at?: string | null;
+}
+
+export interface TextLocator {
+  locator_type: "page" | "paragraph";
+  page_number?: number | null;
+  paragraph_index: number;
+  char_offset_start: number;
+  char_offset_end: number;
+  preview: string;
+}
+
+export interface TextExtractionResponse {
+  id: string;
+  source_artifact_id: string;
+  institution_id: string;
+  extracted_text: string;
+  char_count: number;
+  locators: TextLocator[];
+  page_count?: number | null;
+  paragraph_count: number;
+  parser_version: string;
+  is_empty_or_scanned: boolean;
+  created_at: string;
+}
+
+export interface DownloadUrlResponse {
+  download_url: string;
+  expires_in: number;
+  filename?: string | null;
+}
+
+export interface DomainJobResponse {
+  id: string;
+  institution_id: string;
+  job_kind: string;
+  operation_key: string;
+  resource_id?: string | null;
+  status: string;
+  error_code?: string | null;
+  error_detail?: string | null;
+  attempt_count: number;
+  started_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+}

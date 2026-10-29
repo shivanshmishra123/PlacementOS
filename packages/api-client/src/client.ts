@@ -9,6 +9,21 @@ import type {
   StudentListItemDTO,
   StudentDetailDTO,
   CorrectionProposalDTO,
+  CompanyCreate,
+  CompanyResponse,
+  DriveCreate,
+  DriveUpdate,
+  DriveRevisionCreate,
+  DriveRevisionResponse,
+  DriveResponse,
+  DriveListResponse,
+  UploadSessionCreate,
+  UploadSessionResponse,
+  PastedSourceCreate,
+  SourceArtifactResponse,
+  TextExtractionResponse,
+  DownloadUrlResponse,
+  DomainJobResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -60,25 +75,29 @@ export class PlacementOSClient {
       throw new ApiError(response.status, errorBody);
     }
 
+    if (response.status === 204) {
+      return {} as T;
+    }
+
     return (await response.json()) as T;
   }
 
-  /** Retrieve backend application liveness status. */
+  // ==========================================
+  // Health & Diagnostics
+  // ==========================================
+
   public async getHealth(): Promise<HealthResponse> {
-    return this.request<HealthResponse>("/health");
+    return this.request<HealthResponse>("/api/v1/health");
   }
 
-  /** Retrieve backend and dependency readiness status. */
   public async getReadiness(): Promise<ReadinessResponse> {
-    return this.request<ReadinessResponse>("/ready");
+    return this.request<ReadinessResponse>("/api/v1/ready");
   }
 
-  /** List available development personas. */
-  public async listPersonas(): Promise<PersonaInfo[]> {
-    return this.request<PersonaInfo[]>("/api/v1/auth/personas");
-  }
+  // ==========================================
+  // Authentication & Personas
+  // ==========================================
 
-  /** Sign in using a development persona or email. */
   public async devLogin(req: DevLoginRequest): Promise<DevLoginResponse> {
     return this.request<DevLoginResponse>("/api/v1/auth/dev-login", {
       method: "POST",
@@ -87,19 +106,29 @@ export class PlacementOSClient {
     });
   }
 
+  public async listPersonas(): Promise<PersonaInfo[]> {
+    return this.request<PersonaInfo[]>("/api/v1/auth/personas");
+  }
+
   /** Get profile and active institutional scope of authenticated user. */
   public async getMe(): Promise<UserProfileResponse> {
     return this.request<UserProfileResponse>("/api/v1/auth/me");
   }
 
-  /** Revoke session and sign out. */
+  public async getCurrentUser(): Promise<UserProfileResponse> {
+    return this.getMe();
+  }
+
   public async logout(): Promise<{ message: string }> {
     return this.request<{ message: string }>("/api/v1/auth/logout", {
       method: "POST",
     });
   }
 
-  /** List scoped student records with optional filters. */
+  // ==========================================
+  // Students & Academic Records (Phase 2)
+  // ==========================================
+
   public async listStudents(params?: {
     branch?: string;
     min_cgpa?: number;
@@ -110,16 +139,19 @@ export class PlacementOSClient {
     if (params?.min_cgpa !== undefined) searchParams.set("min_cgpa", String(params.min_cgpa));
     if (params?.graduation_year !== undefined)
       searchParams.set("graduation_year", String(params.graduation_year));
+
     const qs = searchParams.toString();
     return this.request<StudentListItemDTO[]>(`/api/v1/students${qs ? `?${qs}` : ""}`);
   }
 
-  /** Get student record detail with revision history. */
-  public async getStudentDetail(studentId: string): Promise<StudentDetailDTO> {
+  public async getStudent(studentId: string): Promise<StudentDetailDTO> {
     return this.request<StudentDetailDTO>(`/api/v1/students/${studentId}`);
   }
 
-  /** Preview CSV import without mutations. */
+  public async getStudentDetail(studentId: string): Promise<StudentDetailDTO> {
+    return this.getStudent(studentId);
+  }
+
   public async previewCsv(csvContent: string): Promise<{
     preview_token: string;
     total_rows: number;
@@ -130,33 +162,32 @@ export class PlacementOSClient {
     sample_rows: Record<string, unknown>[];
     invalid_rows: Record<string, unknown>[];
   }> {
-    return this.request("/api/v1/students/import-preview", {
+    return this.request("/api/v1/students/import/preview", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ csv_content: csvContent }),
+      body: JSON.stringify({ csv_data: csvContent }),
     });
   }
 
-  /** Commit previewed CSV rows. */
   public async commitCsv(previewToken: string): Promise<{
     message: string;
+    total_committed: number;
     created_students: number;
     updated_students: number;
-    total_committed: number;
+    inserted_count?: number;
+    updated_count?: number;
   }> {
-    return this.request("/api/v1/students/import-commit", {
+    return this.request("/api/v1/students/import/commit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ preview_token: previewToken }),
     });
   }
 
-  /** Get student's self-service profile. */
   public async getMyStudentProfile(): Promise<StudentDetailDTO> {
     return this.request<StudentDetailDTO>("/api/v1/student/me");
   }
 
-  /** Submit student correction proposal. */
   public async submitCorrection(req: {
     proposed_changes: Record<string, unknown>;
     justification: string;
@@ -169,17 +200,14 @@ export class PlacementOSClient {
     });
   }
 
-  /** List authenticated student's correction proposals with status. */
   public async getMyCorrections(): Promise<CorrectionProposalDTO[]> {
     return this.request<CorrectionProposalDTO[]>("/api/v1/student/corrections");
   }
 
-  /** List pending correction proposals for coordinator review. */
   public async listPendingCorrections(): Promise<CorrectionProposalDTO[]> {
     return this.request<CorrectionProposalDTO[]>("/api/v1/students/corrections/pending");
   }
 
-  /** Decide correction proposal (approve/reject). */
   public async decideCorrection(
     proposalId: string,
     decision: "approved" | "rejected",
@@ -194,5 +222,118 @@ export class PlacementOSClient {
       }
     );
   }
+
+  // ==========================================
+  // Recruitment Drives & Companies (Phase 3)
+  // ==========================================
+
+  public async listCompanies(): Promise<CompanyResponse[]> {
+    return this.request<CompanyResponse[]>("/api/v1/companies");
+  }
+
+  public async createCompany(req: CompanyCreate): Promise<CompanyResponse> {
+    return this.request<CompanyResponse>("/api/v1/companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async listDrives(params?: {
+    status?: string;
+    company_id?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<DriveListResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set("status", params.status);
+    if (params?.company_id) searchParams.set("company_id", params.company_id);
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.limit) searchParams.set("limit", String(params.limit));
+
+    const qs = searchParams.toString();
+    return this.request<DriveListResponse>(`/api/v1/drives${qs ? `?${qs}` : ""}`);
+  }
+
+  public async getDrive(driveId: string): Promise<DriveResponse> {
+    return this.request<DriveResponse>(`/api/v1/drives/${driveId}`);
+  }
+
+  public async createDrive(req: DriveCreate): Promise<DriveResponse> {
+    return this.request<DriveResponse>("/api/v1/drives", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async updateDrive(driveId: string, req: DriveUpdate): Promise<DriveResponse> {
+    return this.request<DriveResponse>(`/api/v1/drives/${driveId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async createDriveRevision(
+    driveId: string,
+    req: DriveRevisionCreate
+  ): Promise<DriveRevisionResponse> {
+    return this.request<DriveRevisionResponse>(`/api/v1/drives/${driveId}/revisions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  // ==========================================
+  // Storage, Intake & Extractions (Phase 3)
+  // ==========================================
+
+  public async createUploadSession(req: UploadSessionCreate): Promise<UploadSessionResponse> {
+    return this.request<UploadSessionResponse>("/api/v1/uploads/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async completeUploadSession(sessionId: string): Promise<SourceArtifactResponse> {
+    return this.request<SourceArtifactResponse>(`/api/v1/uploads/sessions/${sessionId}/complete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  public async createPastedSource(
+    driveId: string,
+    req: PastedSourceCreate
+  ): Promise<SourceArtifactResponse> {
+    return this.request<SourceArtifactResponse>(`/api/v1/drives/${driveId}/sources/pasted`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
+
+  public async getSourceArtifact(artifactId: string): Promise<SourceArtifactResponse> {
+    return this.request<SourceArtifactResponse>(`/api/v1/sources/${artifactId}`);
+  }
+
+  public async getTextExtraction(artifactId: string): Promise<TextExtractionResponse> {
+    return this.request<TextExtractionResponse>(`/api/v1/sources/${artifactId}/extractions`);
+  }
+
+  public async getDownloadUrl(artifactId: string): Promise<DownloadUrlResponse> {
+    return this.request<DownloadUrlResponse>(`/api/v1/sources/${artifactId}/download-url`);
+  }
+
+  public async retriggerExtraction(artifactId: string): Promise<DomainJobResponse> {
+    return this.request<DomainJobResponse>(`/api/v1/sources/${artifactId}/extract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
 
+export const api = new PlacementOSClient();

@@ -43,6 +43,12 @@ export default function RootLayout({
                     Overview
                   </Link>
                   <Link
+                    href="/coordinator/drives"
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
+                  >
+                    Recruitment Drives
+                  </Link>
+                  <Link
                     href="/coordinator/students"
                     className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
                   >
