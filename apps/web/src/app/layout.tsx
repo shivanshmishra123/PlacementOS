@@ -66,12 +66,18 @@ export default function RootLayout({
                   >
                     My Eligibility
                   </Link>
+                  <Link
+                    href="/student/drives"
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
+                  >
+                    My Drives
+                  </Link>
                 </nav>
               </div>
 
               <div className="flex items-center gap-4">
                 <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  Phase 2 Verified Records
+                  Phase 6 Participation
                 </span>
                 <PersonaSwitcher />
               </div>

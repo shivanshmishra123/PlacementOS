@@ -741,7 +741,7 @@ async def decide_proposal(
         from placementos.services.eligibility_runs import EligibilityRunService
 
         await EligibilityRunService.mark_drive_runs_stale(
-            session, auth.institution_id, policy.drive_id
+            session, auth.institution_id, policy.drive_id, auth.membership_id
         )
     elif payload.decision == "rejected":
         policy.status = "rejected"

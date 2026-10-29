@@ -557,7 +557,7 @@ async def decide_correction_proposal(
         from placementos.services.eligibility_runs import EligibilityRunService
 
         await EligibilityRunService.mark_student_runs_stale(
-            db, auth.institution_id, profile.id
+            db, auth.institution_id, profile.id, auth.membership_id
         )
         await db.flush()
 

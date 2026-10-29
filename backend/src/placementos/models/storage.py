@@ -44,6 +44,10 @@ class UploadSession(TimestampedUUIDModel):
         nullable=True,
         index=True,
     )
+    student_profile_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("student_profiles.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    document_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
     quarantine_key: Mapped[str] = mapped_column(String(512), unique=True, nullable=False)
     accepted_key: Mapped[str | None] = mapped_column(String(512), nullable=True)
     file_name: Mapped[str] = mapped_column(String(255), nullable=False)

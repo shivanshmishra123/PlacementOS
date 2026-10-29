@@ -452,3 +452,132 @@ export interface DomainJobResponse {
   completed_at?: string | null;
   created_at: string;
 }
+
+// ==========================================
+// Phase 6: Documents, Publication & Registration
+// ==========================================
+
+export type DocumentType = "resume" | "marksheet" | "college_id";
+export type ReadinessStatus = "ready" | "pending" | "blocked" | "needs_review";
+
+export interface RequirementCreate {
+  document_type: DocumentType;
+  display_label: string;
+  allowed_extensions: Array<"pdf" | "docx">;
+  max_size_bytes?: number;
+  filename_pattern?: string | null;
+  required_stage: "registration" | "scheduling";
+  due_at?: string | null;
+}
+
+export interface RequirementResponse extends RequirementCreate {
+  id: string;
+  drive_id: string;
+  drive_revision_id: string;
+  max_size_bytes: number;
+  created_at: string;
+}
+
+export interface PublicationProposalResponse {
+  id: string;
+  drive_id: string;
+  drive_revision_id: string;
+  evaluation_run_id: string;
+  revision_number: number;
+  canonical_hash: string;
+  state: string;
+  payload: Record<string, unknown>;
+  dependencies: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface DocumentUploadSessionResponse {
+  id: string;
+  document_type: DocumentType;
+  original_filename: string;
+  upload_url: string;
+  expires_at: string;
+  status: string;
+}
+
+export interface FindingResponse {
+  code: string;
+  severity: "info" | "warning" | "error";
+  message: string;
+  required_action?: string | null;
+}
+
+export interface DocumentRevisionResponse {
+  id: string;
+  document_type: DocumentType;
+  revision_number: number;
+  original_filename: string;
+  media_type: string;
+  file_size_bytes: number;
+  hash_sha256: string;
+  scan_status: string;
+  structure_status: string;
+  text_status: string;
+  created_at: string;
+}
+
+export interface RequirementReadinessResponse {
+  requirement_id: string;
+  document_type: DocumentType;
+  display_label: string;
+  required_stage: "registration" | "scheduling";
+  due_at?: string | null;
+  status: ReadinessStatus;
+  findings: FindingResponse[];
+  current_document?: DocumentRevisionResponse | null;
+}
+
+export interface DocumentReadinessResponse {
+  status: ReadinessStatus;
+  requirements: RequirementReadinessResponse[];
+}
+
+export interface RegistrationResponse {
+  id: string;
+  drive_id: string;
+  student_profile_id: string;
+  state: "draft" | "submitted" | "withdrawn" | "eligibility_hold";
+  submitted_at?: string | null;
+  withdrawn_at?: string | null;
+  hold_reason?: string | null;
+  concurrency_revision: number;
+}
+
+export interface StudentDriveResponse {
+  drive_id: string;
+  company_name: string;
+  role_title: string;
+  location?: string | null;
+  work_mode: string;
+  employment_type: string;
+  compensation_details?: Record<string, unknown> | null;
+  registration_start_at: string;
+  registration_end_at: string;
+  withdrawal_end_at?: string | null;
+  eligibility_status: "eligible" | "ineligible" | "needs_review";
+  eligibility_reasons: string[];
+  document_readiness: DocumentReadinessResponse;
+  registration?: RegistrationResponse | null;
+}
+
+export interface ParticipantResponse {
+  student_profile_id: string;
+  student_identifier: string;
+  student_name: string;
+  eligibility_status: string;
+  readiness_status: ReadinessStatus;
+  registration_state?: string | null;
+  registration_id?: string | null;
+  registration_revision?: number | null;
+}
+
+export interface ParticipantListResponse {
+  items: ParticipantResponse[];
+  total: number;
+  counts: Record<string, number>;
+}

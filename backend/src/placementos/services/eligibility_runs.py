@@ -15,6 +15,8 @@ from placementos.models.academic import AcademicRecordRevision
 from placementos.models.eligibility import EligibilityResult, EvaluationCohortMember, EvaluationRun
 from placementos.models.identity import AuditLog, Membership, StudentProfile
 from placementos.models.intelligence import EligibilityPolicyVersion
+from placementos.models.participation import Registration, RegistrationEvent
+from placementos.models.recruitment import Drive
 from placementos.services.eligibility_engine import (
     ENGINE_VERSION,
     AcademicFacts,
@@ -27,6 +29,57 @@ from placementos.services.eligibility_engine import (
 
 DEFAULT_NORMALIZATION_VERSION = "institution-normalization-v1"
 EVALUATION_CHUNK_SIZE = 250
+
+
+async def _hold_published_registrations_for_runs(
+    session: AsyncSession,
+    institution_id: uuid.UUID,
+    run_ids: list[uuid.UUID],
+    actor_membership_id: uuid.UUID,
+    reason: str,
+    student_profile_id: uuid.UUID | None = None,
+) -> None:
+    """Convert submitted registrations to explicit holds when their published run becomes stale."""
+    if not run_ids:
+        return
+    drive_ids = (
+        await session.execute(
+            select(Drive.id).where(
+                Drive.institution_id == institution_id,
+                Drive.published_evaluation_run_id.in_(run_ids),
+            )
+        )
+    ).scalars().all()
+    if not drive_ids:
+        return
+    statement = (
+        select(Registration)
+        .where(
+            Registration.institution_id == institution_id,
+            Registration.drive_id.in_(drive_ids),
+            Registration.state == "submitted",
+        )
+        .with_for_update()
+    )
+    if student_profile_id is not None:
+        statement = statement.where(Registration.student_profile_id == student_profile_id)
+    registrations = (await session.execute(statement)).scalars().all()
+    for registration in registrations:
+        registration.state = "eligibility_hold"
+        registration.hold_reason = reason
+        registration.concurrency_revision += 1
+        session.add(
+            RegistrationEvent(
+                institution_id=institution_id,
+                registration_id=registration.id,
+                event_type="held",
+                from_state="submitted",
+                to_state="eligibility_hold",
+                reason=reason,
+                actor_membership_id=actor_membership_id,
+                evidence={"stale_evaluation_run_ids": [str(item) for item in run_ids]},
+            )
+        )
 
 
 def _facts(revision: AcademicRecordRevision | None) -> AcademicFacts:
@@ -313,6 +366,16 @@ class EligibilityRunService:
                         },
                     )
                 )
+                stale_run_ids = (
+                    await session.execute(
+                        select(EvaluationRun.id).where(
+                            EvaluationRun.institution_id == institution_id,
+                            EvaluationRun.drive_id == run.drive_id,
+                            EvaluationRun.id != run.id,
+                            EvaluationRun.is_stale.is_(False),
+                        )
+                    )
+                ).scalars().all()
                 await session.execute(
                     update(EvaluationRun)
                     .where(
@@ -322,6 +385,13 @@ class EligibilityRunService:
                         EvaluationRun.is_stale.is_(False),
                     )
                     .values(is_stale=True, stale_reason="A newer evaluation completed for this drive")
+                )
+                await _hold_published_registrations_for_runs(
+                    session,
+                    institution_id,
+                    list(stale_run_ids),
+                    run.created_by_membership_id,
+                    "Published eligibility became stale after a newer evaluation completed",
                 )
                 await session.commit()
                 return run
@@ -359,6 +429,13 @@ class EligibilityRunService:
         if current_policy != run.policy_id:
             run.is_stale = True
             run.stale_reason = "The approved policy changed"
+            await _hold_published_registrations_for_runs(
+                session,
+                run.institution_id,
+                [run.id],
+                run.created_by_membership_id,
+                "Published eligibility became stale because the approved policy changed",
+            )
             await session.flush()
             return run
 
@@ -387,17 +464,34 @@ class EligibilityRunService:
         if frozen != current:
             run.is_stale = True
             run.stale_reason = "The active roster or a verified academic revision changed"
+            await _hold_published_registrations_for_runs(
+                session,
+                run.institution_id,
+                [run.id],
+                run.created_by_membership_id,
+                "Published eligibility became stale after a roster or academic revision change",
+            )
             await session.flush()
         return run
 
     @staticmethod
     async def mark_student_runs_stale(
-        session: AsyncSession, institution_id: uuid.UUID, student_profile_id: uuid.UUID
+        session: AsyncSession,
+        institution_id: uuid.UUID,
+        student_profile_id: uuid.UUID,
+        actor_membership_id: uuid.UUID,
     ) -> None:
-        run_ids = select(EvaluationCohortMember.evaluation_run_id).where(
-            EvaluationCohortMember.institution_id == institution_id,
-            EvaluationCohortMember.student_profile_id == student_profile_id,
-        )
+        run_ids = (
+            await session.execute(
+                select(EvaluationCohortMember.evaluation_run_id)
+                .join(EvaluationRun, EvaluationRun.id == EvaluationCohortMember.evaluation_run_id)
+                .where(
+                    EvaluationCohortMember.institution_id == institution_id,
+                    EvaluationCohortMember.student_profile_id == student_profile_id,
+                    EvaluationRun.is_stale.is_(False),
+                )
+            )
+        ).scalars().all()
         await session.execute(
             update(EvaluationRun)
             .where(
@@ -407,17 +501,56 @@ class EligibilityRunService:
             )
             .values(is_stale=True, stale_reason="A verified academic revision changed")
         )
+        await _hold_published_registrations_for_runs(
+            session,
+            institution_id,
+            list(run_ids),
+            actor_membership_id,
+            "Published eligibility became stale after a verified academic revision changed",
+            student_profile_id,
+        )
 
     @staticmethod
-    async def mark_institution_runs_stale(session: AsyncSession, institution_id: uuid.UUID) -> None:
+    async def mark_institution_runs_stale(
+        session: AsyncSession, institution_id: uuid.UUID, actor_membership_id: uuid.UUID
+    ) -> None:
+        run_ids = (
+            await session.execute(
+                select(EvaluationRun.id).where(
+                    EvaluationRun.institution_id == institution_id,
+                    EvaluationRun.is_stale.is_(False),
+                )
+            )
+        ).scalars().all()
         await session.execute(
             update(EvaluationRun)
             .where(EvaluationRun.institution_id == institution_id, EvaluationRun.is_stale.is_(False))
             .values(is_stale=True, stale_reason="The active student roster changed")
         )
+        await _hold_published_registrations_for_runs(
+            session,
+            institution_id,
+            list(run_ids),
+            actor_membership_id,
+            "Published eligibility became stale after the active roster changed",
+        )
 
     @staticmethod
-    async def mark_drive_runs_stale(session: AsyncSession, institution_id: uuid.UUID, drive_id: uuid.UUID) -> None:
+    async def mark_drive_runs_stale(
+        session: AsyncSession,
+        institution_id: uuid.UUID,
+        drive_id: uuid.UUID,
+        actor_membership_id: uuid.UUID,
+    ) -> None:
+        run_ids = (
+            await session.execute(
+                select(EvaluationRun.id).where(
+                    EvaluationRun.institution_id == institution_id,
+                    EvaluationRun.drive_id == drive_id,
+                    EvaluationRun.is_stale.is_(False),
+                )
+            )
+        ).scalars().all()
         await session.execute(
             update(EvaluationRun)
             .where(
@@ -426,4 +559,11 @@ class EligibilityRunService:
                 EvaluationRun.is_stale.is_(False),
             )
             .values(is_stale=True, stale_reason="The approved eligibility policy changed")
+        )
+        await _hold_published_registrations_for_runs(
+            session,
+            institution_id,
+            list(run_ids),
+            actor_membership_id,
+            "Published eligibility became stale after the approved policy changed",
         )

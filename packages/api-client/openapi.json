@@ -42,7 +42,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReadinessResponse"
+                  "$ref": "#/components/schemas/placementos__api__v1__health__ReadinessResponse"
                 }
               }
             }
@@ -52,7 +52,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReadinessResponse"
+                  "$ref": "#/components/schemas/placementos__api__v1__health__ReadinessResponse"
                 }
               }
             }
@@ -96,7 +96,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReadinessResponse"
+                  "$ref": "#/components/schemas/placementos__api__v1__health__ReadinessResponse"
                 }
               }
             }
@@ -106,7 +106,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReadinessResponse"
+                  "$ref": "#/components/schemas/placementos__api__v1__health__ReadinessResponse"
                 }
               }
             }
@@ -2054,6 +2054,827 @@
           }
         }
       }
+    },
+    "/api/v1/drives/{drive_id}/document-requirements": {
+      "put": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Set Document Requirements",
+        "operationId": "set_document_requirements_api_v1_drives__drive_id__document_requirements_put",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequirementSetCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementResponse"
+                  },
+                  "title": "Response Set Document Requirements Api V1 Drives  Drive Id  Document Requirements Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "List Document Requirements",
+        "operationId": "list_document_requirements_api_v1_drives__drive_id__document_requirements_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequirementResponse"
+                  },
+                  "title": "Response List Document Requirements Api V1 Drives  Drive Id  Document Requirements Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/publication-proposals": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Create Publication Proposal",
+        "operationId": "create_publication_proposal_api_v1_drives__drive_id__publication_proposals_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicationProposalCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicationProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/publication-proposals/{proposal_id}/decisions": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Decide Publication Proposal",
+        "operationId": "decide_publication_proposal_api_v1_publication_proposals__proposal_id__decisions_post",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicationDecisionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicationProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/documents/upload-sessions": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Create Document Upload Session",
+        "operationId": "create_document_upload_session_api_v1_student_documents_upload_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentUploadSessionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentUploadSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/documents/upload-sessions/{upload_session_id}/complete": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Complete Document Upload",
+        "operationId": "complete_document_upload_api_v1_student_documents_upload_sessions__upload_session_id__complete_post",
+        "parameters": [
+          {
+            "name": "upload_session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Upload Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentRevisionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/documents": {
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "List My Documents",
+        "operationId": "list_my_documents_api_v1_student_documents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentRevisionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List My Documents Api V1 Student Documents Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/documents/{revision_id}/download-url": {
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Download My Document",
+        "operationId": "download_my_document_api_v1_student_documents__revision_id__download_url_get",
+        "parameters": [
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Revision Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/students/{student_profile_id}/documents": {
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "List Student Documents For Drive",
+        "operationId": "list_student_documents_for_drive_api_v1_drives__drive_id__students__student_profile_id__documents_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          },
+          {
+            "name": "student_profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Student Profile Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentRevisionResponse"
+                  },
+                  "title": "Response List Student Documents For Drive Api V1 Drives  Drive Id  Students  Student Profile Id  Documents Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/document-revisions/{revision_id}/download-url": {
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Download Student Document For Drive",
+        "operationId": "download_student_document_for_drive_api_v1_drives__drive_id__document_revisions__revision_id__download_url_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          },
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Revision Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/drives": {
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "List Student Drives",
+        "operationId": "list_student_drives_api_v1_student_drives_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StudentDriveResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Student Drives Api V1 Student Drives Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/drives/{drive_id}/registrations/draft": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Save Registration Draft",
+        "operationId": "save_registration_draft_api_v1_student_drives__drive_id__registrations_draft_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/drives/{drive_id}/registrations": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Submit Registration",
+        "operationId": "submit_registration_api_v1_student_drives__drive_id__registrations_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/registrations/{registration_id}/withdraw": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Withdraw Registration",
+        "operationId": "withdraw_registration_api_v1_student_registrations__registration_id__withdraw_post",
+        "parameters": [
+          {
+            "name": "registration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Registration Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawalCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/registrations/{registration_id}/coordinator-action": {
+      "post": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Coordinator Registration Action",
+        "operationId": "coordinator_registration_action_api_v1_registrations__registration_id__coordinator_action_post",
+        "parameters": [
+          {
+            "name": "registration_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Registration Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CoordinatorRegistrationAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/participants": {
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "List Participants",
+        "operationId": "list_participants_api_v1_drives__drive_id__participants_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          },
+          {
+            "name": "eligibility_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Eligibility Status"
+            }
+          },
+          {
+            "name": "readiness_status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Readiness Status"
+            }
+          },
+          {
+            "name": "registration_state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Registration State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/participants.csv": {
+      "get": {
+        "tags": [
+          "Participation and Documents"
+        ],
+        "summary": "Export Participants",
+        "operationId": "export_participants_api_v1_drives__drive_id__participants_csv_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2377,6 +3198,36 @@
         ],
         "title": "CompanyResponse"
       },
+      "CoordinatorRegistrationAction": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "restore",
+              "withdraw"
+            ],
+            "title": "Action"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "action",
+          "reason"
+        ],
+        "title": "CoordinatorRegistrationAction"
+      },
       "CorrectionDecisionRequest": {
         "properties": {
           "decision": {
@@ -2642,6 +3493,160 @@
           "session_token"
         ],
         "title": "DevLoginResponse"
+      },
+      "DocumentRevisionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "resume",
+              "marksheet",
+              "college_id"
+            ],
+            "title": "Document Type"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "original_filename": {
+            "type": "string",
+            "title": "Original Filename"
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type"
+          },
+          "file_size_bytes": {
+            "type": "integer",
+            "title": "File Size Bytes"
+          },
+          "hash_sha256": {
+            "type": "string",
+            "title": "Hash Sha256"
+          },
+          "scan_status": {
+            "type": "string",
+            "title": "Scan Status"
+          },
+          "structure_status": {
+            "type": "string",
+            "title": "Structure Status"
+          },
+          "text_status": {
+            "type": "string",
+            "title": "Text Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "document_type",
+          "revision_number",
+          "original_filename",
+          "media_type",
+          "file_size_bytes",
+          "hash_sha256",
+          "scan_status",
+          "structure_status",
+          "text_status",
+          "created_at"
+        ],
+        "title": "DocumentRevisionResponse"
+      },
+      "DocumentUploadSessionCreate": {
+        "properties": {
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "resume",
+              "marksheet",
+              "college_id"
+            ],
+            "title": "Document Type"
+          },
+          "original_filename": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Original Filename"
+          },
+          "content_type": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Content Type"
+          },
+          "byte_size": {
+            "type": "integer",
+            "maximum": 10485760.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Byte Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_type",
+          "original_filename",
+          "content_type",
+          "byte_size"
+        ],
+        "title": "DocumentUploadSessionCreate"
+      },
+      "DocumentUploadSessionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "resume",
+              "marksheet",
+              "college_id"
+            ],
+            "title": "Document Type"
+          },
+          "original_filename": {
+            "type": "string",
+            "title": "Original Filename"
+          },
+          "upload_url": {
+            "type": "string",
+            "title": "Upload Url"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "document_type",
+          "original_filename",
+          "upload_url",
+          "expires_at",
+          "status"
+        ],
+        "title": "DocumentUploadSessionResponse"
       },
       "DomainJobResponse": {
         "properties": {
@@ -3428,6 +4433,45 @@
         ],
         "title": "EvidenceLocator"
       },
+      "FindingResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ],
+            "title": "Severity"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "required_action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "title": "FindingResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3672,6 +4716,112 @@
           "created_at"
         ],
         "title": "InterpretationResponse"
+      },
+      "ParticipantListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "counts"
+        ],
+        "title": "ParticipantListResponse"
+      },
+      "ParticipantResponse": {
+        "properties": {
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "student_identifier": {
+            "type": "string",
+            "title": "Student Identifier"
+          },
+          "student_name": {
+            "type": "string",
+            "title": "Student Name"
+          },
+          "eligibility_status": {
+            "type": "string",
+            "title": "Eligibility Status"
+          },
+          "readiness_status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "pending",
+              "blocked",
+              "needs_review"
+            ],
+            "title": "Readiness Status"
+          },
+          "registration_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration State"
+          },
+          "registration_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Id"
+          },
+          "registration_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_profile_id",
+          "student_identifier",
+          "student_name",
+          "eligibility_status",
+          "readiness_status",
+          "registration_state",
+          "registration_id",
+          "registration_revision"
+        ],
+        "title": "ParticipantResponse"
       },
       "PastedSourceCreate": {
         "properties": {
@@ -4017,25 +5167,210 @@
         ],
         "title": "ProposalResponse"
       },
-      "ReadinessResponse": {
+      "PublicationDecisionCreate": {
         "properties": {
-          "status": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Expected Hash"
+          },
+          "decision": {
             "type": "string",
             "enum": [
-              "ready",
-              "not_ready"
+              "approved",
+              "rejected",
+              "revision_requested"
             ],
-            "title": "Status"
+            "title": "Decision"
           },
-          "database": {
-            "type": "boolean",
-            "title": "Database"
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_hash",
+          "decision"
+        ],
+        "title": "PublicationDecisionCreate"
+      },
+      "PublicationProposalCreate": {
+        "properties": {
+          "expected_drive_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Drive Revision"
           },
-          "redis": {
-            "type": "boolean",
-            "title": "Redis"
+          "evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Evaluation Run Id"
           },
-          "correlation_id": {
+          "registration_start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Registration Start At"
+          },
+          "registration_end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Registration End At"
+          },
+          "withdrawal_end_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawal End At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_drive_revision",
+          "evaluation_run_id",
+          "registration_start_at",
+          "registration_end_at"
+        ],
+        "title": "PublicationProposalCreate"
+      },
+      "PublicationProposalResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "drive_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Revision Id"
+          },
+          "evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Evaluation Run Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "dependencies": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dependencies"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "drive_revision_id",
+          "evaluation_run_id",
+          "revision_number",
+          "canonical_hash",
+          "state",
+          "payload",
+          "dependencies",
+          "created_at"
+        ],
+        "title": "PublicationProposalResponse"
+      },
+      "RegistrationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "submitted",
+              "withdrawn",
+              "eligibility_hold"
+            ],
+            "title": "State"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "hold_reason": {
             "anyOf": [
               {
                 "type": "string"
@@ -4044,17 +5379,309 @@
                 "type": "null"
               }
             ],
-            "title": "Correlation Id"
+            "title": "Hold Reason"
+          },
+          "concurrency_revision": {
+            "type": "integer",
+            "title": "Concurrency Revision"
           }
         },
         "type": "object",
         "required": [
-          "status",
-          "database",
-          "redis"
+          "id",
+          "drive_id",
+          "student_profile_id",
+          "state",
+          "submitted_at",
+          "withdrawn_at",
+          "hold_reason",
+          "concurrency_revision"
         ],
-        "title": "ReadinessResponse",
-        "description": "Readiness probe response payload indicating downstream dependency health."
+        "title": "RegistrationResponse"
+      },
+      "RequirementCreate": {
+        "properties": {
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "resume",
+              "marksheet",
+              "college_id"
+            ],
+            "title": "Document Type"
+          },
+          "display_label": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Display Label"
+          },
+          "allowed_extensions": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "docx"
+              ]
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Allowed Extensions"
+          },
+          "max_size_bytes": {
+            "type": "integer",
+            "maximum": 10485760.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Max Size Bytes",
+            "default": 10485760
+          },
+          "filename_pattern": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename Pattern"
+          },
+          "required_stage": {
+            "type": "string",
+            "enum": [
+              "registration",
+              "scheduling"
+            ],
+            "title": "Required Stage"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_type",
+          "display_label",
+          "allowed_extensions",
+          "required_stage"
+        ],
+        "title": "RequirementCreate"
+      },
+      "RequirementReadinessResponse": {
+        "properties": {
+          "requirement_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Requirement Id"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "resume",
+              "marksheet",
+              "college_id"
+            ],
+            "title": "Document Type"
+          },
+          "display_label": {
+            "type": "string",
+            "title": "Display Label"
+          },
+          "required_stage": {
+            "type": "string",
+            "enum": [
+              "registration",
+              "scheduling"
+            ],
+            "title": "Required Stage"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "pending",
+              "blocked",
+              "needs_review"
+            ],
+            "title": "Status"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/FindingResponse"
+            },
+            "type": "array",
+            "title": "Findings"
+          },
+          "current_document": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentRevisionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "requirement_id",
+          "document_type",
+          "display_label",
+          "required_stage",
+          "due_at",
+          "status",
+          "findings"
+        ],
+        "title": "RequirementReadinessResponse"
+      },
+      "RequirementResponse": {
+        "properties": {
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "resume",
+              "marksheet",
+              "college_id"
+            ],
+            "title": "Document Type"
+          },
+          "display_label": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Display Label"
+          },
+          "allowed_extensions": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "docx"
+              ]
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Allowed Extensions"
+          },
+          "max_size_bytes": {
+            "type": "integer",
+            "maximum": 10485760.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Max Size Bytes",
+            "default": 10485760
+          },
+          "filename_pattern": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename Pattern"
+          },
+          "required_stage": {
+            "type": "string",
+            "enum": [
+              "registration",
+              "scheduling"
+            ],
+            "title": "Required Stage"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "drive_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Revision Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_type",
+          "display_label",
+          "allowed_extensions",
+          "required_stage",
+          "id",
+          "drive_id",
+          "drive_revision_id",
+          "created_at"
+        ],
+        "title": "RequirementResponse"
+      },
+      "RequirementSetCreate": {
+        "properties": {
+          "expected_drive_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Drive Revision"
+          },
+          "requirements": {
+            "items": {
+              "$ref": "#/components/schemas/RequirementCreate"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Requirements"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_drive_revision",
+          "requirements"
+        ],
+        "title": "RequirementSetCreate"
       },
       "ReviewRequestCreate": {
         "properties": {
@@ -4347,6 +5974,123 @@
           "institution_id"
         ],
         "title": "StudentDetailDTO"
+      },
+      "StudentDriveResponse": {
+        "properties": {
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "company_name": {
+            "type": "string",
+            "title": "Company Name"
+          },
+          "role_title": {
+            "type": "string",
+            "title": "Role Title"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "work_mode": {
+            "type": "string",
+            "title": "Work Mode"
+          },
+          "employment_type": {
+            "type": "string",
+            "title": "Employment Type"
+          },
+          "compensation_details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compensation Details"
+          },
+          "registration_start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Registration Start At"
+          },
+          "registration_end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Registration End At"
+          },
+          "withdrawal_end_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawal End At"
+          },
+          "eligibility_status": {
+            "type": "string",
+            "enum": [
+              "eligible",
+              "ineligible",
+              "needs_review"
+            ],
+            "title": "Eligibility Status"
+          },
+          "eligibility_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Eligibility Reasons"
+          },
+          "document_readiness": {
+            "$ref": "#/components/schemas/placementos__schemas__participation__ReadinessResponse"
+          },
+          "registration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RegistrationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "drive_id",
+          "company_name",
+          "role_title",
+          "location",
+          "work_mode",
+          "employment_type",
+          "compensation_details",
+          "registration_start_at",
+          "registration_end_at",
+          "withdrawal_end_at",
+          "eligibility_status",
+          "eligibility_reasons",
+          "document_readiness",
+          "registration"
+        ],
+        "title": "StudentDriveResponse"
       },
       "StudentEligibilityResponse": {
         "properties": {
@@ -4851,6 +6595,93 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WithdrawalCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "reason"
+        ],
+        "title": "WithdrawalCreate"
+      },
+      "placementos__api__v1__health__ReadinessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "not_ready"
+            ],
+            "title": "Status"
+          },
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "redis": {
+            "type": "boolean",
+            "title": "Redis"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "database",
+          "redis"
+        ],
+        "title": "ReadinessResponse",
+        "description": "Readiness probe response payload indicating downstream dependency health."
+      },
+      "placementos__schemas__participation__ReadinessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "pending",
+              "blocked",
+              "needs_review"
+            ],
+            "title": "Status"
+          },
+          "requirements": {
+            "items": {
+              "$ref": "#/components/schemas/RequirementReadinessResponse"
+            },
+            "type": "array",
+            "title": "Requirements"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "requirements"
+        ],
+        "title": "ReadinessResponse"
       }
     }
   }

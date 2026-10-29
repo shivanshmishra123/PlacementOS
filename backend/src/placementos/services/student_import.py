@@ -376,7 +376,9 @@ class StudentImportService:
         # Any committed roster or verified-record change invalidates current projections.
         from placementos.services.eligibility_runs import EligibilityRunService
 
-        await EligibilityRunService.mark_institution_runs_stale(db, institution_id)
+        await EligibilityRunService.mark_institution_runs_stale(
+            db, institution_id, committer_membership_id
+        )
         await db.commit()
 
         # Invalidate preview token in Redis

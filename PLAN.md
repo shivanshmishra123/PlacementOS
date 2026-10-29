@@ -71,7 +71,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P03 | Completed; stabilized private intake, pre-acceptance validation, asynchronous extraction, and provenance | FR-JD; FR-DOC security foundation | Private source ingestion and located extracted text. |
 | P04 | Completed; source-backed review, clarification, typed policy, and exact approval | FR-AI-JD, FR-POL, initial FR-APP | Reviewed JD and immutable approved rules. |
 | P05 | Completed; deterministic frozen-cohort evaluation, stale history, and scoped explanations | FR-ELIG, NFR-01 | Reproducible cohort results and explanations. |
-| P06 | Not started | FR-DOC, FR-REG | Functional student participation journey. |
+| P06 | Completed; revisioned documents, exact publication, readiness, and registration | FR-DOC, FR-REG | Functional student participation journey. |
 | P07 | Not started | FR-COM, FR-APP, FR-DISP | Exact approved communications and durable dispatch. |
 | P08 | Not started | FR-WF, baseline FR-EXC | Persistent end-to-end orchestration. |
 | P09 | Not started | FR-SCHED, FR-RESULT, FR-REPORT, FR-CLOSE | Complete local recruitment lifecycle. |
@@ -326,17 +326,30 @@ Next dependency-ready task: P06-T01, intentionally not started in this phase.
 
 **Objective:** Deliver a functional student participation journey. **Dependencies:** P03 and P05. **Requirements:** FR-DOC, FR-REG.
 
-- [ ] **P06-T01: Model document requirements/revisions.** Bind requirements to a drive revision and validation to immutable file plus requirement revision. Evidence: a replaced resume or changed format rule cannot reuse an obsolete pass.
-- [ ] **P06-T02: Implement operational document checks.** Add presence, format, filename, integrity, duplicate triage, and required-stage checks on top of P03 scanning. Evidence: the resume/marksheet/ID example produces distinct passed/missing findings without authenticity claims.
-- [ ] **P06-T03: Compute readiness independently.** Implement blocked/review/pending/ready precedence and deadline behavior. Evidence: document failure does not alter academic eligibility and readiness explains each unmet requirement.
-- [ ] **P06-T04: Publish approved student facts.** Extend the proposal core for exact drive publication/window and expose a minimal student DTO. Evidence: internal notes and draft facts remain hidden; publication does not imply email dispatch.
-- [ ] **P06-T05: Implement registration/withdrawal commands.** Enforce current eligible status, server-side time bounds, document-at-submission requirements, uniqueness, and audited assisted actions. Evidence: concurrent submission and exact-cutoff tests pass.
-- [ ] **P06-T06: Add revision-driven registration holds.** Preserve submitted records when eligibility becomes unresolved/ineligible and require a current audited restoration path. Evidence: prior submission evidence survives without automatic rejection mail.
-- [ ] **P06-T07: Deliver the student portal.** Implement drive detail, personal status/reasons, document checklist/upload history, submit/withdraw confirmation, and review requests with accessible state handling. Evidence: an end-to-end eligible and needs-review journey works.
-- [ ] **P06-T08: Deliver coordinator participation views.** Add combined eligibility/readiness/registration filters and candidate-list snapshot/export foundation. Evidence: unique-student counts reconcile and export is scoped and CSV-safe.
-- [ ] **P06-T09: Phase completion testing and verification.** Execute documents and registration test suite: student document checklist validation, readiness hierarchy calculation (`blocked > needs_review > pending > ready`), registration window cutoff test (exclusive boundary rejection at exact deadline), student withdrawal lifecycle, and eligibility-hold retention upon criteria change. Evidence: participation journey integration tests passing.
+- [x] **P06-T01: Model document requirements/revisions.** Bind requirements to a drive revision and validation to immutable file plus requirement revision. Evidence: a replaced resume or changed format rule cannot reuse an obsolete pass.
+- [x] **P06-T02: Implement operational document checks.** Add presence, format, filename, integrity, duplicate triage, and required-stage checks on top of P03 scanning. Evidence: the resume/marksheet/ID example produces distinct passed/missing findings without authenticity claims.
+- [x] **P06-T03: Compute readiness independently.** Implement blocked/review/pending/ready precedence and deadline behavior. Evidence: document failure does not alter academic eligibility and readiness explains each unmet requirement.
+- [x] **P06-T04: Publish approved student facts.** Extend the proposal core for exact drive publication/window and expose a minimal student DTO. Evidence: internal notes and draft facts remain hidden; publication does not imply email dispatch.
+- [x] **P06-T05: Implement registration/withdrawal commands.** Enforce current eligible status, server-side time bounds, document-at-submission requirements, uniqueness, and audited assisted actions. Evidence: concurrent submission and exact-cutoff tests pass.
+- [x] **P06-T06: Add revision-driven registration holds.** Preserve submitted records when eligibility becomes unresolved/ineligible and require a current audited restoration path. Evidence: prior submission evidence survives without automatic rejection mail.
+- [x] **P06-T07: Deliver the student portal.** Implement drive detail, personal status/reasons, document checklist/upload history, submit/withdraw confirmation, and review requests with accessible state handling. Evidence: an end-to-end eligible and needs-review journey works.
+- [x] **P06-T08: Deliver coordinator participation views.** Add combined eligibility/readiness/registration filters and candidate-list snapshot/export foundation. Evidence: unique-student counts reconcile and export is scoped and CSV-safe.
+- [x] **P06-T09: Phase completion testing and verification.** Execute documents and registration test suite: student document checklist validation, readiness hierarchy calculation (`blocked > needs_review > pending > ready`), registration window cutoff test (exclusive boundary rejection at exact deadline), student withdrawal lifecycle, and eligibility-hold retention upon criteria change. Evidence: participation journey integration tests passing.
 
 **Exit gate:** an eligible student can register with the drive's permitted document timing; unknown/ineligible/stale cases are blocked appropriately. Upload replacements and deadline changes remain traceable. No shared public student-document links exist.
+
+### P06 Completion Record
+
+```text
+Task/phase: P06 (student documents, publication, and registration)
+Behavior delivered: Added immutable per-drive-revision document requirements; student-owned document histories and accepted byte revisions; operational PDF/DOCX validation, same-student duplicate triage, exact requirement/file validation dependencies, and deterministic readiness; exact drive-publication proposals with approved revision/evaluation/window fingerprints; minimal student opportunity DTOs; draft, replay-safe submission, withdrawal, eligibility hold, explicit coordinator restore, and assisted withdrawal transitions; scoped short-lived downloads; combined coordinator participation projections and CSV-safe export; student and coordinator participation workspaces.
+Requirements covered: FR-DOC-01 through FR-DOC-10, FR-REG-01 through FR-REG-10; INV-01/02/03/04/05/06/08/09/10/11/12.
+Files/change reference: backend/src/placementos/models/participation.py, backend/src/placementos/services/participation.py, backend/src/placementos/api/v1/participation.py, backend/migrations/versions/20261030_0900_p06_participation.py, backend/tests/unit/test_participation.py, backend/tests/integration/test_participation.py, apps/web/src/app/student/drives/page.tsx, apps/web/src/app/coordinator/drives/[id]/participation/page.tsx, and packages/api-client.
+Verification commands and results: 69 backend tests passed; Ruff and Mypy passed; ESLint and TypeScript passed; Next.js production build passed; OpenAPI contract drift was zero; Alembic p06 -> p05 -> p06 cycle passed; Postgres/Redis/object storage/Mailpit remained healthy.
+Demonstrated user/recovery scenario: Coordinator freezes requirements and exact publication proposal; stale hash is rejected; approved drive exposes only student-visible facts; missing/corrupt documents remain separate from eligibility; accepted resume unlocks registration-stage readiness while later marksheet remains pending; duplicate submission returns one registration; non-eligible reevaluation retains submission evidence on hold; eligible reevaluation does not silently restore it; explicit attributed restore and withdrawal work; cross-student private download is denied.
+Remaining limits or decisions: Malware scanning remains the visibly identified development fixture and OCR remains deferred with manual review. Publication deliberately sends no email; exact communications and delivery are P07. Frontend production build and typed contracts pass, but browser-level Playwright coverage remains a P10 hardening item.
+Next dependency-ready task: P07-T01 (Generalize immutable action proposals).
+```
 
 ## 11. P07: Implement exact proposals, approvals, and safe dispatch
 

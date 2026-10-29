@@ -1,6 +1,6 @@
 # PlacementOS: Architecture and Technical Reference
 
-> Status: proposed implementation baseline, 28 October 2026. This file is the canonical technical reference. It contains design decisions and contracts, not a description of deployed infrastructure.
+> Status: implementation baseline, updated 30 October 2026. This file is the canonical technical reference; implemented routes and schema currently extend through P06, while later sections remain target contracts.
 
 ## 1. Architectural intent
 
@@ -122,7 +122,7 @@ No vector database, Kubernetes, Kafka, service mesh, autonomous browser agent, o
 
 ## 5. Repository layout
 
-This structure was established in P01 and has since been extended through P05. The source inputs and four canonical reference documents remain preserved at the repository root; current implementation status is tracked in `PLAN.md`.
+This structure was established in P01 and has since been extended through P06. The source inputs and four canonical reference documents remain preserved at the repository root; current implementation status is tracked in `PLAN.md`.
 
 ```text
 PlacementOS/
@@ -378,7 +378,7 @@ LangGraph checkpoint tables need their own protected adapter/access path because
 
 ### 9.2 Endpoint inventory
 
-This is the representative contract inventory. Routes through P05 are implemented; later rows remain target contracts, with exact current paths generated in `packages/api-client/openapi.json`.
+This is the representative contract inventory. Routes through P06 are implemented; later rows remain target contracts, with exact current paths generated in `packages/api-client/openapi.json`.
 
 | Area | Representative endpoints | Important behavior |
 | --- | --- | --- |

@@ -80,6 +80,14 @@ class Drive(TimestampedUUIDModel):
         UUID(as_uuid=True),
         nullable=True,
     )
+    published_drive_revision_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+    published_evaluation_run_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+    publication_proposal_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     concurrency_revision: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     # Relationships
@@ -130,6 +138,9 @@ class DriveRevision(TimestampedUUIDModel):
         DateTime(timezone=True), nullable=True
     )
     registration_end_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    withdrawal_end_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 

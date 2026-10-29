@@ -32,6 +32,15 @@ import type {
   EvaluationRunResponse,
   StudentEligibilityResponse,
   EligibilityReviewRequestResponse,
+  DocumentType,
+  RequirementCreate,
+  RequirementResponse,
+  PublicationProposalResponse,
+  DocumentUploadSessionResponse,
+  DocumentRevisionResponse,
+  StudentDriveResponse,
+  RegistrationResponse,
+  ParticipantListResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -502,6 +511,138 @@ export class PlacementOSClient {
     return this.request<EligibilityReviewRequestResponse[]>(
       `/api/v1/drives/${driveId}/eligibility-review-requests`
     );
+  }
+
+  // ==========================================
+  // Documents, Publication & Registration (Phase 6)
+  // ==========================================
+
+  public async setDocumentRequirements(
+    driveId: string,
+    expectedDriveRevision: number,
+    requirements: RequirementCreate[]
+  ): Promise<RequirementResponse[]> {
+    return this.request<RequirementResponse[]>(`/api/v1/drives/${driveId}/document-requirements`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_drive_revision: expectedDriveRevision, requirements }),
+    });
+  }
+
+  public async listDocumentRequirements(driveId: string): Promise<RequirementResponse[]> {
+    return this.request<RequirementResponse[]>(`/api/v1/drives/${driveId}/document-requirements`);
+  }
+
+  public async createPublicationProposal(
+    driveId: string,
+    request: {
+      expected_drive_revision: number;
+      evaluation_run_id: string;
+      registration_start_at: string;
+      registration_end_at: string;
+      withdrawal_end_at?: string | null;
+    }
+  ): Promise<PublicationProposalResponse> {
+    return this.request<PublicationProposalResponse>(`/api/v1/drives/${driveId}/publication-proposals`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+  }
+
+  public async decidePublicationProposal(
+    proposalId: string,
+    request: { expected_revision: number; expected_hash: string; decision: "approved" | "rejected" | "revision_requested"; comment?: string }
+  ): Promise<PublicationProposalResponse> {
+    return this.request<PublicationProposalResponse>(`/api/v1/publication-proposals/${proposalId}/decisions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+  }
+
+  public async createDocumentUploadSession(
+    documentType: DocumentType,
+    file: File
+  ): Promise<DocumentUploadSessionResponse> {
+    return this.request<DocumentUploadSessionResponse>("/api/v1/student/documents/upload-sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        document_type: documentType,
+        original_filename: file.name,
+        content_type: file.type || "application/octet-stream",
+        byte_size: file.size,
+      }),
+    });
+  }
+
+  public async uploadStudentDocument(documentType: DocumentType, file: File): Promise<DocumentRevisionResponse> {
+    const upload = await this.createDocumentUploadSession(documentType, file);
+    const response = await fetch(upload.upload_url, {
+      method: "PUT",
+      headers: { "Content-Type": file.type || "application/octet-stream" },
+      body: file,
+    });
+    if (!response.ok) throw new Error(`Private upload failed with status ${response.status}`);
+    return this.request<DocumentRevisionResponse>(`/api/v1/student/documents/upload-sessions/${upload.id}/complete`, {
+      method: "POST",
+    });
+  }
+
+  public async listMyDocuments(): Promise<DocumentRevisionResponse[]> {
+    return this.request<DocumentRevisionResponse[]>("/api/v1/student/documents");
+  }
+
+  public async getMyDocumentDownloadUrl(revisionId: string): Promise<DownloadUrlResponse> {
+    return this.request<DownloadUrlResponse>(`/api/v1/student/documents/${revisionId}/download-url`);
+  }
+
+  public async listStudentDrives(): Promise<StudentDriveResponse[]> {
+    return this.request<StudentDriveResponse[]>("/api/v1/student/drives");
+  }
+
+  public async saveRegistrationDraft(driveId: string): Promise<RegistrationResponse> {
+    return this.request<RegistrationResponse>(`/api/v1/student/drives/${driveId}/registrations/draft`, { method: "POST" });
+  }
+
+  public async submitRegistration(driveId: string): Promise<RegistrationResponse> {
+    return this.request<RegistrationResponse>(`/api/v1/student/drives/${driveId}/registrations`, { method: "POST" });
+  }
+
+  public async withdrawRegistration(registrationId: string, expectedRevision: number, reason: string): Promise<RegistrationResponse> {
+    return this.request<RegistrationResponse>(`/api/v1/student/registrations/${registrationId}/withdraw`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_revision: expectedRevision, reason }),
+    });
+  }
+
+  public async listParticipants(
+    driveId: string,
+    filters: { eligibility_status?: string; readiness_status?: string; registration_state?: string } = {}
+  ): Promise<ParticipantListResponse> {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    const query = params.toString();
+    return this.request<ParticipantListResponse>(`/api/v1/drives/${driveId}/participants${query ? `?${query}` : ""}`);
+  }
+
+  public async coordinatorRegistrationAction(
+    registrationId: string,
+    expectedRevision: number,
+    action: "restore" | "withdraw",
+    reason: string
+  ): Promise<RegistrationResponse> {
+    return this.request<RegistrationResponse>(`/api/v1/registrations/${registrationId}/coordinator-action`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_revision: expectedRevision, action, reason }),
+    });
+  }
+
+  public getParticipantExportUrl(driveId: string): string {
+    return `${this.baseUrl}/api/v1/drives/${driveId}/participants.csv`;
   }
 }
 
