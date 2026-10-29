@@ -258,15 +258,18 @@ export default function CoordinatorDrivesPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <Link
-                      href={`/coordinator/drives/${d.id}/intake`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition"
-                    >
-                      Intake & Workspace
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
+                    <div className="flex justify-end gap-2">
+                      <Link href={`/coordinator/drives/${d.id}/eligibility`} className="inline-flex items-center px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-medium rounded-lg transition">Eligibility</Link>
+                      <Link
+                        href={`/coordinator/drives/${d.id}/intake`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition"
+                      >
+                        Intake & Workspace
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

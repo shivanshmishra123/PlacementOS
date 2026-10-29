@@ -327,6 +327,88 @@ export interface DecisionResponse {
   policy_status: string;
 }
 
+// ==========================================
+// Phase 5: Deterministic Eligibility
+// ==========================================
+
+export interface PredicateFindingResponse {
+  predicate: string;
+  outcome: "true" | "false" | "unknown";
+  reason_code: string;
+  expected: unknown;
+  actual: unknown;
+  evidence_status: string;
+  explanation: string;
+}
+
+export interface EligibilityResultResponse {
+  id: string;
+  evaluation_run_id: string;
+  student_profile_id: string;
+  student_identifier: string;
+  student_name: string;
+  academic_revision_id?: string | null;
+  outcome: "eligible" | "ineligible" | "needs_review";
+  predicate_results: PredicateFindingResponse[];
+  reason_codes: string[];
+  student_explanation: string;
+  input_fingerprint: string;
+  created_at: string;
+}
+
+export interface EvaluationRunResponse {
+  id: string;
+  drive_id: string;
+  policy_id: string;
+  policy_version: number;
+  policy_hash: string;
+  engine_version: string;
+  normalization_version: string;
+  cohort_fingerprint: string;
+  status: string;
+  is_stale: boolean;
+  stale_reason?: string | null;
+  total_count: number;
+  eligible_count: number;
+  ineligible_count: number;
+  needs_review_count: number;
+  duration_ms?: number | null;
+  error_code?: string | null;
+  error_detail?: string | null;
+  started_at?: string | null;
+  completed_at?: string | null;
+  created_at: string;
+  results: EligibilityResultResponse[];
+}
+
+export interface StudentEligibilityResponse {
+  result_id: string;
+  evaluation_run_id: string;
+  drive_id: string;
+  drive_title: string;
+  company_name: string;
+  policy_version: number;
+  outcome: "eligible" | "ineligible" | "needs_review";
+  predicate_results: PredicateFindingResponse[];
+  reason_codes: string[];
+  student_explanation: string;
+  is_stale: boolean;
+  stale_reason?: string | null;
+  evaluated_at: string;
+}
+
+export interface EligibilityReviewRequestResponse {
+  id: string;
+  drive_id: string;
+  eligibility_result_id: string;
+  student_profile_id: string;
+  student_identifier: string;
+  student_name: string;
+  reason: string;
+  status: string;
+  created_at: string;
+}
+
 export interface TextLocator {
   locator_type: "page" | "paragraph";
   page_number?: number | null;

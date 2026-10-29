@@ -70,7 +70,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P02 | Completed; scoped identities, verified records, CSV preview/commit, and correction review | FR-ID, FR-STU, FR-AUD foundation | Scoped identities and verified student dataset. |
 | P03 | Completed; stabilized private intake, pre-acceptance validation, asynchronous extraction, and provenance | FR-JD; FR-DOC security foundation | Private source ingestion and located extracted text. |
 | P04 | Completed; source-backed review, clarification, typed policy, and exact approval | FR-AI-JD, FR-POL, initial FR-APP | Reviewed JD and immutable approved rules. |
-| P05 | Not started | FR-ELIG, NFR-01 | Reproducible cohort results and explanations. |
+| P05 | Completed; deterministic frozen-cohort evaluation, stale history, and scoped explanations | FR-ELIG, NFR-01 | Reproducible cohort results and explanations. |
 | P06 | Not started | FR-DOC, FR-REG | Functional student participation journey. |
 | P07 | Not started | FR-COM, FR-APP, FR-DISP | Exact approved communications and durable dispatch. |
 | P08 | Not started | FR-WF, baseline FR-EXC | Persistent end-to-end orchestration. |
@@ -294,17 +294,33 @@ Next dependency-ready task: P05-T01, intentionally not started under the current
 
 **Objective:** Reproducibly evaluate a verified cohort and explain every outcome. **Dependencies:** P02 and P04. **Requirements:** FR-ELIG, NFR-01, INV-01/02/05.
 
-- [ ] **P05-T01: Implement pure predicates.** Support branch, exact decimal CGPA/scale, graduation cohort, and maximum active backlog count. Evidence: predicates have no model/network/database dependency and return stable reason codes.
-- [ ] **P05-T02: Implement conservative aggregation.** Required unknown takes precedence, then known failure, then pass; invalid policy fails the run. Evidence: the entire fictional Section 10.2 dataset and mixed unknown/failure cases match the specification.
-- [ ] **P05-T03: Snapshot cohort inputs.** Persist student membership and academic revision references, policy/config/engine versions, and fingerprints. Evidence: a mid-run academic update cannot produce a mixed-version cohort.
-- [ ] **P05-T04: Add queued evaluation and persistence.** Process bounded chunks under one frozen run and persist immutable results/counts. Evidence: restart/rerun yields the same logical results without duplicate rows.
-- [ ] **P05-T05: Implement freshness/invalidation.** Academic, policy, normalization, or relevant roster change marks dependent current projections stale. Evidence: a historical pass cannot authorize a new submission under changed criteria.
-- [ ] **P05-T06: Deliver coordinator eligibility views.** Show three groups, predicate details, source revisions, historical/current state, and filters. Evidence: counts reconcile to the run's cohort and no row is silently omitted.
-- [ ] **P05-T07: Expose student explanations.** Return only personal outcomes/reasons and review-request actions. Evidence: a student cannot infer another candidate's academics through IDs, filters, or error details.
-- [ ] **P05-T08: Benchmark and audit.** Evaluate the target synthetic cohort, record environment/timing, and preserve engine/version references. Evidence: initial performance target is measured and any shortfall is reported honestly without weakening correctness.
-- [ ] **P05-T09: Phase completion testing and verification.** Execute deterministic eligibility engine test suite: evaluation of Section 10.2 cohort truth table (Students A through J) verifying exact match on eligible, ineligible, and needs_review reason codes; exact decimal CGPA threshold equality without rounding; snapshot immutability test; and evaluation benchmark measurement. Evidence: pure domain unit test suite passing with 100% agreement on Section 10.2 dataset.
+- [x] **P05-T01: Implement pure predicates.** Support branch, exact decimal CGPA/scale, graduation cohort, and maximum active backlog count. Evidence: predicates have no model/network/database dependency and return stable reason codes.
+- [x] **P05-T02: Implement conservative aggregation.** Required unknown takes precedence, then known failure, then pass; invalid policy fails the run. Evidence: the entire fictional Section 10.2 dataset and mixed unknown/failure cases match the specification.
+- [x] **P05-T03: Snapshot cohort inputs.** Persist student membership and academic revision references, policy/config/engine versions, and fingerprints. Evidence: a mid-run academic update cannot produce a mixed-version cohort.
+- [x] **P05-T04: Add queued evaluation and persistence.** Process bounded chunks under one frozen run and persist immutable results/counts. Evidence: restart/rerun yields the same logical results without duplicate rows.
+- [x] **P05-T05: Implement freshness/invalidation.** Academic, policy, normalization, or relevant roster change marks dependent current projections stale. Evidence: a historical pass cannot authorize a new submission under changed criteria.
+- [x] **P05-T06: Deliver coordinator eligibility views.** Show three groups, predicate details, source revisions, historical/current state, and filters. Evidence: counts reconcile to the run's cohort and no row is silently omitted.
+- [x] **P05-T07: Expose student explanations.** Return only personal outcomes/reasons and review-request actions. Evidence: a student cannot infer another candidate's academics through IDs, filters, or error details.
+- [x] **P05-T08: Benchmark and audit.** Evaluate the target synthetic cohort, record environment/timing, and preserve engine/version references. Evidence: initial performance target is measured and any shortfall is reported honestly without weakening correctness.
+- [x] **P05-T09: Phase completion testing and verification.** Execute deterministic eligibility engine test suite: evaluation of Section 10.2 cohort truth table (Students A through J) verifying exact match on eligible, ineligible, and needs_review reason codes; exact decimal CGPA threshold equality without rounding; snapshot immutability test; and evaluation benchmark measurement. Evidence: pure domain unit test suite passing with 100% agreement on Section 10.2 dataset.
 
 **Exit gate:** academic eligibility is deterministic, exact, explainable, versioned, and independent of document readiness. There is no direct editable eligibility override or LLM cohort classifier.
+
+### P05 Completion Record
+
+Task/phase: P05 (deterministic eligibility engine and frozen cohort evaluation)
+
+Behavior delivered: Added a pure `eligibility-v1.0.0` engine for branch, exact-decimal CGPA/scale, graduation year, and active-backlog predicates; unknown-first conservative aggregation; immutable policy/cohort/input fingerprints; frozen membership and academic-revision references; idempotent queued Celery evaluation; persisted predicate explanations and reconciled counts; conservative stale invalidation on policy, roster, and verified-record changes; assigned-coordinator outcome views; student-only personal explanations for published drives; and evidence-review requests that cannot override a result.
+
+Requirements covered: FR-ELIG-01 through FR-ELIG-08, NFR-01, INV-01, INV-02, INV-05, INV-06, INV-08, INV-09, and INV-10.
+
+Primary change references: `backend/src/placementos/services/eligibility_engine.py`, `backend/src/placementos/services/eligibility_runs.py`, `backend/src/placementos/models/eligibility.py`, `backend/src/placementos/api/v1/eligibility.py`, `backend/migrations/versions/20261029_1500_p05_deterministic_eligibility.py`, `apps/web/src/app/coordinator/drives/[id]/eligibility/page.tsx`, `apps/web/src/app/student/eligibility/page.tsx`, and `docs/p05-eligibility-verification.md`.
+
+Verification: Section 10.2 A-J truth table, threshold equality/no-rounding, mixed failure-plus-unknown precedence, invalid policy rejection, stable fingerprints, duplicate run idempotency, snapshot immutability, academic-change staleness, new-current-run behavior, count reconciliation, personal-result scoping, cross-student hidden-ID denial, review-request uniqueness, full backend suite, backend/frontend lint and typing, production frontend build, OpenAPI drift check, and fresh migration upgrade/downgrade/upgrade.
+
+Remaining limits or decisions: normalization configuration is frozen as the explicit version `institution-normalization-v1`; no unapproved scale conversion or branch alias mapping is performed. The current MVP cohort is the active institutional student roster captured when the run is created. Student results are exposed only for published drives. Document readiness and registration remain separate P06 work. No P06 implementation has started.
+
+Next dependency-ready task: P06-T01, intentionally not started in this phase.
 
 ## 10. P06: Implement student documents, publication, and registration
 

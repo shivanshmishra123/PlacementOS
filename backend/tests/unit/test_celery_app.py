@@ -7,3 +7,4 @@ def test_source_extraction_task_is_registered():
     """Starting the documented worker must register the P03 extraction task."""
     celery_app.loader.import_default_modules()
     assert "placementos.workers.extract_source_text" in celery_app.tasks
+    assert "placementos.workers.evaluate_eligibility" in celery_app.tasks

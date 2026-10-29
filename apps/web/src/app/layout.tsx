@@ -60,6 +60,12 @@ export default function RootLayout({
                   >
                     Student Portal
                   </Link>
+                  <Link
+                    href="/student/eligibility"
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
+                  >
+                    My Eligibility
+                  </Link>
                 </nav>
               </div>
 

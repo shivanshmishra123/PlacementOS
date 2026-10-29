@@ -29,6 +29,9 @@ import type {
   PolicyResponse,
   ProposalResponse,
   DecisionResponse,
+  EvaluationRunResponse,
+  StudentEligibilityResponse,
+  EligibilityReviewRequestResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -177,10 +180,10 @@ export class PlacementOSClient {
     sample_rows: Record<string, unknown>[];
     invalid_rows: Record<string, unknown>[];
   }> {
-    return this.request("/api/v1/students/import/preview", {
+    return this.request("/api/v1/students/import-preview", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ csv_data: csvContent }),
+      body: JSON.stringify({ csv_content: csvContent }),
     });
   }
 
@@ -192,7 +195,7 @@ export class PlacementOSClient {
     inserted_count?: number;
     updated_count?: number;
   }> {
-    return this.request("/api/v1/students/import/commit", {
+    return this.request("/api/v1/students/import-commit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ preview_token: previewToken }),
@@ -446,6 +449,59 @@ export class PlacementOSClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),
     });
+  }
+
+  // ==========================================
+  // Deterministic Eligibility (Phase 5)
+  // ==========================================
+
+  public async createEvaluationRun(
+    driveId: string,
+    policyId?: string
+  ): Promise<EvaluationRunResponse> {
+    return this.request<EvaluationRunResponse>(`/api/v1/drives/${driveId}/evaluations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ policy_id: policyId }),
+    });
+  }
+
+  public async listEvaluationRuns(driveId: string): Promise<EvaluationRunResponse[]> {
+    return this.request<EvaluationRunResponse[]>(`/api/v1/drives/${driveId}/evaluations`);
+  }
+
+  public async getEvaluationRun(
+    runId: string,
+    outcome?: "eligible" | "ineligible" | "needs_review"
+  ): Promise<EvaluationRunResponse> {
+    const query = outcome ? `?outcome=${outcome}` : "";
+    return this.request<EvaluationRunResponse>(`/api/v1/evaluation-runs/${runId}${query}`);
+  }
+
+  public async getMyEligibility(): Promise<StudentEligibilityResponse[]> {
+    return this.request<StudentEligibilityResponse[]>("/api/v1/student/eligibility");
+  }
+
+  public async requestEligibilityReview(
+    resultId: string,
+    reason: string
+  ): Promise<EligibilityReviewRequestResponse> {
+    return this.request<EligibilityReviewRequestResponse>(
+      `/api/v1/student/eligibility/${resultId}/review-request`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      }
+    );
+  }
+
+  public async listEligibilityReviewRequests(
+    driveId: string
+  ): Promise<EligibilityReviewRequestResponse[]> {
+    return this.request<EligibilityReviewRequestResponse[]>(
+      `/api/v1/drives/${driveId}/eligibility-review-requests`
+    );
   }
 }
 

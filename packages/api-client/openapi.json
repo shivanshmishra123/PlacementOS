@@ -1767,6 +1767,293 @@
           }
         }
       }
+    },
+    "/api/v1/drives/{drive_id}/evaluations": {
+      "post": {
+        "tags": [
+          "Deterministic Eligibility"
+        ],
+        "summary": "Create Evaluation Run",
+        "operationId": "create_evaluation_run_api_v1_drives__drive_id__evaluations_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationRunCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Deterministic Eligibility"
+        ],
+        "summary": "List Evaluation Runs",
+        "operationId": "list_evaluation_runs_api_v1_drives__drive_id__evaluations_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EvaluationRunResponse"
+                  },
+                  "title": "Response List Evaluation Runs Api V1 Drives  Drive Id  Evaluations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluation-runs/{run_id}": {
+      "get": {
+        "tags": [
+          "Deterministic Eligibility"
+        ],
+        "summary": "Get Evaluation Run",
+        "operationId": "get_evaluation_run_api_v1_evaluation_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "eligible",
+                    "ineligible",
+                    "needs_review"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/eligibility": {
+      "get": {
+        "tags": [
+          "Deterministic Eligibility"
+        ],
+        "summary": "Get My Eligibility",
+        "operationId": "get_my_eligibility_api_v1_student_eligibility_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StudentEligibilityResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Eligibility Api V1 Student Eligibility Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/eligibility/{result_id}/review-request": {
+      "post": {
+        "tags": [
+          "Deterministic Eligibility"
+        ],
+        "summary": "Request Eligibility Review",
+        "operationId": "request_eligibility_review_api_v1_student_eligibility__result_id__review_request_post",
+        "parameters": [
+          {
+            "name": "result_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Result Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequestCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRequestResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/eligibility-review-requests": {
+      "get": {
+        "tags": [
+          "Deterministic Eligibility"
+        ],
+        "summary": "List Eligibility Review Requests",
+        "operationId": "list_eligibility_review_requests_api_v1_drives__drive_id__eligibility_review_requests_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewRequestResponse"
+                  },
+                  "title": "Response List Eligibility Review Requests Api V1 Drives  Drive Id  Eligibility Review Requests Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2784,6 +3071,283 @@
         "type": "object",
         "title": "DriveUpdate"
       },
+      "EligibilityResultResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Evaluation Run Id"
+          },
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "student_identifier": {
+            "type": "string",
+            "title": "Student Identifier"
+          },
+          "student_name": {
+            "type": "string",
+            "title": "Student Name"
+          },
+          "academic_revision_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Academic Revision Id"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "eligible",
+              "ineligible",
+              "needs_review"
+            ],
+            "title": "Outcome"
+          },
+          "predicate_results": {
+            "items": {
+              "$ref": "#/components/schemas/PredicateFindingResponse"
+            },
+            "type": "array",
+            "title": "Predicate Results"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reason Codes"
+          },
+          "student_explanation": {
+            "type": "string",
+            "title": "Student Explanation"
+          },
+          "input_fingerprint": {
+            "type": "string",
+            "title": "Input Fingerprint"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "evaluation_run_id",
+          "student_profile_id",
+          "student_identifier",
+          "student_name",
+          "academic_revision_id",
+          "outcome",
+          "predicate_results",
+          "reason_codes",
+          "student_explanation",
+          "input_fingerprint",
+          "created_at"
+        ],
+        "title": "EligibilityResultResponse"
+      },
+      "EvaluationRunCreate": {
+        "properties": {
+          "policy_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Id"
+          }
+        },
+        "type": "object",
+        "title": "EvaluationRunCreate"
+      },
+      "EvaluationRunResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "policy_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Policy Id"
+          },
+          "policy_version": {
+            "type": "integer",
+            "title": "Policy Version"
+          },
+          "policy_hash": {
+            "type": "string",
+            "title": "Policy Hash"
+          },
+          "engine_version": {
+            "type": "string",
+            "title": "Engine Version"
+          },
+          "normalization_version": {
+            "type": "string",
+            "title": "Normalization Version"
+          },
+          "cohort_fingerprint": {
+            "type": "string",
+            "title": "Cohort Fingerprint"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "is_stale": {
+            "type": "boolean",
+            "title": "Is Stale"
+          },
+          "stale_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Reason"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "eligible_count": {
+            "type": "integer",
+            "title": "Eligible Count"
+          },
+          "ineligible_count": {
+            "type": "integer",
+            "title": "Ineligible Count"
+          },
+          "needs_review_count": {
+            "type": "integer",
+            "title": "Needs Review Count"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Detail"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/EligibilityResultResponse"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "policy_id",
+          "policy_version",
+          "policy_hash",
+          "engine_version",
+          "normalization_version",
+          "cohort_fingerprint",
+          "status",
+          "is_stale",
+          "stale_reason",
+          "total_count",
+          "eligible_count",
+          "ineligible_count",
+          "needs_review_count",
+          "duration_ms",
+          "error_code",
+          "error_detail",
+          "started_at",
+          "completed_at",
+          "created_at"
+        ],
+        "title": "EvaluationRunResponse"
+      },
       "EvidenceLocator": {
         "properties": {
           "field_path": {
@@ -3282,6 +3846,52 @@
         ],
         "title": "PolicyResponse"
       },
+      "PredicateFindingResponse": {
+        "properties": {
+          "predicate": {
+            "type": "string",
+            "title": "Predicate"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "true",
+              "false",
+              "unknown"
+            ],
+            "title": "Outcome"
+          },
+          "reason_code": {
+            "type": "string",
+            "title": "Reason Code"
+          },
+          "expected": {
+            "title": "Expected"
+          },
+          "actual": {
+            "title": "Actual"
+          },
+          "evidence_status": {
+            "type": "string",
+            "title": "Evidence Status"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "predicate",
+          "outcome",
+          "reason_code",
+          "expected",
+          "actual",
+          "evidence_status",
+          "explanation"
+        ],
+        "title": "PredicateFindingResponse"
+      },
       "ProposalDecisionCreate": {
         "properties": {
           "expected_revision": {
@@ -3445,6 +4055,79 @@
         ],
         "title": "ReadinessResponse",
         "description": "Readiness probe response payload indicating downstream dependency health."
+      },
+      "ReviewRequestCreate": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 5,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ReviewRequestCreate"
+      },
+      "ReviewRequestResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "eligibility_result_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Eligibility Result Id"
+          },
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "student_identifier": {
+            "type": "string",
+            "title": "Student Identifier"
+          },
+          "student_name": {
+            "type": "string",
+            "title": "Student Name"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "eligibility_result_id",
+          "student_profile_id",
+          "student_identifier",
+          "student_name",
+          "reason",
+          "status",
+          "created_at"
+        ],
+        "title": "ReviewRequestResponse"
       },
       "SourceArtifactResponse": {
         "properties": {
@@ -3664,6 +4347,101 @@
           "institution_id"
         ],
         "title": "StudentDetailDTO"
+      },
+      "StudentEligibilityResponse": {
+        "properties": {
+          "result_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Result Id"
+          },
+          "evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Evaluation Run Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "drive_title": {
+            "type": "string",
+            "title": "Drive Title"
+          },
+          "company_name": {
+            "type": "string",
+            "title": "Company Name"
+          },
+          "policy_version": {
+            "type": "integer",
+            "title": "Policy Version"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "eligible",
+              "ineligible",
+              "needs_review"
+            ],
+            "title": "Outcome"
+          },
+          "predicate_results": {
+            "items": {
+              "$ref": "#/components/schemas/PredicateFindingResponse"
+            },
+            "type": "array",
+            "title": "Predicate Results"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reason Codes"
+          },
+          "student_explanation": {
+            "type": "string",
+            "title": "Student Explanation"
+          },
+          "is_stale": {
+            "type": "boolean",
+            "title": "Is Stale"
+          },
+          "stale_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Reason"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Evaluated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result_id",
+          "evaluation_run_id",
+          "drive_id",
+          "drive_title",
+          "company_name",
+          "policy_version",
+          "outcome",
+          "predicate_results",
+          "reason_codes",
+          "student_explanation",
+          "is_stale",
+          "stale_reason",
+          "evaluated_at"
+        ],
+        "title": "StudentEligibilityResponse"
       },
       "StudentListItemDTO": {
         "properties": {

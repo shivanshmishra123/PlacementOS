@@ -122,7 +122,7 @@ No vector database, Kubernetes, Kafka, service mesh, autonomous browser agent, o
 
 ## 5. Repository layout
 
-This structure was established in P01 and has since been extended through P04. The source inputs and four canonical reference documents remain preserved at the repository root; current implementation status is tracked in `PLAN.md`.
+This structure was established in P01 and has since been extended through P05. The source inputs and four canonical reference documents remain preserved at the repository root; current implementation status is tracked in `PLAN.md`.
 
 ```text
 PlacementOS/
@@ -378,7 +378,7 @@ LangGraph checkpoint tables need their own protected adapter/access path because
 
 ### 9.2 Endpoint inventory
 
-These are target contracts, not implemented routes.
+This is the representative contract inventory. Routes through P05 are implemented; later rows remain target contracts, with exact current paths generated in `packages/api-client/openapi.json`.
 
 | Area | Representative endpoints | Important behavior |
 | --- | --- | --- |
@@ -389,7 +389,7 @@ These are target contracts, not implemented routes.
 | Upload | `POST /uploads`, `POST /uploads/{id}/complete`, `GET /uploads/{id}` | Signed quarantine destination; server validation and immutable acceptance. |
 | Sources | `POST /drives/{id}/sources`, `POST /sources/{id}/extract`, `GET /sources/{id}/extractions` | Bind accepted upload, queue parsing, evidence access. |
 | Policy | `POST /drives/{id}/policies`, `POST /policies/{id}/submit-review` | Validate policy; create exact approval proposal. |
-| Evaluation | `POST /drives/{id}/evaluations`, `GET /evaluations/{id}`, `GET /evaluations/{id}/results` | Snapshot inputs; async run. |
+| Evaluation | `POST /drives/{id}/evaluations`, `GET /drives/{id}/evaluations`, `GET /evaluation-runs/{id}`, `GET /student/eligibility` | Freeze inputs; async deterministic run; scoped explanations. |
 | Documents | `GET /drives/{id}/document-checklist`, `POST /students/me/documents`, `GET /documents/{id}/validations` | Own uploads and scoped findings. |
 | Registration | `POST /drives/{id}/registrations`, `POST /registrations/{id}/withdraw` | Current eligibility and server-side cutoff. |
 | Communications | `POST /drives/{id}/communication-drafts`, `POST /communication-drafts/{id}/freeze` | Freeze content and audience into a proposal. |

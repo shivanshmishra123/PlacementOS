@@ -4,6 +4,12 @@ from placementos.models.academic import (
     AcademicRecordRevision,
     StudentCorrectionProposal,
 )
+from placementos.models.eligibility import (
+    EligibilityResult,
+    EligibilityReviewRequest,
+    EvaluationCohortMember,
+    EvaluationRun,
+)
 from placementos.models.identity import (
     AuditLog,
     DriveAssignment,
@@ -44,6 +50,10 @@ __all__ = [
     "DriveAssignment",
     "DriveRevision",
     "EligibilityPolicyVersion",
+    "EligibilityResult",
+    "EligibilityReviewRequest",
+    "EvaluationCohortMember",
+    "EvaluationRun",
     "Institution",
     "JDInterpretationRevision",
     "JDReviewCorrection",

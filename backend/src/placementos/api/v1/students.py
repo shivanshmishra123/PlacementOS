@@ -554,6 +554,11 @@ async def decide_correction_proposal(
 
         profile.current_academic_revision_id = new_revision.id
         proposal.resulting_revision_id = new_revision.id
+        from placementos.services.eligibility_runs import EligibilityRunService
+
+        await EligibilityRunService.mark_student_runs_stale(
+            db, auth.institution_id, profile.id
+        )
         await db.flush()
 
     audit = AuditLog(
