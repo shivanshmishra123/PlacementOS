@@ -3278,6 +3278,466 @@
           }
         }
       }
+    },
+    "/api/v1/drives/{drive_id}/workflow-runs": {
+      "post": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "Start Workflow Run",
+        "operationId": "start_workflow_run_api_v1_drives__drive_id__workflow_runs_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowRunCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "List Workflow Runs",
+        "operationId": "list_workflow_runs_api_v1_drives__drive_id__workflow_runs_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowRunResponse"
+                  },
+                  "title": "Response List Workflow Runs Api V1 Drives  Drive Id  Workflow Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflow-runs/{workflow_run_id}": {
+      "get": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "Get Workflow Run",
+        "operationId": "get_workflow_run_api_v1_workflow_runs__workflow_run_id__get",
+        "parameters": [
+          {
+            "name": "workflow_run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Workflow Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflow-runs/{workflow_run_id}/resume": {
+      "post": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "Resume Workflow Run",
+        "operationId": "resume_workflow_run_api_v1_workflow_runs__workflow_run_id__resume_post",
+        "parameters": [
+          {
+            "name": "workflow_run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Workflow Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowResumeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowCommandResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflow-runs/{workflow_run_id}/events": {
+      "post": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "Submit Workflow Event",
+        "operationId": "submit_workflow_event_api_v1_workflow_runs__workflow_run_id__events_post",
+        "parameters": [
+          {
+            "name": "workflow_run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Workflow Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowEventCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowEventResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflow-runs/{workflow_run_id}/hold": {
+      "post": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "Place Operational Hold",
+        "operationId": "place_operational_hold_api_v1_workflow_runs__workflow_run_id__hold_post",
+        "parameters": [
+          {
+            "name": "workflow_run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Workflow Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationalHoldCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflow-runs/{workflow_run_id}/release-hold": {
+      "post": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "Release Operational Hold",
+        "operationId": "release_operational_hold_api_v1_workflow_runs__workflow_run_id__release_hold_post",
+        "parameters": [
+          {
+            "name": "workflow_run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Workflow Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationalHoldRelease"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowRunResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exception-cases": {
+      "get": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "List Exception Cases",
+        "operationId": "list_exception_cases_api_v1_exception_cases_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(open|acknowledged|resolved|dismissed)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExceptionCaseResponse"
+                  },
+                  "title": "Response List Exception Cases Api V1 Exception Cases Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exception-cases/{case_id}/actions": {
+      "post": {
+        "tags": [
+          "Durable Workflows"
+        ],
+        "summary": "Act On Exception Case",
+        "operationId": "act_on_exception_case_api_v1_exception_cases__case_id__actions_post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExceptionCaseAction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionCaseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5409,6 +5869,145 @@
         ],
         "title": "EvidenceLocator"
       },
+      "ExceptionCaseAction": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "acknowledged",
+              "resolved",
+              "dismissed"
+            ],
+            "title": "Action"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Note"
+          },
+          "expected_run_revision": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Run Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action",
+          "note"
+        ],
+        "title": "ExceptionCaseAction"
+      },
+      "ExceptionCaseResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "workflow_run_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workflow Run Id"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "affected_resources": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Affected Resources"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Evidence"
+          },
+          "proposed_next_action": {
+            "type": "string",
+            "title": "Proposed Next Action"
+          },
+          "owner_membership_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Membership Id"
+          },
+          "resolution_history": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Resolution History"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "workflow_run_id",
+          "category",
+          "severity",
+          "status",
+          "affected_resources",
+          "evidence",
+          "proposed_next_action",
+          "owner_membership_id",
+          "resolution_history",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ExceptionCaseResponse"
+      },
       "FindingResponse": {
         "properties": {
           "code": {
@@ -5692,6 +6291,48 @@
           "created_at"
         ],
         "title": "InterpretationResponse"
+      },
+      "OperationalHoldCreate": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          },
+          "expected_run_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Run Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason",
+          "expected_run_revision"
+        ],
+        "title": "OperationalHoldCreate"
+      },
+      "OperationalHoldRelease": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          },
+          "expected_run_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Run Revision"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason",
+          "expected_run_revision"
+        ],
+        "title": "OperationalHoldRelease"
       },
       "ParticipantListResponse": {
         "properties": {
@@ -7616,6 +8257,425 @@
           "reason"
         ],
         "title": "WithdrawalCreate"
+      },
+      "WorkflowCommandResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "workflow_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Workflow Run Id"
+          },
+          "command_type": {
+            "type": "string",
+            "title": "Command Type"
+          },
+          "reference_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Type"
+          },
+          "reference_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "workflow_run_id",
+          "command_type",
+          "reference_type",
+          "reference_id",
+          "status",
+          "created_at"
+        ],
+        "title": "WorkflowCommandResponse"
+      },
+      "WorkflowEventCreate": {
+        "properties": {
+          "event_key": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9:._-]+$",
+            "title": "Event Key"
+          },
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "registration_changed",
+              "document_changed",
+              "policy_changed",
+              "deadline_reached",
+              "dispatch_changed"
+            ],
+            "title": "Event Type"
+          },
+          "resource_type": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 2,
+            "pattern": "^[a-z0-9_]+$",
+            "title": "Resource Type"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Resource Id"
+          },
+          "resource_revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource Revision"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_key",
+          "event_type",
+          "resource_type",
+          "resource_id",
+          "occurred_at"
+        ],
+        "title": "WorkflowEventCreate"
+      },
+      "WorkflowEventResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "workflow_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Workflow Run Id"
+          },
+          "event_key": {
+            "type": "string",
+            "title": "Event Key"
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type"
+          },
+          "resource_type": {
+            "type": "string",
+            "title": "Resource Type"
+          },
+          "resource_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Resource Id"
+          },
+          "resource_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource Revision"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "processing_result": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Processing Result"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "workflow_run_id",
+          "event_key",
+          "event_type",
+          "resource_type",
+          "resource_id",
+          "resource_revision",
+          "payload",
+          "occurred_at",
+          "status",
+          "processing_result"
+        ],
+        "title": "WorkflowEventResponse"
+      },
+      "WorkflowResumeCreate": {
+        "properties": {
+          "expected_run_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Run Revision"
+          },
+          "reference_type": {
+            "type": "string",
+            "enum": [
+              "decision",
+              "clarification",
+              "event"
+            ],
+            "title": "Reference Type"
+          },
+          "reference_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Reference Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_run_revision",
+          "reference_type",
+          "reference_id"
+        ],
+        "title": "WorkflowResumeCreate"
+      },
+      "WorkflowRunCreate": {
+        "properties": {
+          "source_artifact_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Artifact Id"
+          }
+        },
+        "type": "object",
+        "title": "WorkflowRunCreate"
+      },
+      "WorkflowRunResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "graph_version": {
+            "type": "string",
+            "title": "Graph Version"
+          },
+          "state_schema_version": {
+            "type": "integer",
+            "title": "State Schema Version"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "current_step": {
+            "type": "string",
+            "title": "Current Step"
+          },
+          "state_references": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "State References"
+          },
+          "pending_proposal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Proposal Id"
+          },
+          "pending_clarification_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Clarification Id"
+          },
+          "pending_case_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Case Id"
+          },
+          "last_event_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Event Id"
+          },
+          "last_processed_command_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Processed Command Id"
+          },
+          "error_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Category"
+          },
+          "error_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Detail"
+          },
+          "concurrency_revision": {
+            "type": "integer",
+            "title": "Concurrency Revision"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "graph_version",
+          "state_schema_version",
+          "status",
+          "current_step",
+          "state_references",
+          "pending_proposal_id",
+          "pending_clarification_id",
+          "pending_case_id",
+          "last_event_id",
+          "last_processed_command_id",
+          "error_category",
+          "error_detail",
+          "concurrency_revision",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "WorkflowRunResponse"
       },
       "placementos__api__v1__health__ReadinessResponse": {
         "properties": {

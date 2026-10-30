@@ -32,17 +32,20 @@ uv sync --project backend --all-extras
 # 5. Run database migrations
 uv run --project backend alembic -c backend/alembic.ini upgrade head
 
-# 6. Start the web frontend (http://localhost:3000)
+# 6. Install/update package-owned LangGraph checkpoint tables
+uv run --project backend python scripts/setup_workflow_checkpoints.py
+
+# 7. Start the web frontend (http://localhost:3000)
 pnpm dev
 
-# 7. Start the FastAPI backend server (http://localhost:8000)
+# 8. Start the FastAPI backend server (http://localhost:8000)
 uv run --project backend uvicorn placementos.main:app --reload --port 8000
 
-# 8. Start the Celery worker from Linux or WSL
+# 9. Start the Celery worker from Linux or WSL
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
 ```
 
-For P07 local dispatch, run Celery beat separately so the durable outbox is relayed:
+Run Celery beat separately so the P07 dispatch outbox and P08 workflow-command outbox are relayed:
 
 ```text
 uv run --project backend celery -A placementos.workers.celery_app beat --loglevel=info
@@ -52,7 +55,7 @@ Mailpit is available at `http://127.0.0.1:8025`. SMTP acceptance is shown as pro
 
 On Windows, run step 8 inside WSL or a Linux worker container. Native Windows Celery pools are not a supported PlacementOS runtime. The web/API commands may run in PowerShell while the shared infrastructure remains in Docker Desktop.
 
-All backend environment variables use the `PLACEMENTOS_` prefix. `PLACEMENTOS_DATABASE_URL` is the restricted runtime role; only Alembic and administrative migration checks use `PLACEMENTOS_MIGRATION_DATABASE_URL`. The local `development_fixture` scanner and `fixture` interpreter are visibly synthetic and configuration validation rejects them in production.
+All backend environment variables use the `PLACEMENTOS_` prefix. `PLACEMENTOS_DATABASE_URL` is the restricted runtime role; only Alembic and administrative migration checks use `PLACEMENTOS_MIGRATION_DATABASE_URL`. `PLACEMENTOS_WORKFLOW_DATABASE_URL` uses a separate restricted role whose search path is the private `workflow_checkpoints` schema. Run the checkpoint setup command after every P08 migration upgrade and never grant browser/API callers direct access to that role or its opaque thread IDs. The local `development_fixture` scanner and `fixture` interpreter are visibly synthetic and configuration validation rejects them in production.
 
 ---
 
@@ -71,6 +74,9 @@ uv run --project backend pytest backend/tests
 # Export OpenAPI schema
 uv run --project backend python scripts/export_openapi.py
 uv run --project backend python scripts/check_contracts_drift.py
+
+# P08 checkpoint package setup is idempotent
+uv run --project backend python scripts/setup_workflow_checkpoints.py
 ```
 
 ---

@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://127.0.0.1:6379/0"
     CELERY_RESULT_BACKEND: str = "redis://127.0.0.1:6379/1"
 
+    # Trusted LangGraph checkpoint role/schema (never exposed to clients)
+    WORKFLOW_DATABASE_URL: str = (
+        "postgresql://placementos_workflow:placementos_workflow_dev_password@127.0.0.1:55432/"
+        "placementos?options=-csearch_path%3Dworkflow_checkpoints"
+    )
+
     # Private Object Storage (S3 / MinIO)
     S3_ENDPOINT_URL: str = "http://127.0.0.1:4566"
     S3_ACCESS_KEY_ID: str = "dev_access_key"
@@ -110,6 +116,14 @@ class Settings(BaseSettings):
         if environment == "production" and not v.startswith("https://"):
             raise ValueError("Production PUBLIC_WEB_URL must use HTTPS")
         return v.rstrip("/")
+
+    @field_validator("WORKFLOW_DATABASE_URL")
+    @classmethod
+    def validate_workflow_database_url(cls, v: str, info) -> str:
+        environment = info.data.get("ENVIRONMENT", "development")
+        if environment == "production" and "_dev_password" in v:
+            raise ValueError("Production requires a separately provisioned workflow database role")
+        return v
 
 
 # Cached global settings instance

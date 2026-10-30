@@ -1,6 +1,6 @@
 # PlacementOS: Instructions for AI Coding Agents
 
-> Status: implementation baseline, updated 30 October 2026. The repository contains a working local application through Phase P07; `PLAN.md` is authoritative for current completion evidence and remaining phases.
+> Status: implementation baseline, updated 30 October 2026. The repository contains a working local application through Phase P08; `PLAN.md` is authoritative for current completion evidence and remaining phases.
 
 ## 1. Purpose and reading order
 
@@ -203,6 +203,7 @@ docker compose up -d postgres redis object-store mailpit
 pnpm install
 uv sync --project backend
 uv run --project backend alembic -c backend/alembic.ini upgrade head
+uv run --project backend python scripts/setup_workflow_checkpoints.py
 pnpm dev
 uv run --project backend uvicorn placementos.main:app --reload
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info

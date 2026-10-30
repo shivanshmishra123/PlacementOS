@@ -61,6 +61,12 @@ export default function RootLayout({
                     Approvals
                   </Link>
                   <Link
+                    href="/coordinator/exceptions"
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
+                  >
+                    Exceptions
+                  </Link>
+                  <Link
                     href="/student/portal"
                     className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
                   >
@@ -83,7 +89,7 @@ export default function RootLayout({
 
               <div className="flex items-center gap-4">
                 <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  Phase 7 Safe Dispatch
+                  Phase 8 Durable Workflows
                 </span>
                 <PersonaSwitcher />
               </div>

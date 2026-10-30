@@ -12,6 +12,7 @@ celery_app = Celery(
         "placementos.workers.source_tasks",
         "placementos.workers.eligibility_tasks",
         "placementos.workers.dispatch_tasks",
+        "placementos.workers.workflow_tasks",
     ],
 )
 
@@ -28,7 +29,11 @@ celery_app.conf.update(
         "relay-dispatch-outbox": {
             "task": "placementos.workers.relay_dispatch_outbox",
             "schedule": 5.0,
-        }
+        },
+        "relay-workflow-commands": {
+            "task": "placementos.workers.relay_workflow_commands",
+            "schedule": 5.0,
+        },
     },
 )
 

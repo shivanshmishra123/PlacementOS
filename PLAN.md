@@ -1,6 +1,6 @@
 # PlacementOS: Implementation Plan
 
-> Baseline dated 28 October 2026; implementation status updated 30 October 2026. The repository now contains the verified P00-P07 application slices and local infrastructure. Live provider integrations remain deferred.
+> Baseline dated 28 October 2026; implementation status updated 30 October 2026. The repository now contains the verified P00-P08 application slices and local infrastructure. Live provider integrations remain deferred.
 
 ## 1. How to execute this plan
 
@@ -73,7 +73,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P05 | Completed; deterministic frozen-cohort evaluation, stale history, and scoped explanations | FR-ELIG, NFR-01 | Reproducible cohort results and explanations. |
 | P06 | Completed; revisioned documents, exact publication, readiness, and registration | FR-DOC, FR-REG | Functional student participation journey. |
 | P07 | Completed; frozen audiences/content, exact approval, durable outbox, Mailpit dispatch, and uncertainty reconciliation | FR-COM, FR-APP, FR-DISP | Exact approved communications and durable dispatch. |
-| P08 | Not started | FR-WF, baseline FR-EXC | Persistent end-to-end orchestration. |
+| P08 | Completed; protected PostgreSQL checkpoints, authenticated resume outbox, bounded monitoring, holds, and baseline cases | FR-WF, baseline FR-EXC | Persistent end-to-end orchestration. |
 | P09 | Not started | FR-SCHED, FR-RESULT, FR-REPORT, FR-CLOSE | Complete local recruitment lifecycle. |
 | P10 | Not started | Cross-cutting NFRs, privacy, real-data gate | Verified MVP release and documented pilot readiness. |
 | P11 | Not started; post-MVP | FR-INT-03 through FR-INT-09 | Reconciled live Google integrations. |
@@ -385,17 +385,30 @@ Next dependency-ready task: P08-T01 (Define versioned durable graph state).
 
 **Objective:** Compose existing services into a persistent human-supervised workflow. **Dependencies:** P07. **Requirements:** FR-WF and baseline FR-EXC.
 
-- [ ] **P08-T01: Define versioned graph state.** Store scoped IDs/revisions, thread mapping, pending proposal/case, event reference, and errors. Evidence: state excludes full cohorts, tokens, signed URLs, and raw files.
-- [ ] **P08-T02: Configure protected PostgreSQL checkpoints.** Establish package migrations/setup, trusted thread access, connection lifecycle, and restart persistence. Evidence: arbitrary client thread IDs cannot expose or mutate another run.
-- [ ] **P08-T03: Compose intake-to-review nodes.** Reuse source, interpretation, clarification, and policy services rather than reimplementing them in prompts/nodes. Evidence: replay finds existing domain artifacts by operation keys.
-- [ ] **P08-T04: Add authenticated pause/resume.** Use persisted proposal decisions and outbox resume events, with serialization and freshness checks. Evidence: API/worker restart while waiting resumes the original run once and rejects unauthorized/stale responses.
-- [ ] **P08-T05: Compose evaluation/publication/communication execution.** Coordinate approved domain services and enqueue effects; do not give the graph a raw send tool. Evidence: the happy path reaches monitoring with the same audited approvals as direct commands.
-- [ ] **P08-T06: Implement monitoring handlers and event deduplication.** Route registration, document, policy, and deadline events to bounded handlers. Evidence: a new document event does not repeat original JD analysis or announcement dispatch.
-- [ ] **P08-T07: Add operational holds and baseline cases.** Surface unresolved inputs, stale approvals, delivery uncertainty, and failed jobs with owners and manual actions. Evidence: a hold blocks new consequential work while preserving completed history.
-- [ ] **P08-T08: Test coordination gaps and version upgrades.** Crash between domain commits and checkpoints, replay decisions, and exercise duplicate/out-of-order events. Define compatible-run migration policy. Evidence: no duplicate approvals/effects and no blind incompatible resume.
-- [ ] **P08-T09: Phase completion testing and verification.** Execute LangGraph durable orchestration test suite: persistent pause at approval gates with PostgreSQL checkpoints, API/worker restart and resume via authenticated decision reference, duplicate event idempotency, and operational hold enforcement. Evidence: workflow lifecycle tests passing across process restarts.
+- [x] **P08-T01: Define versioned graph state.** Store scoped IDs/revisions, thread mapping, pending proposal/case, event reference, and errors. Evidence: state excludes full cohorts, tokens, signed URLs, and raw files.
+- [x] **P08-T02: Configure protected PostgreSQL checkpoints.** Establish package migrations/setup, trusted thread access, connection lifecycle, and restart persistence. Evidence: arbitrary client thread IDs cannot expose or mutate another run.
+- [x] **P08-T03: Compose intake-to-review nodes.** Reuse source, interpretation, clarification, and policy services rather than reimplementing them in prompts/nodes. Evidence: replay finds existing domain artifacts by operation keys.
+- [x] **P08-T04: Add authenticated pause/resume.** Use persisted proposal decisions and outbox resume events, with serialization and freshness checks. Evidence: API/worker restart while waiting resumes the original run once and rejects unauthorized/stale responses.
+- [x] **P08-T05: Compose evaluation/publication/communication execution.** Coordinate approved domain services and enqueue effects; do not give the graph a raw send tool. Evidence: the happy path reaches monitoring with the same audited approvals as direct commands.
+- [x] **P08-T06: Implement monitoring handlers and event deduplication.** Route registration, document, policy, and deadline events to bounded handlers. Evidence: a new document event does not repeat original JD analysis or announcement dispatch.
+- [x] **P08-T07: Add operational holds and baseline cases.** Surface unresolved inputs, stale approvals, delivery uncertainty, and failed jobs with owners and manual actions. Evidence: a hold blocks new consequential work while preserving completed history.
+- [x] **P08-T08: Test coordination gaps and version upgrades.** Crash between domain commits and checkpoints, replay decisions, and exercise duplicate/out-of-order events. Define compatible-run migration policy. Evidence: no duplicate approvals/effects and no blind incompatible resume.
+- [x] **P08-T09: Phase completion testing and verification.** Execute LangGraph durable orchestration test suite: persistent pause at approval gates with PostgreSQL checkpoints, API/worker restart and resume via authenticated decision reference, duplicate event idempotency, and operational hold enforcement. Evidence: workflow lifecycle tests passing across process restarts.
 
 **Exit gate:** the source workflow can pause, restart, resume, and monitor without a continuously occupied worker or hidden duplicate actions. Manual service paths remain available and use the same authority checks.
+
+### P08 Completion Record
+
+```text
+Task/phase: P08 (durable LangGraph orchestration)
+Behavior delivered: Versioned identifier-only drive graph state; a private PostgreSQL checkpoint schema and separate restricted role; package-owned checkpoint setup; institution-scoped workflow runs/commands/events/cases; transactional decision-to-resume intents; tenant-scoped Celery relay and trusted authorization/freshness validation; restart-safe clarification and approval interrupts; idempotent intake/policy/evaluation/publication/communication composition; bounded monitoring event handlers; coordinator workflow and exception screens; operational holds; and explicit incompatible-version cases.
+Requirements covered: FR-WF and baseline FR-EXC; INV-01/02/04/05/06/07/08/09/10/12.
+Files/change reference: backend/src/placementos/workflows/drive_lifecycle.py, backend/src/placementos/services/workflows.py, backend/src/placementos/services/workflow_domain.py, backend/src/placementos/services/workflow_checkpoints.py, backend/src/placementos/models/workflow.py, backend/src/placementos/api/v1/workflows.py, backend/src/placementos/workers/workflow_tasks.py, backend/migrations/versions/20261030_2100_p08_durable_workflows.py, backend/tests/integration/test_durable_workflows.py, apps/web/src/app/coordinator/drives/[id]/workflow/page.tsx, apps/web/src/app/coordinator/exceptions/page.tsx, scripts/setup_workflow_checkpoints.py, and docs/p08-durable-workflows-verification.md.
+Verification commands and results: 78 backend tests passed; the focused P08 lifecycle suite passed; Ruff and Mypy passed; API-client TypeScript and Next lint/build passed; OpenAPI contract drift was zero; existing-database P08 -> P07 -> P08 migration and checkpoint re-setup passed; an empty database upgraded through P08 and created 4 domain plus 4 private checkpoint tables.
+Demonstrated user/recovery scenario: A fresh accepted JD pauses for attributed clarifications, resumes through persisted clarification records, pauses for exact policy approval, resumes through the canonical decision, evaluates deterministically, and reaches publication input. An already approved drive reaches monitoring; duplicate/concurrent document and registration events process once without replaying intake, a simulated post-checkpoint/pre-finalization crash reclaims safely, an operational hold preserves pending work, cross-tenant access returns not found, and an unknown graph version stops with an owned case.
+Remaining limits or decisions: Monitoring handlers are bounded baseline projections/cases rather than P12 impact plans. Drive closure remains P09. LangGraph compatibility is intentionally limited to drive-lifecycle-v1/state schema 1 until a tested migration is added. Fixture interpretation/scanning and Mailpit remain local-development adapters, not pilot-ready providers.
+Next dependency-ready task: P09-T01 (Model rounds and session revisions).
+```
 
 ## 13. P09: Implement scheduling, results, closure, and reporting
 

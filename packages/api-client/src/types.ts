@@ -674,3 +674,49 @@ export interface DispatchBatchResponse {
   operations: DispatchOperationResponse[];
   created_at: string;
 }
+
+export interface WorkflowRunResponse {
+  id: string;
+  drive_id: string;
+  graph_version: string;
+  state_schema_version: number;
+  status: string;
+  current_step: string;
+  state_references: Record<string, unknown>;
+  pending_proposal_id: string | null;
+  pending_clarification_id: string | null;
+  pending_case_id: string | null;
+  last_event_id: string | null;
+  last_processed_command_id: string | null;
+  error_category: string | null;
+  error_detail: string | null;
+  concurrency_revision: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkflowCommandResponse {
+  id: string;
+  workflow_run_id: string;
+  command_type: string;
+  reference_type: string | null;
+  reference_id: string | null;
+  status: string;
+  created_at: string;
+}
+
+export interface ExceptionCaseResponse {
+  id: string;
+  drive_id: string;
+  workflow_run_id: string | null;
+  category: string;
+  severity: string;
+  status: string;
+  affected_resources: Array<Record<string, unknown>>;
+  evidence: Record<string, unknown>;
+  proposed_next_action: string;
+  owner_membership_id: string | null;
+  resolution_history: Array<Record<string, unknown>>;
+  created_at: string;
+  updated_at: string;
+}

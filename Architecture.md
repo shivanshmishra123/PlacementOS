@@ -632,6 +632,14 @@ Do not keep a worker in a loop while a drive is active. Monitoring is persisted 
 
 After an initial processing graph reaches monitoring, a later event can trigger a distinct child operation with its own idempotency key. It must not traverse the original announcement branch again. Closure is a domain command with preconditions; the graph records its result.
 
+### 13.5 Implemented checkpoint and upgrade policy
+
+The P08 baseline pins `langgraph==1.2.18` and `langgraph-checkpoint-postgres==3.2.0`. Domain workflow rows remain in the institution-scoped application schema; package-owned checkpoints use the private `workflow_checkpoints` schema through the separate `placementos_workflow` role. The application maps an authorized `workflow_runs` record to its opaque thread UUID before opening a checkpoint. Public contracts expose the workflow run UUID, never the thread UUID or arbitrary checkpoint state.
+
+`drive-lifecycle-v1` with state schema `1` is the only compatible baseline. Waiting runs resume only when both versions are explicitly recognized. An unknown graph/state version becomes `incompatible` and opens a case; it is never blindly replayed with newer node ordering. A future compatible release must add a tested, deterministic state migration and retain the old graph while waiting runs exist, or require a reviewed replacement run. Run domain migrations first, then `scripts/setup_workflow_checkpoints.py`; package-owned checkpoint migrations are idempotent but are not treated as part of an atomic transaction with domain rows.
+
+Workflow decisions and events commit a domain `workflow_commands` outbox row in the same transaction. Celery beat relays these commands, and the trusted worker revalidates tenant scope, drive assignment, actor status, exact decision evidence, run revision, operational hold, and graph versions before calling `Command(resume=...)`. Domain commits and checkpoints can still be separated by a crash, so nodes find persisted artifacts idempotently and commands are safe to replay. Monitoring events use unique event keys and bounded handlers; concurrent event commands are serialized and rebased only while the run remains at the monitoring checkpoint.
+
 ## 14. AI adapter and evidence design
 
 Use narrowly scoped calls with explicit input/output schemas and allowlisted retrieval functions. An LLM does not receive a generic SQL connection, unrestricted storage listing, Gmail client, calendar writer, shell, or notification dispatcher.

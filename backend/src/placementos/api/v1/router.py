@@ -11,6 +11,7 @@ from placementos.api.v1.intelligence import router as intelligence_router
 from placementos.api.v1.participation import router as participation_router
 from placementos.api.v1.sources import router as sources_router
 from placementos.api.v1.students import router as students_router
+from placementos.api.v1.workflows import router as workflows_router
 
 api_v1_router = APIRouter()
 
@@ -32,3 +33,5 @@ api_v1_router.include_router(eligibility_router)
 api_v1_router.include_router(participation_router)
 # Mount P07 immutable communications, approvals, and dispatch routes
 api_v1_router.include_router(communications_router)
+# Mount P08 durable, human-supervised workflow and exception routes
+api_v1_router.include_router(workflows_router)

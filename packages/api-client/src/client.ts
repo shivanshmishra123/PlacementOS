@@ -47,6 +47,8 @@ import type {
   CommunicationProposalResponse,
   DispatchBatchResponse,
   DispatchOperationResponse,
+  WorkflowRunResponse,
+  ExceptionCaseResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -730,6 +732,75 @@ export class PlacementOSClient {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ resolution, evidence }),
+    });
+  }
+
+  // ==========================================
+  // Durable Workflows & Baseline Cases (Phase 8)
+  // ==========================================
+
+  public async startWorkflowRun(
+    driveId: string,
+    sourceArtifactId?: string
+  ): Promise<WorkflowRunResponse> {
+    return this.request<WorkflowRunResponse>(`/api/v1/drives/${driveId}/workflow-runs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_artifact_id: sourceArtifactId || null }),
+    });
+  }
+
+  public async listWorkflowRuns(driveId: string): Promise<WorkflowRunResponse[]> {
+    return this.request<WorkflowRunResponse[]>(`/api/v1/drives/${driveId}/workflow-runs`);
+  }
+
+  public async getWorkflowRun(workflowRunId: string): Promise<WorkflowRunResponse> {
+    return this.request<WorkflowRunResponse>(`/api/v1/workflow-runs/${workflowRunId}`);
+  }
+
+  public async placeWorkflowHold(
+    workflowRunId: string,
+    expectedRevision: number,
+    reason: string
+  ): Promise<WorkflowRunResponse> {
+    return this.request<WorkflowRunResponse>(`/api/v1/workflow-runs/${workflowRunId}/hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_run_revision: expectedRevision, reason }),
+    });
+  }
+
+  public async releaseWorkflowHold(
+    workflowRunId: string,
+    expectedRevision: number,
+    reason: string
+  ): Promise<WorkflowRunResponse> {
+    return this.request<WorkflowRunResponse>(`/api/v1/workflow-runs/${workflowRunId}/release-hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_run_revision: expectedRevision, reason }),
+    });
+  }
+
+  public async listExceptionCases(status?: string): Promise<ExceptionCaseResponse[]> {
+    const query = status ? `?status=${encodeURIComponent(status)}` : "";
+    return this.request<ExceptionCaseResponse[]>(`/api/v1/exception-cases${query}`);
+  }
+
+  public async actOnExceptionCase(
+    caseId: string,
+    action: "acknowledged" | "resolved" | "dismissed",
+    note: string,
+    expectedRunRevision?: number
+  ): Promise<ExceptionCaseResponse> {
+    return this.request<ExceptionCaseResponse>(`/api/v1/exception-cases/${caseId}/actions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        note,
+        expected_run_revision: expectedRunRevision || null,
+      }),
     });
   }
 }

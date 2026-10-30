@@ -54,6 +54,7 @@ from placementos.models.storage import (
     TextExtraction,
     UploadSession,
 )
+from placementos.models.workflow import ExceptionCase, WorkflowCommand, WorkflowEvent, WorkflowRun
 
 __all__ = [
     "AcademicRecordRevision",
@@ -78,6 +79,7 @@ __all__ = [
     "EligibilityPolicyVersion",
     "EligibilityResult",
     "EligibilityReviewRequest",
+    "ExceptionCase",
     "EvaluationCohortMember",
     "EvaluationRun",
     "Institution",
@@ -94,4 +96,7 @@ __all__ = [
     "TextExtraction",
     "UploadSession",
     "User",
+    "WorkflowCommand",
+    "WorkflowEvent",
+    "WorkflowRun",
 ]

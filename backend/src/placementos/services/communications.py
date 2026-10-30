@@ -20,6 +20,7 @@ from placementos.models.communications import (
 )
 from placementos.models.eligibility import EligibilityResult, EvaluationRun
 from placementos.models.identity import Institution, StudentProfile, User
+from placementos.models.intelligence import ActionProposal
 from placementos.models.participation import Registration
 from placementos.models.recruitment import Company, Drive, DriveRevision
 from placementos.schemas.communications import CommunicationDraftCreate
@@ -383,3 +384,52 @@ def proposal_envelope(
         "dependencies": dependencies,
         "execution_expires_at": execution_expires_at.astimezone(UTC).isoformat(),
     }
+
+
+async def create_communication_proposal(
+    session: AsyncSession,
+    auth: AuthContext,
+    drive: Drive,
+    draft: CommunicationDraft,
+    snapshot: AudienceSnapshot,
+    execution_expires_at: datetime,
+) -> ActionProposal:
+    """Persist the exact generic proposal shared by HTTP and workflow orchestration."""
+    evaluation = await session.get(EvaluationRun, drive.published_evaluation_run_id)
+    if not evaluation or evaluation.status != "completed" or evaluation.is_stale:
+        raise ConflictException("Communication review requires a current completed evaluation")
+    dependencies = {
+        "drive_concurrency_revision": drive.concurrency_revision,
+        "published_drive_revision_id": str(drive.published_drive_revision_id),
+        "published_evaluation_run_id": str(drive.published_evaluation_run_id),
+        "evaluation_run_fingerprint": evaluation.run_fingerprint,
+        "policy_id": str(evaluation.policy_id),
+        "content_hash": draft.content_hash,
+        "audience_hash": snapshot.canonical_hash,
+        "sender_connection_revision": sender_connection_revision(),
+    }
+    envelope = proposal_envelope(
+        auth.institution_id, draft, snapshot, dependencies, execution_expires_at
+    )
+    proposal = ActionProposal(
+        institution_id=auth.institution_id,
+        drive_id=drive.id,
+        action_type="send_communication",
+        target_type="communication_draft",
+        target_id=draft.id,
+        revision_number=draft.revision_number,
+        schema_version=1,
+        payload=envelope["payload"],
+        dependencies=dependencies,
+        canonical_hash=canonical_hash(envelope),
+        state="pending_approval",
+        requested_by_membership_id=auth.membership_id,
+        expires_at=execution_expires_at,
+        execution_expires_at=execution_expires_at,
+        execution_bounds={"max_recipients": snapshot.included_count, "channel": "email"},
+        sender_connection_revision=dependencies["sender_connection_revision"],
+    )
+    session.add(proposal)
+    draft.state = "in_review"
+    await session.flush()
+    return proposal

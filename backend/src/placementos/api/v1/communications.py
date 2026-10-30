@@ -37,6 +37,7 @@ from placementos.schemas.communications import (
 from placementos.services.audit import record_audit
 from placementos.services.authorization import load_authorized_drive
 from placementos.services.communications import (
+    create_communication_proposal,
     create_frozen_draft,
     proposal_envelope,
     sender_connection_revision,
@@ -324,43 +325,9 @@ async def submit_communication_review(
             select(AudienceSnapshot).where(AudienceSnapshot.communication_draft_id == draft.id)
         )
     ).scalar_one()
-    evaluation = await session.get(EvaluationRun, drive.published_evaluation_run_id)
-    if not evaluation or evaluation.status != "completed" or evaluation.is_stale:
-        raise ConflictException("Communication review requires a current completed evaluation")
-    dependencies = {
-        "drive_concurrency_revision": drive.concurrency_revision,
-        "published_drive_revision_id": str(drive.published_drive_revision_id),
-        "published_evaluation_run_id": str(drive.published_evaluation_run_id),
-        "evaluation_run_fingerprint": evaluation.run_fingerprint,
-        "policy_id": str(evaluation.policy_id),
-        "content_hash": draft.content_hash,
-        "audience_hash": snapshot.canonical_hash,
-        "sender_connection_revision": sender_connection_revision(),
-    }
-    envelope = proposal_envelope(
-        auth.institution_id, draft, snapshot, dependencies, payload.execution_expires_at
+    proposal = await create_communication_proposal(
+        session, auth, drive, draft, snapshot, payload.execution_expires_at
     )
-    proposal = ActionProposal(
-        institution_id=auth.institution_id,
-        drive_id=drive.id,
-        action_type="send_communication",
-        target_type="communication_draft",
-        target_id=draft.id,
-        revision_number=draft.revision_number,
-        schema_version=1,
-        payload=envelope["payload"],
-        dependencies=dependencies,
-        canonical_hash=canonical_hash(envelope),
-        state="pending_approval",
-        requested_by_membership_id=auth.membership_id,
-        expires_at=payload.execution_expires_at,
-        execution_expires_at=payload.execution_expires_at,
-        execution_bounds={"max_recipients": snapshot.included_count, "channel": "email"},
-        sender_connection_revision=dependencies["sender_connection_revision"],
-    )
-    session.add(proposal)
-    draft.state = "in_review"
-    await session.flush()
     record_audit(
         session,
         auth,
@@ -569,6 +536,12 @@ async def decide_communication_proposal(
         "action_proposal",
         proposal.id,
         {"decision": payload.decision, "proposal_hash": proposal.canonical_hash},
+    )
+    await session.flush()
+    from placementos.services.workflows import enqueue_workflow_resume_for_proposal
+
+    await enqueue_workflow_resume_for_proposal(
+        session, proposal.id, decision.id, auth.membership_id
     )
     await session.commit()
     return await _proposal_response(session, proposal)

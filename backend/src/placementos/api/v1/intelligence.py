@@ -71,12 +71,16 @@ async def _interpretation_response(
     session: AsyncSession, item: JDInterpretationRevision
 ) -> InterpretationResponse:
     clarifications = (
-        await session.execute(
-            select(ClarificationTask)
-            .where(ClarificationTask.interpretation_id == item.id)
-            .order_by(ClarificationTask.created_at)
+        (
+            await session.execute(
+                select(ClarificationTask)
+                .where(ClarificationTask.interpretation_id == item.id)
+                .order_by(ClarificationTask.created_at)
+            )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return InterpretationResponse(
         id=item.id,
         drive_id=item.drive_id,
@@ -131,7 +135,11 @@ def _proposal_response(item: ActionProposal) -> ProposalResponse:
 
 
 async def _load_interpretation(
-    session: AsyncSession, auth: AuthContext, interpretation_id: uuid.UUID, *, for_update: bool = False
+    session: AsyncSession,
+    auth: AuthContext,
+    interpretation_id: uuid.UUID,
+    *,
+    for_update: bool = False,
 ) -> JDInterpretationRevision:
     statement = select(JDInterpretationRevision).where(
         JDInterpretationRevision.id == interpretation_id,
@@ -148,23 +156,31 @@ async def _load_interpretation(
 
 async def _stale_policy_work(session: AsyncSession, interpretation_id: uuid.UUID) -> None:
     policies = (
-        await session.execute(
-            select(EligibilityPolicyVersion).where(
-                EligibilityPolicyVersion.interpretation_id == interpretation_id,
-                EligibilityPolicyVersion.status.in_(["draft", "in_review"]),
+        (
+            await session.execute(
+                select(EligibilityPolicyVersion).where(
+                    EligibilityPolicyVersion.interpretation_id == interpretation_id,
+                    EligibilityPolicyVersion.status.in_(["draft", "in_review"]),
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     for policy in policies:
         policy.status = "superseded"
         proposals = (
-            await session.execute(
-                select(ActionProposal).where(
-                    ActionProposal.target_id == policy.id,
-                    ActionProposal.state == "pending_approval",
+            (
+                await session.execute(
+                    select(ActionProposal).where(
+                        ActionProposal.target_id == policy.id,
+                        ActionProposal.state == "pending_approval",
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         for proposal in proposals:
             proposal.state = "stale"
 
@@ -174,7 +190,9 @@ async def _ensure_interpretation_mutable(
 ) -> None:
     approved = (
         await session.execute(
-            select(func.count()).select_from(EligibilityPolicyVersion).where(
+            select(func.count())
+            .select_from(EligibilityPolicyVersion)
+            .where(
                 EligibilityPolicyVersion.interpretation_id == interpretation_id,
                 EligibilityPolicyVersion.status == "approved",
             )
@@ -241,7 +259,9 @@ async def create_interpretation(
         prompt_version = adapter.prompt_version
     else:
         if not payload.manual_facts or not payload.rationale:
-            raise BadRequestException("Manual interpretation requires facts and an attributed rationale")
+            raise BadRequestException(
+                "Manual interpretation requires facts and an attributed rationale"
+            )
         facts = payload.manual_facts
         evidence = [entry.model_dump() for entry in payload.manual_evidence]
         if not evidence:
@@ -277,13 +297,17 @@ async def create_interpretation(
         )
     ).scalar_one()
     previous = (
-        await session.execute(
-            select(JDInterpretationRevision).where(
-                JDInterpretationRevision.drive_id == drive_id,
-                JDInterpretationRevision.status == "review_ready",
+        (
+            await session.execute(
+                select(JDInterpretationRevision).where(
+                    JDInterpretationRevision.drive_id == drive_id,
+                    JDInterpretationRevision.status == "review_ready",
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     for old in previous:
         old.status = "superseded"
 
@@ -342,15 +366,19 @@ async def list_interpretations(
 ) -> list[InterpretationResponse]:
     await load_authorized_drive(session, auth, drive_id)
     items = (
-        await session.execute(
-            select(JDInterpretationRevision)
-            .where(
-                JDInterpretationRevision.drive_id == drive_id,
-                JDInterpretationRevision.institution_id == auth.institution_id,
+        (
+            await session.execute(
+                select(JDInterpretationRevision)
+                .where(
+                    JDInterpretationRevision.drive_id == drive_id,
+                    JDInterpretationRevision.institution_id == auth.institution_id,
+                )
+                .order_by(JDInterpretationRevision.revision_number.desc())
             )
-            .order_by(JDInterpretationRevision.revision_number.desc())
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return [await _interpretation_response(session, item) for item in items]
 
 
@@ -370,12 +398,18 @@ async def correct_interpretation(
     await _ensure_interpretation_mutable(session, item.id)
     previous = get_path(item.reviewed_facts, payload.field_path)
     item.reviewed_facts = set_path(item.reviewed_facts, payload.field_path, payload.corrected_value)
-    evidence = payload.evidence.model_dump() if payload.evidence else {
-        "field_path": payload.field_path,
-        "locator_type": "human_correction",
-        "excerpt": payload.rationale,
-    }
-    item.evidence = [entry for entry in item.evidence if entry.get("field_path") != payload.field_path] + [evidence]
+    evidence = (
+        payload.evidence.model_dump()
+        if payload.evidence
+        else {
+            "field_path": payload.field_path,
+            "locator_type": "human_correction",
+            "excerpt": payload.rationale,
+        }
+    )
+    item.evidence = [
+        entry for entry in item.evidence if entry.get("field_path") != payload.field_path
+    ] + [evidence]
     session.add(
         JDReviewCorrection(
             institution_id=auth.institution_id,
@@ -433,7 +467,9 @@ async def resolve_clarification(
     task.resolution_reason = payload.rationale
     task.resolved_by_membership_id = auth.membership_id
     task.resolved_at = datetime.now(UTC)
-    item.evidence = [entry for entry in item.evidence if entry.get("field_path") != task.field_path] + [
+    item.evidence = [
+        entry for entry in item.evidence if entry.get("field_path") != task.field_path
+    ] + [
         {
             "field_path": task.field_path,
             "locator_type": "human_correction",
@@ -450,6 +486,9 @@ async def resolve_clarification(
         task.id,
         {"field_path": task.field_path, "rationale": payload.rationale},
     )
+    from placementos.services.workflows import enqueue_workflow_resume_for_clarification
+
+    await enqueue_workflow_resume_for_clarification(session, task.id, auth.membership_id)
     await session.commit()
     return await _interpretation_response(session, item)
 
@@ -466,14 +505,18 @@ async def create_policy(
     if interpretation.drive_id != drive_id or interpretation.status != "review_ready":
         raise ConflictException("Policy must use the current review-ready interpretation")
     open_tasks = (
-        await session.execute(
-            select(ClarificationTask).where(
-                ClarificationTask.interpretation_id == interpretation.id,
-                ClarificationTask.blocking.is_(True),
-                ClarificationTask.status == "open",
+        (
+            await session.execute(
+                select(ClarificationTask).where(
+                    ClarificationTask.interpretation_id == interpretation.id,
+                    ClarificationTask.blocking.is_(True),
+                    ClarificationTask.status == "open",
+                )
             )
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     if open_tasks:
         raise ConflictException(
             "Blocking clarifications must be resolved before policy compilation",
@@ -506,7 +549,14 @@ async def create_policy(
     )
     session.add(item)
     await session.flush()
-    record_audit(session, auth, "policy:draft_created", "eligibility_policy", item.id, {"version": next_version})
+    record_audit(
+        session,
+        auth,
+        "policy:draft_created",
+        "eligibility_policy",
+        item.id,
+        {"version": next_version},
+    )
     await session.commit()
     return _policy_response(item)
 
@@ -519,19 +569,25 @@ async def list_policies(
 ) -> list[PolicyResponse]:
     await load_authorized_drive(session, auth, drive_id)
     items = (
-        await session.execute(
-            select(EligibilityPolicyVersion)
-            .where(
-                EligibilityPolicyVersion.drive_id == drive_id,
-                EligibilityPolicyVersion.institution_id == auth.institution_id,
+        (
+            await session.execute(
+                select(EligibilityPolicyVersion)
+                .where(
+                    EligibilityPolicyVersion.drive_id == drive_id,
+                    EligibilityPolicyVersion.institution_id == auth.institution_id,
+                )
+                .order_by(EligibilityPolicyVersion.version_number.desc())
             )
-            .order_by(EligibilityPolicyVersion.version_number.desc())
         )
-    ).scalars().all()
+        .scalars()
+        .all()
+    )
     return [_policy_response(item) for item in items]
 
 
-@router.post("/policies/{policy_id}/submit-review", response_model=ProposalResponse, status_code=201)
+@router.post(
+    "/policies/{policy_id}/submit-review", response_model=ProposalResponse, status_code=201
+)
 async def submit_policy_review(
     policy_id: uuid.UUID,
     auth: AuthContext = Depends(get_current_auth),
@@ -555,7 +611,9 @@ async def submit_policy_review(
     interpretation = await _load_interpretation(session, auth, policy.interpretation_id)
     open_count = (
         await session.execute(
-            select(func.count()).select_from(ClarificationTask).where(
+            select(func.count())
+            .select_from(ClarificationTask)
+            .where(
                 ClarificationTask.interpretation_id == interpretation.id,
                 ClarificationTask.blocking.is_(True),
                 ClarificationTask.status == "open",
@@ -604,7 +662,14 @@ async def submit_policy_review(
     session.add(proposal)
     policy.status = "in_review"
     await session.flush()
-    record_audit(session, auth, "policy:review_submitted", "action_proposal", proposal.id, {"policy_id": str(policy.id)})
+    record_audit(
+        session,
+        auth,
+        "policy:review_submitted",
+        "action_proposal",
+        proposal.id,
+        {"policy_id": str(policy.id)},
+    )
     await session.commit()
     return _proposal_response(proposal)
 
@@ -662,7 +727,10 @@ async def decide_proposal(
         raise NotFoundException(f"Proposal '{proposal_id}' not found")
     if proposal.state != "pending_approval":
         raise ConflictException(f"Proposal is already '{proposal.state}'")
-    if proposal.revision_number != payload.expected_revision or proposal.canonical_hash != payload.expected_hash:
+    if (
+        proposal.revision_number != payload.expected_revision
+        or proposal.canonical_hash != payload.expected_hash
+    ):
         raise ProposalStaleError(details={"current_revision": proposal.revision_number})
     if proposal.expires_at and proposal.expires_at <= datetime.now(UTC):
         proposal.state = "expired"
@@ -690,7 +758,11 @@ async def decide_proposal(
             .with_for_update()
         )
     ).scalar_one_or_none()
-    if not policy or policy.status != "in_review" or policy.canonical_hash != proposal.dependencies.get("policy_hash"):
+    if (
+        not policy
+        or policy.status != "in_review"
+        or policy.canonical_hash != proposal.dependencies.get("policy_hash")
+    ):
         proposal.state = "stale"
         await session.commit()
         raise ProposalStaleError("Policy or dependencies changed after proposal creation")
@@ -701,7 +773,9 @@ async def decide_proposal(
         raise ProposalStaleError("Interpretation revision changed")
     open_count = (
         await session.execute(
-            select(func.count()).select_from(ClarificationTask).where(
+            select(func.count())
+            .select_from(ClarificationTask)
+            .where(
                 ClarificationTask.interpretation_id == interpretation.id,
                 ClarificationTask.blocking.is_(True),
                 ClarificationTask.status == "open",
@@ -726,14 +800,18 @@ async def decide_proposal(
     proposal.state = payload.decision
     if payload.decision == "approved":
         previous_approved = (
-            await session.execute(
-                select(EligibilityPolicyVersion).where(
-                    EligibilityPolicyVersion.drive_id == policy.drive_id,
-                    EligibilityPolicyVersion.status == "approved",
-                    EligibilityPolicyVersion.id != policy.id,
+            (
+                await session.execute(
+                    select(EligibilityPolicyVersion).where(
+                        EligibilityPolicyVersion.drive_id == policy.drive_id,
+                        EligibilityPolicyVersion.status == "approved",
+                        EligibilityPolicyVersion.id != policy.id,
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         for previous in previous_approved:
             previous.status = "superseded"
         policy.status = "approved"
@@ -748,6 +826,11 @@ async def decide_proposal(
     else:
         policy.status = "draft"
     await session.flush()
+    from placementos.services.workflows import enqueue_workflow_resume_for_proposal
+
+    await enqueue_workflow_resume_for_proposal(
+        session, proposal.id, decision.id, auth.membership_id
+    )
     record_audit(
         session,
         auth,

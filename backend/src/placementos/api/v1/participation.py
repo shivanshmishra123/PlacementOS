@@ -454,6 +454,11 @@ async def decide_publication_proposal(
             actor_membership_id=auth.membership_id,
         )
     await session.flush()
+    from placementos.services.workflows import enqueue_workflow_resume_for_proposal
+
+    await enqueue_workflow_resume_for_proposal(
+        session, proposal.id, decision.id, auth.membership_id
+    )
     record_audit(
         session,
         auth,
