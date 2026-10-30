@@ -42,6 +42,14 @@ uv run --project backend uvicorn placementos.main:app --reload --port 8000
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
 ```
 
+For P07 local dispatch, run Celery beat separately so the durable outbox is relayed:
+
+```text
+uv run --project backend celery -A placementos.workers.celery_app beat --loglevel=info
+```
+
+Mailpit is available at `http://127.0.0.1:8025`. SMTP acceptance is shown as provider acceptance, not confirmed inbox delivery. The default recipient-domain allowlist is configured with `PLACEMENTOS_EMAIL_RECIPIENT_ALLOWLIST_DOMAINS`.
+
 On Windows, run step 8 inside WSL or a Linux worker container. Native Windows Celery pools are not a supported PlacementOS runtime. The web/API commands may run in PowerShell while the shared infrastructure remains in Docker Desktop.
 
 All backend environment variables use the `PLACEMENTOS_` prefix. `PLACEMENTOS_DATABASE_URL` is the restricted runtime role; only Alembic and administrative migration checks use `PLACEMENTOS_MIGRATION_DATABASE_URL`. The local `development_fixture` scanner and `fixture` interpreter are visibly synthetic and configuration validation rejects them in production.

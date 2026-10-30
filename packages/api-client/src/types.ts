@@ -581,3 +581,96 @@ export interface ParticipantListResponse {
   total: number;
   counts: Record<string, number>;
 }
+
+// ==========================================
+// Phase 7: Exact Communications & Safe Dispatch
+// ==========================================
+
+export type CommunicationKind =
+  | "drive_announcement"
+  | "missing_document_reminder"
+  | "registration_deadline_reminder"
+  | "clarification";
+export type AudienceType =
+  | "current_eligible"
+  | "submitted_registrants"
+  | "required_document_findings"
+  | "explicit_recipients";
+
+export interface AudienceRecipientResponse {
+  id: string;
+  student_profile_id: string;
+  email: string;
+  display_name: string;
+  inclusion_reason: string;
+  rendered_subject: string;
+  rendered_body: string;
+  rendered_hash: string;
+}
+
+export interface CommunicationDraftResponse {
+  id: string;
+  drive_id: string;
+  revision_number: number;
+  communication_kind: CommunicationKind;
+  audience_type: AudienceType;
+  subject_template: string;
+  body_template: string;
+  sender_email: string;
+  reply_to: string;
+  state: string;
+  content_hash: string;
+  audience_snapshot_id: string;
+  audience_hash: string;
+  included_count: number;
+  excluded_count: number;
+  duplicate_count: number;
+  unresolved_count: number;
+  exclusion_summary: Record<string, number>;
+  recipients: AudienceRecipientResponse[];
+  created_at: string;
+}
+
+export interface CommunicationProposalResponse {
+  id: string;
+  drive_id: string;
+  draft: CommunicationDraftResponse;
+  revision_number: number;
+  canonical_hash: string;
+  state: string;
+  payload: Record<string, unknown>;
+  dependencies: Record<string, unknown>;
+  execution_expires_at?: string | null;
+  sender_connection_revision?: string | null;
+  decision?: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface DispatchOperationResponse {
+  id: string;
+  operation_key: string;
+  recipient: string;
+  recipient_name: string;
+  status: string;
+  attempt_count: number;
+  provider_message_id?: string | null;
+  last_error_code?: string | null;
+}
+
+export interface DispatchBatchResponse {
+  id: string;
+  drive_id: string;
+  proposal_id: string;
+  communication_draft_id: string;
+  status: string;
+  total_count: number;
+  pending_count: number;
+  accepted_count: number;
+  delivered_count: number;
+  failed_count: number;
+  unknown_count: number;
+  cancelled_count: number;
+  execution_expires_at: string;
+  operations: DispatchOperationResponse[];
+  created_at: string;
+}

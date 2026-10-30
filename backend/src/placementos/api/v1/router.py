@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from placementos.api.v1.auth import router as auth_router
+from placementos.api.v1.communications import router as communications_router
 from placementos.api.v1.drives import router as drives_router
 from placementos.api.v1.eligibility import router as eligibility_router
 from placementos.api.v1.health import router as health_router
@@ -29,3 +30,5 @@ api_v1_router.include_router(intelligence_router)
 api_v1_router.include_router(eligibility_router)
 # Mount P06 student documents, publication, readiness, and registration routes
 api_v1_router.include_router(participation_router)
+# Mount P07 immutable communications, approvals, and dispatch routes
+api_v1_router.include_router(communications_router)

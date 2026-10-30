@@ -153,6 +153,10 @@ class ActionProposal(TimestampedUUIDModel):
         UUID(as_uuid=True), ForeignKey("memberships.id", ondelete="RESTRICT"), nullable=False
     )
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    earliest_execution_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    execution_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    execution_bounds: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
+    sender_connection_revision: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
 
 class ApprovalDecision(TimestampedUUIDModel):

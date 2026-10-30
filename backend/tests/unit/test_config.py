@@ -38,3 +38,14 @@ def test_production_rejects_deterministic_model_fixture():
             MALWARE_SCANNER_MODE="clamav",
             MODEL_INTERPRETER_MODE="fixture",
         )
+
+
+def test_production_rejects_mailpit_transport():
+    """The development sink cannot silently become a production mail adapter."""
+    with pytest.raises(ValueError, match="Mailpit development adapter"):
+        Settings(
+            ENVIRONMENT="production",
+            MALWARE_SCANNER_MODE="clamav",
+            MODEL_INTERPRETER_MODE="disabled",
+            EMAIL_ADAPTER_MODE="mailpit",
+        )

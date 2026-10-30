@@ -1,6 +1,6 @@
 # PlacementOS: Implementation Plan
 
-> Baseline dated 28 October 2026; implementation status updated 29 October 2026. The repository now contains the verified P00-P04 application slices and local infrastructure. Live provider integrations remain deferred.
+> Baseline dated 28 October 2026; implementation status updated 30 October 2026. The repository now contains the verified P00-P07 application slices and local infrastructure. Live provider integrations remain deferred.
 
 ## 1. How to execute this plan
 
@@ -72,7 +72,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P04 | Completed; source-backed review, clarification, typed policy, and exact approval | FR-AI-JD, FR-POL, initial FR-APP | Reviewed JD and immutable approved rules. |
 | P05 | Completed; deterministic frozen-cohort evaluation, stale history, and scoped explanations | FR-ELIG, NFR-01 | Reproducible cohort results and explanations. |
 | P06 | Completed; revisioned documents, exact publication, readiness, and registration | FR-DOC, FR-REG | Functional student participation journey. |
-| P07 | Not started | FR-COM, FR-APP, FR-DISP | Exact approved communications and durable dispatch. |
+| P07 | Completed; frozen audiences/content, exact approval, durable outbox, Mailpit dispatch, and uncertainty reconciliation | FR-COM, FR-APP, FR-DISP | Exact approved communications and durable dispatch. |
 | P08 | Not started | FR-WF, baseline FR-EXC | Persistent end-to-end orchestration. |
 | P09 | Not started | FR-SCHED, FR-RESULT, FR-REPORT, FR-CLOSE | Complete local recruitment lifecycle. |
 | P10 | Not started | Cross-cutting NFRs, privacy, real-data gate | Verified MVP release and documented pilot readiness. |
@@ -355,18 +355,31 @@ Next dependency-ready task: P07-T01 (Generalize immutable action proposals).
 
 **Objective:** Execute approved communications without losing intent or hiding uncertain outcomes. **Dependencies:** P04-P06. **Requirements:** FR-COM, FR-APP, FR-DISP.
 
-- [ ] **P07-T01: Complete generic proposal contracts.** Extend the P04 core with immutable action payloads, canonical hashes, dependencies, expiry, sender/connection revision, and execution bounds. Evidence: policy approval never grants generic send authority.
-- [ ] **P07-T02: Implement explicit audience snapshots.** Compute backend audience queries, deduplicate contacts, store inclusion/exclusion reasons, merge data, and per-recipient renders. Evidence: no LLM chooses recipient IDs and the exact intended audience is inspectable.
-- [ ] **P07-T03: Add drafting and content validation.** Provide deterministic templates and optional AI drafts for announcements/reminders/schedules/corrections. Evidence: required facts/links/timezones are validated and approved content is never regenerated during send.
-- [ ] **P07-T04: Deliver the approval center.** Show exact versions, audience, content, effects, and decision history with approve/reject/revision actions. Evidence: concurrent decisions, stale edits, expired proposals, and revoked reviewers fail safely.
-- [ ] **P07-T05: Complete transactional outbox and relay.** Commit execution intent alongside decision/audit and publish recoverably. Evidence: broker outage, relay crash after publish, and lost Redis messages do not lose or duplicate logical work.
-- [ ] **P07-T06: Implement per-item claim and attempts.** Apply final freshness/capability checks, operation uniqueness, leases, exact renders, known-safe retries, and unknown-outcome reconciliation. Evidence: provider crash-window fixtures behave as specified.
-- [ ] **P07-T07: Deliver mail adapters and progress UI.** Wire the sink first, classify acceptance/delivery/failure/unknown honestly, show partial batch progress, and configure sender/allowlist safeguards. Evidence: one logical message appears per approved recipient in the local scenario.
-- [ ] **P07-T08: Verify invalidation and cancellation races.** Change criteria/deadline/content/recipient and stop affected unclaimed operations; preserve in-flight/sent history. Evidence: documented claim boundary and no false promise that cancellation recalls sent mail.
-- [ ] **P07-T09: Define production transport readiness.** Identify the selected production adapter's sender, quota, receipt, idempotency, and lookup behavior. Implement/configure it only within authorized scope. Evidence: limitations are explicit before a real-data pilot.
-- [ ] **P07-T10: Phase completion testing and verification.** Execute proposal approval and safe dispatch test suite: proposal dependency hash invalidation on change, transactional outbox atomicity, Mailpit recipient delivery (exactly one message per approved recipient), duplicate queue message deduplication, and provider timeout `unknown` outcome reconciliation. Evidence: dispatch and approval integration tests passing.
+- [x] **P07-T01: Complete generic proposal contracts.** Extend the P04 core with immutable action payloads, canonical hashes, dependencies, expiry, sender/connection revision, and execution bounds. Evidence: policy approval never grants generic send authority.
+- [x] **P07-T02: Implement explicit audience snapshots.** Compute backend audience queries, deduplicate contacts, store inclusion/exclusion reasons, merge data, and per-recipient renders. Evidence: no LLM chooses recipient IDs and the exact intended audience is inspectable.
+- [x] **P07-T03: Add drafting and content validation.** Provide deterministic templates and optional AI drafts for announcements/reminders/schedules/corrections. Evidence: required facts/links/timezones are validated and approved content is never regenerated during send.
+- [x] **P07-T04: Deliver the approval center.** Show exact versions, audience, content, effects, and decision history with approve/reject/revision actions. Evidence: concurrent decisions, stale edits, expired proposals, and revoked reviewers fail safely.
+- [x] **P07-T05: Complete transactional outbox and relay.** Commit execution intent alongside decision/audit and publish recoverably. Evidence: broker outage, relay crash after publish, and lost Redis messages do not lose or duplicate logical work.
+- [x] **P07-T06: Implement per-item claim and attempts.** Apply final freshness/capability checks, operation uniqueness, leases, exact renders, known-safe retries, and unknown-outcome reconciliation. Evidence: provider crash-window fixtures behave as specified.
+- [x] **P07-T07: Deliver mail adapters and progress UI.** Wire the sink first, classify acceptance/delivery/failure/unknown honestly, show partial batch progress, and configure sender/allowlist safeguards. Evidence: one logical message appears per approved recipient in the local scenario.
+- [x] **P07-T08: Verify invalidation and cancellation races.** Change criteria/deadline/content/recipient and stop affected unclaimed operations; preserve in-flight/sent history. Evidence: documented claim boundary and no false promise that cancellation recalls sent mail.
+- [x] **P07-T09: Define production transport readiness.** Identify the selected production adapter's sender, quota, receipt, idempotency, and lookup behavior. Implement/configure it only within authorized scope. Evidence: limitations are explicit before a real-data pilot.
+- [x] **P07-T10: Phase completion testing and verification.** Execute proposal approval and safe dispatch test suite: proposal dependency hash invalidation on change, transactional outbox atomicity, Mailpit recipient delivery (exactly one message per approved recipient), duplicate queue message deduplication, and provider timeout `unknown` outcome reconciliation. Evidence: dispatch and approval integration tests passing.
 
 **Exit gate:** an exact reviewed proposal dispatches through the sink with durable intent, immutable content/audience, deduplicated logical operations, and visible uncertain outcomes. Unapproved direct API/task calls cannot send.
+
+### P07 Completion Record
+
+```text
+Task/phase: P07 (exact proposals, approvals, and safe dispatch)
+Behavior delivered: Deterministic communication drafting; backend-computed frozen audiences and per-recipient renders; exact approval center; transactional decision/batch/outbox creation; tenant-scoped outbox relay; unique leased operations and attempt history; Mailpit SMTP adapter; honest accepted/delivered/failed/unknown states; evidence-backed reconciliation; and unclaimed cancellation/invalidation.
+Requirements covered: FR-COM, FR-APP, FR-DISP; INV-04/05/06/07/08/09/10/11/12.
+Files/change reference: backend/src/placementos/models/communications.py, backend/src/placementos/services/communications.py, backend/src/placementos/services/dispatch.py, backend/src/placementos/services/mail.py, backend/src/placementos/api/v1/communications.py, backend/src/placementos/workers/dispatch_tasks.py, backend/migrations/versions/20261030_1700_p07_safe_dispatch.py, backend/tests/integration/test_communications_dispatch.py, apps/web/src/app/coordinator/drives/[id]/communications/page.tsx, apps/web/src/app/coordinator/approvals/page.tsx, packages/api-client, and docs/p07-safe-dispatch-verification.md.
+Verification commands and results: 74 backend tests passed; Ruff and Mypy passed; API-client TypeScript and Next lint/build passed; OpenAPI contract drift was zero; Alembic P07 -> P06 -> P07 cycle passed; real Mailpit fixture showed exactly one message for one approved logical operation.
+Demonstrated user/recovery scenario: Coordinator freezes an explicitly inspectable audience and exact personalized renders, submits review, receives a conflict for a stale hash, approves once, commits durable outbox intent, and dispatches through Mailpit; duplicate execution does not call the adapter again; a timeout remains unknown until evidence-backed reconciliation; a stale evaluation cancels unclaimed mail; rejection creates no dispatch intent.
+Remaining limits or decisions: Mailpit is a development sink and SMTP acceptance is not delivery. Production adapter/sender/quota/receipt/idempotency/lookup/credential/retention decisions remain a real-data pilot blocker. Schedule corrections and result notices require P09 published source facts before exposure; P07 does not allow free-text text to establish those consequential facts. Browser Playwright coverage remains part of P10 hardening.
+Next dependency-ready task: P08-T01 (Define versioned durable graph state).
+```
 
 ## 12. P08: Implement durable LangGraph orchestration
 

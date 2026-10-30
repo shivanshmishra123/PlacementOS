@@ -1,6 +1,6 @@
 # PlacementOS: Instructions for AI Coding Agents
 
-> Status: implementation baseline, updated 30 October 2026. The repository contains a working local application through Phase P06; `PLAN.md` is authoritative for current completion evidence and remaining phases.
+> Status: implementation baseline, updated 30 October 2026. The repository contains a working local application through Phase P07; `PLAN.md` is authoritative for current completion evidence and remaining phases.
 
 ## 1. Purpose and reading order
 

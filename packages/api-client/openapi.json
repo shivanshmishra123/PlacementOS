@@ -2875,6 +2875,409 @@
           }
         }
       }
+    },
+    "/api/v1/drives/{drive_id}/communication-drafts": {
+      "post": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "Create Communication Draft",
+        "operationId": "create_communication_draft_api_v1_drives__drive_id__communication_drafts_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommunicationDraftCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunicationDraftResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "List Communication Drafts",
+        "operationId": "list_communication_drafts_api_v1_drives__drive_id__communication_drafts_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommunicationDraftResponse"
+                  },
+                  "title": "Response List Communication Drafts Api V1 Drives  Drive Id  Communication Drafts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/communication-drafts/{draft_id}/submit-review": {
+      "post": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "Submit Communication Review",
+        "operationId": "submit_communication_review_api_v1_communication_drafts__draft_id__submit_review_post",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommunicationProposalCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunicationProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/communication-proposals": {
+      "get": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "List Communication Proposals",
+        "operationId": "list_communication_proposals_api_v1_communication_proposals_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CommunicationProposalResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Communication Proposals Api V1 Communication Proposals Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/communication-proposals/{proposal_id}": {
+      "get": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "Get Communication Proposal",
+        "operationId": "get_communication_proposal_api_v1_communication_proposals__proposal_id__get",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunicationProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/communication-proposals/{proposal_id}/decisions": {
+      "post": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "Decide Communication Proposal",
+        "operationId": "decide_communication_proposal_api_v1_communication_proposals__proposal_id__decisions_post",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommunicationDecisionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunicationProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dispatch-batches": {
+      "get": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "List Dispatch Batches",
+        "operationId": "list_dispatch_batches_api_v1_dispatch_batches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DispatchBatchResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Dispatch Batches Api V1 Dispatch Batches Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dispatch-batches/{batch_id}/cancel": {
+      "post": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "Cancel Dispatch Batch",
+        "operationId": "cancel_dispatch_batch_api_v1_dispatch_batches__batch_id__cancel_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancellationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchBatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dispatch-operations/{operation_id}/reconcile": {
+      "post": {
+        "tags": [
+          "Communications and Dispatch"
+        ],
+        "summary": "Reconcile Dispatch Operation",
+        "operationId": "reconcile_dispatch_operation_api_v1_dispatch_operations__operation_id__reconcile_post",
+        "parameters": [
+          {
+            "name": "operation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Operation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnknownOutcomeResolution"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchOperationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2979,6 +3382,56 @@
         ],
         "title": "AcademicRevisionDTO"
       },
+      "AudienceRecipientResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "inclusion_reason": {
+            "type": "string",
+            "title": "Inclusion Reason"
+          },
+          "rendered_subject": {
+            "type": "string",
+            "title": "Rendered Subject"
+          },
+          "rendered_body": {
+            "type": "string",
+            "title": "Rendered Body"
+          },
+          "rendered_hash": {
+            "type": "string",
+            "title": "Rendered Hash"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "student_profile_id",
+          "email",
+          "display_name",
+          "inclusion_reason",
+          "rendered_subject",
+          "rendered_body",
+          "rendered_hash"
+        ],
+        "title": "AudienceRecipientResponse"
+      },
       "CSVCommitRequest": {
         "properties": {
           "preview_token": {
@@ -3004,6 +3457,21 @@
           "csv_content"
         ],
         "title": "CSVPreviewRequest"
+      },
+      "CancellationCreate": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "CancellationCreate"
       },
       "ClarificationResolve": {
         "properties": {
@@ -3082,6 +3550,359 @@
           "status"
         ],
         "title": "ClarificationResponse"
+      },
+      "CommunicationDecisionCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Expected Hash"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "revision_requested"
+            ],
+            "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_hash",
+          "decision"
+        ],
+        "title": "CommunicationDecisionCreate"
+      },
+      "CommunicationDraftCreate": {
+        "properties": {
+          "communication_kind": {
+            "type": "string",
+            "enum": [
+              "drive_announcement",
+              "missing_document_reminder",
+              "registration_deadline_reminder",
+              "clarification"
+            ],
+            "title": "Communication Kind"
+          },
+          "audience_type": {
+            "type": "string",
+            "enum": [
+              "current_eligible",
+              "submitted_registrants",
+              "required_document_findings",
+              "explicit_recipients"
+            ],
+            "title": "Audience Type"
+          },
+          "explicit_student_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 5000,
+            "title": "Explicit Student Ids"
+          },
+          "subject_template": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Template"
+          },
+          "body_template": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body Template"
+          },
+          "sender_email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender Email"
+          },
+          "reply_to": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 3,
+            "title": "Reply To"
+          }
+        },
+        "type": "object",
+        "required": [
+          "communication_kind",
+          "audience_type",
+          "reply_to"
+        ],
+        "title": "CommunicationDraftCreate"
+      },
+      "CommunicationDraftResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "communication_kind": {
+            "type": "string",
+            "title": "Communication Kind"
+          },
+          "audience_type": {
+            "type": "string",
+            "title": "Audience Type"
+          },
+          "subject_template": {
+            "type": "string",
+            "title": "Subject Template"
+          },
+          "body_template": {
+            "type": "string",
+            "title": "Body Template"
+          },
+          "sender_email": {
+            "type": "string",
+            "title": "Sender Email"
+          },
+          "reply_to": {
+            "type": "string",
+            "title": "Reply To"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "content_hash": {
+            "type": "string",
+            "title": "Content Hash"
+          },
+          "audience_snapshot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Audience Snapshot Id"
+          },
+          "audience_hash": {
+            "type": "string",
+            "title": "Audience Hash"
+          },
+          "included_count": {
+            "type": "integer",
+            "title": "Included Count"
+          },
+          "excluded_count": {
+            "type": "integer",
+            "title": "Excluded Count"
+          },
+          "duplicate_count": {
+            "type": "integer",
+            "title": "Duplicate Count"
+          },
+          "unresolved_count": {
+            "type": "integer",
+            "title": "Unresolved Count"
+          },
+          "exclusion_summary": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Exclusion Summary"
+          },
+          "recipients": {
+            "items": {
+              "$ref": "#/components/schemas/AudienceRecipientResponse"
+            },
+            "type": "array",
+            "title": "Recipients"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "revision_number",
+          "communication_kind",
+          "audience_type",
+          "subject_template",
+          "body_template",
+          "sender_email",
+          "reply_to",
+          "state",
+          "content_hash",
+          "audience_snapshot_id",
+          "audience_hash",
+          "included_count",
+          "excluded_count",
+          "duplicate_count",
+          "unresolved_count",
+          "exclusion_summary",
+          "recipients",
+          "created_at"
+        ],
+        "title": "CommunicationDraftResponse"
+      },
+      "CommunicationProposalCreate": {
+        "properties": {
+          "execution_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Execution Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_expires_at"
+        ],
+        "title": "CommunicationProposalCreate"
+      },
+      "CommunicationProposalResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/CommunicationDraftResponse"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "dependencies": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dependencies"
+          },
+          "execution_expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Expires At"
+          },
+          "sender_connection_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender Connection Revision"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "draft",
+          "revision_number",
+          "canonical_hash",
+          "state",
+          "payload",
+          "dependencies",
+          "execution_expires_at",
+          "sender_connection_revision",
+          "created_at"
+        ],
+        "title": "CommunicationProposalResponse"
       },
       "CompanyCreate": {
         "properties": {
@@ -3493,6 +4314,161 @@
           "session_token"
         ],
         "title": "DevLoginResponse"
+      },
+      "DispatchBatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "proposal_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Proposal Id"
+          },
+          "communication_draft_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Communication Draft Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count"
+          },
+          "pending_count": {
+            "type": "integer",
+            "title": "Pending Count"
+          },
+          "accepted_count": {
+            "type": "integer",
+            "title": "Accepted Count"
+          },
+          "delivered_count": {
+            "type": "integer",
+            "title": "Delivered Count"
+          },
+          "failed_count": {
+            "type": "integer",
+            "title": "Failed Count"
+          },
+          "unknown_count": {
+            "type": "integer",
+            "title": "Unknown Count"
+          },
+          "cancelled_count": {
+            "type": "integer",
+            "title": "Cancelled Count"
+          },
+          "execution_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Execution Expires At"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/DispatchOperationResponse"
+            },
+            "type": "array",
+            "title": "Operations"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "proposal_id",
+          "communication_draft_id",
+          "status",
+          "total_count",
+          "pending_count",
+          "accepted_count",
+          "delivered_count",
+          "failed_count",
+          "unknown_count",
+          "cancelled_count",
+          "execution_expires_at",
+          "operations",
+          "created_at"
+        ],
+        "title": "DispatchBatchResponse"
+      },
+      "DispatchOperationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "operation_key": {
+            "type": "string",
+            "title": "Operation Key"
+          },
+          "recipient": {
+            "type": "string",
+            "title": "Recipient"
+          },
+          "recipient_name": {
+            "type": "string",
+            "title": "Recipient Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "provider_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Message Id"
+          },
+          "last_error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "operation_key",
+          "recipient",
+          "recipient_name",
+          "status",
+          "attempt_count",
+          "provider_message_id",
+          "last_error_code"
+        ],
+        "title": "DispatchOperationResponse"
       },
       "DocumentRevisionResponse": {
         "properties": {
@@ -6402,6 +7378,30 @@
           "preview"
         ],
         "title": "TextLocatorSchema"
+      },
+      "UnknownOutcomeResolution": {
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "provider_accepted",
+              "confirmed_not_accepted"
+            ],
+            "title": "Resolution"
+          },
+          "evidence": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolution",
+          "evidence"
+        ],
+        "title": "UnknownOutcomeResolution"
       },
       "UploadSessionCreate": {
         "properties": {

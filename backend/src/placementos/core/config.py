@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_TLS: bool = False
+    EMAIL_ADAPTER_MODE: Literal["mailpit", "smtp", "disabled"] = "mailpit"
+    EMAIL_RECIPIENT_ALLOWLIST_DOMAINS: list[str] = ["apex.edu", "beacon.edu"]
+    EMAIL_SEND_TIMEOUT_SECONDS: int = 10
+    PUBLIC_WEB_URL: str = "http://localhost:3000"
 
     # CORS & Web
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
@@ -90,6 +94,22 @@ class Settings(BaseSettings):
         if environment == "production" and v == "fixture":
             raise ValueError("Production cannot use the deterministic model fixture")
         return v
+
+    @field_validator("EMAIL_ADAPTER_MODE")
+    @classmethod
+    def validate_email_adapter(cls, v: str, info) -> str:
+        environment = info.data.get("ENVIRONMENT", "development")
+        if environment == "production" and v == "mailpit":
+            raise ValueError("Production cannot use the Mailpit development adapter")
+        return v
+
+    @field_validator("PUBLIC_WEB_URL")
+    @classmethod
+    def validate_public_web_url(cls, v: str, info) -> str:
+        environment = info.data.get("ENVIRONMENT", "development")
+        if environment == "production" and not v.startswith("https://"):
+            raise ValueError("Production PUBLIC_WEB_URL must use HTTPS")
+        return v.rstrip("/")
 
 
 # Cached global settings instance

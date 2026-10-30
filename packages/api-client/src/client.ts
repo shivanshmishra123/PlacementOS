@@ -41,6 +41,12 @@ import type {
   StudentDriveResponse,
   RegistrationResponse,
   ParticipantListResponse,
+  CommunicationKind,
+  AudienceType,
+  CommunicationDraftResponse,
+  CommunicationProposalResponse,
+  DispatchBatchResponse,
+  DispatchOperationResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -643,6 +649,88 @@ export class PlacementOSClient {
 
   public getParticipantExportUrl(driveId: string): string {
     return `${this.baseUrl}/api/v1/drives/${driveId}/participants.csv`;
+  }
+
+  // ==========================================
+  // Exact Communications & Safe Dispatch (Phase 7)
+  // ==========================================
+
+  public async createCommunicationDraft(
+    driveId: string,
+    request: {
+      communication_kind: CommunicationKind;
+      audience_type: AudienceType;
+      explicit_student_ids?: string[];
+      subject_template?: string;
+      body_template?: string;
+      sender_email?: string;
+      reply_to: string;
+    }
+  ): Promise<CommunicationDraftResponse> {
+    return this.request<CommunicationDraftResponse>(`/api/v1/drives/${driveId}/communication-drafts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+  }
+
+  public async listCommunicationDrafts(driveId: string): Promise<CommunicationDraftResponse[]> {
+    return this.request<CommunicationDraftResponse[]>(`/api/v1/drives/${driveId}/communication-drafts`);
+  }
+
+  public async submitCommunicationReview(
+    draftId: string,
+    executionExpiresAt: string
+  ): Promise<CommunicationProposalResponse> {
+    return this.request<CommunicationProposalResponse>(`/api/v1/communication-drafts/${draftId}/submit-review`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ execution_expires_at: executionExpiresAt }),
+    });
+  }
+
+  public async listCommunicationProposals(): Promise<CommunicationProposalResponse[]> {
+    return this.request<CommunicationProposalResponse[]>("/api/v1/communication-proposals");
+  }
+
+  public async decideCommunicationProposal(
+    proposalId: string,
+    request: {
+      expected_revision: number;
+      expected_hash: string;
+      decision: "approved" | "rejected" | "revision_requested";
+      comment?: string;
+    }
+  ): Promise<CommunicationProposalResponse> {
+    return this.request<CommunicationProposalResponse>(`/api/v1/communication-proposals/${proposalId}/decisions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+  }
+
+  public async listDispatchBatches(): Promise<DispatchBatchResponse[]> {
+    return this.request<DispatchBatchResponse[]>("/api/v1/dispatch-batches");
+  }
+
+  public async cancelDispatchBatch(batchId: string, reason: string): Promise<DispatchBatchResponse> {
+    return this.request<DispatchBatchResponse>(`/api/v1/dispatch-batches/${batchId}/cancel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  public async reconcileDispatchOperation(
+    operationId: string,
+    resolution: "provider_accepted" | "confirmed_not_accepted",
+    evidence: string
+  ): Promise<DispatchOperationResponse> {
+    return this.request<DispatchOperationResponse>(`/api/v1/dispatch-operations/${operationId}/reconcile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resolution, evidence }),
+    });
   }
 }
 
