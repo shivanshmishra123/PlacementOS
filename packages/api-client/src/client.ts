@@ -49,6 +49,12 @@ import type {
   DispatchOperationResponse,
   WorkflowRunResponse,
   ExceptionCaseResponse,
+  RecruitmentRoundResponse,
+  RecruitmentSessionResponse,
+  LifecycleProposalResponse,
+  DriveReportResponse,
+  StudentScheduleResult,
+  OutcomeRevisionResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -802,6 +808,109 @@ export class PlacementOSClient {
         expected_run_revision: expectedRunRevision || null,
       }),
     });
+  }
+
+  // ==========================================
+  // Scheduling, Results, Reports & Closure (Phase 9)
+  // ==========================================
+
+  public async listRounds(driveId: string): Promise<RecruitmentRoundResponse[]> {
+    return this.request<RecruitmentRoundResponse[]>(`/api/v1/drives/${driveId}/rounds`);
+  }
+
+  public async createRound(driveId: string, request: {
+    sequence_number: number; name: string; round_type: string; requires_previous_round_outcome: boolean;
+  }): Promise<RecruitmentRoundResponse> {
+    return this.request<RecruitmentRoundResponse>(`/api/v1/drives/${driveId}/rounds`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request),
+    });
+  }
+
+  public async listSessions(driveId: string): Promise<RecruitmentSessionResponse[]> {
+    return this.request<RecruitmentSessionResponse[]>(`/api/v1/drives/${driveId}/sessions`);
+  }
+
+  public async createSession(roundId: string, request: {
+    start_at: string; end_at: string; timezone: string; buffer_minutes: number; capacity: number;
+    venue?: string; meeting_url?: string; panel_members: string[]; student_profile_ids: string[];
+  }): Promise<RecruitmentSessionResponse> {
+    return this.request<RecruitmentSessionResponse>(`/api/v1/rounds/${roundId}/sessions`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request),
+    });
+  }
+
+  public async proposeSchedule(revisionId: string): Promise<LifecycleProposalResponse> {
+    return this.request<LifecycleProposalResponse>(`/api/v1/session-revisions/${revisionId}/publication-proposals`, { method: "POST" });
+  }
+
+  public async decideSchedule(proposal: LifecycleProposalResponse, decision: "approved" | "rejected" | "revision_requested"): Promise<LifecycleProposalResponse> {
+    return this.request<LifecycleProposalResponse>(`/api/v1/schedule-proposals/${proposal.id}/decisions`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_revision: proposal.revision_number, expected_hash: proposal.canonical_hash, decision }),
+    });
+  }
+
+  public async recordAttendance(sessionId: string, studentProfileId: string, status: "present" | "absent" | "excused"): Promise<Array<Record<string, unknown>>> {
+    return this.request<Array<Record<string, unknown>>>(`/api/v1/sessions/${sessionId}/attendance`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [{ student_profile_id: studentProfileId, status }] }),
+    });
+  }
+
+  public async recordOutcome(roundId: string, request: {
+    student_profile_id: string; outcome: "advanced" | "rejected" | "waitlisted" | "selected" | "withdrawn";
+    source_type: string; source_reference: string; note?: string;
+  }): Promise<OutcomeRevisionResponse> {
+    return this.request<OutcomeRevisionResponse>(`/api/v1/rounds/${roundId}/outcomes`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request),
+    });
+  }
+
+  public async listOutcomes(driveId: string): Promise<OutcomeRevisionResponse[]> {
+    return this.request<OutcomeRevisionResponse[]>(`/api/v1/drives/${driveId}/outcomes`);
+  }
+
+  public async proposeResult(outcomeId: string): Promise<LifecycleProposalResponse> {
+    return this.request<LifecycleProposalResponse>(`/api/v1/outcomes/${outcomeId}/publication-proposals`, { method: "POST" });
+  }
+
+  public async decideResult(proposal: LifecycleProposalResponse, decision: "approved" | "rejected" | "revision_requested"): Promise<LifecycleProposalResponse> {
+    return this.request<LifecycleProposalResponse>(`/api/v1/result-proposals/${proposal.id}/decisions`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_revision: proposal.revision_number, expected_hash: proposal.canonical_hash, decision }),
+    });
+  }
+
+  public async completeSession(sessionId: string): Promise<RecruitmentSessionResponse> {
+    return this.request<RecruitmentSessionResponse>(`/api/v1/sessions/${sessionId}/complete`, { method: "POST" });
+  }
+
+  public async closeRegistration(driveId: string, reason: string): Promise<Record<string, string>> {
+    return this.request<Record<string, string>>(`/api/v1/drives/${driveId}/registration-close`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason }),
+    });
+  }
+
+  public async freezeReport(driveId: string, reason: string): Promise<DriveReportResponse> {
+    return this.request<DriveReportResponse>(`/api/v1/drives/${driveId}/reports`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ report_kind: "operational", reason }),
+    });
+  }
+
+  public async closeDrive(driveId: string, reason: string): Promise<DriveReportResponse> {
+    return this.request<DriveReportResponse>(`/api/v1/drives/${driveId}/close`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason }),
+    });
+  }
+
+  public async reopenDrive(driveId: string, reason: string): Promise<DriveReportResponse> {
+    return this.request<DriveReportResponse>(`/api/v1/drives/${driveId}/reopen`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason }),
+    });
+  }
+
+  public async listMyScheduleResults(): Promise<StudentScheduleResult[]> {
+    return this.request<StudentScheduleResult[]>("/api/v1/student/schedule-results");
   }
 }
 

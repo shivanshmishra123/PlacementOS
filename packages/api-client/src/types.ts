@@ -720,3 +720,92 @@ export interface ExceptionCaseResponse {
   created_at: string;
   updated_at: string;
 }
+
+// ==========================================
+// Phase 9: Scheduling, Results & Closure
+// ==========================================
+
+export interface RecruitmentRoundResponse {
+  id: string;
+  drive_id: string;
+  sequence_number: number;
+  name: string;
+  round_type: string;
+  requires_previous_round_outcome: boolean;
+  status: string;
+}
+
+export interface RecruitmentSessionResponse {
+  id: string;
+  drive_id: string;
+  round_id: string;
+  status: string;
+  current_revision_id: string | null;
+  published_revision_id: string | null;
+  revision: {
+    id: string;
+    revision_number: number;
+    start_at: string;
+    end_at: string;
+    timezone: string;
+    buffer_minutes: number;
+    capacity: number;
+    venue: string | null;
+    meeting_url: string | null;
+    panel_members: string[];
+    change_reason: string | null;
+  } | null;
+  assignments: Array<{ student_profile_id: string; status: string; document_override_reason: string | null }>;
+}
+
+export interface LifecycleProposalResponse {
+  id: string;
+  action_type: string;
+  target_type: string;
+  target_id: string;
+  revision_number: number;
+  canonical_hash: string;
+  state: string;
+  payload: Record<string, unknown>;
+  dependencies: Record<string, unknown>;
+}
+
+export interface DriveReportResponse {
+  id: string;
+  drive_id: string;
+  revision_number: number;
+  report_kind: string;
+  status: string;
+  snapshot_payload: Record<string, unknown>;
+  snapshot_hash: string;
+  reason: string;
+  created_at: string;
+}
+
+export interface OutcomeRevisionResponse {
+  id: string;
+  round_id: string;
+  student_profile_id: string;
+  revision_number: number;
+  outcome: string;
+  source_type: string;
+  source_reference: string;
+  source_evidence: Record<string, unknown>;
+  note: string | null;
+  offer_status: string;
+  acceptance_status: string;
+  joining_status: string;
+  published_at: string | null;
+}
+
+export interface StudentScheduleResult {
+  drive_id: string;
+  session_id: string;
+  round: string;
+  start_at: string;
+  end_at: string;
+  timezone: string;
+  venue: string | null;
+  meeting_url: string | null;
+  outcome: { outcome: string; revision_number: number; offer_status: string; acceptance_status: string; joining_status: string } | null;
+}

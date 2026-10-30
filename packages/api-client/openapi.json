@@ -1654,7 +1654,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProposalResponse"
+                  "$ref": "#/components/schemas/placementos__schemas__intelligence__ProposalResponse"
                 }
               }
             }
@@ -1697,7 +1697,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProposalResponse"
+                  "$ref": "#/components/schemas/placementos__schemas__intelligence__ProposalResponse"
                 }
               }
             }
@@ -1739,7 +1739,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProposalDecisionCreate"
+                "$ref": "#/components/schemas/placementos__schemas__intelligence__ProposalDecisionCreate"
               }
             }
           }
@@ -3738,6 +3738,1179 @@
           }
         }
       }
+    },
+    "/api/v1/drives/{drive_id}/rounds": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Create Round",
+        "operationId": "create_round_api_v1_drives__drive_id__rounds_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoundCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "List Rounds",
+        "operationId": "list_rounds_api_v1_drives__drive_id__rounds_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoundResponse"
+                  },
+                  "title": "Response List Rounds Api V1 Drives  Drive Id  Rounds Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rounds/{round_id}/sessions": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Create Session",
+        "operationId": "create_session_api_v1_rounds__round_id__sessions_post",
+        "parameters": [
+          {
+            "name": "round_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Round Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/revisions": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Revise Session",
+        "operationId": "revise_session_api_v1_sessions__session_id__revisions_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/sessions": {
+      "get": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "List Sessions",
+        "operationId": "list_sessions_api_v1_drives__drive_id__sessions_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionResponse"
+                  },
+                  "title": "Response List Sessions Api V1 Drives  Drive Id  Sessions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/session-revisions/{revision_id}/publication-proposals": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Propose Session",
+        "operationId": "propose_session_api_v1_session_revisions__revision_id__publication_proposals_post",
+        "parameters": [
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Revision Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/placementos__schemas__lifecycle__ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedule-proposals/{proposal_id}/decisions": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Decide Schedule",
+        "operationId": "decide_schedule_api_v1_schedule_proposals__proposal_id__decisions_post",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/placementos__schemas__lifecycle__ProposalDecisionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/placementos__schemas__lifecycle__ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/attendance": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Record Attendance",
+        "operationId": "record_attendance_api_v1_sessions__session_id__attendance_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendanceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Record Attendance Api V1 Sessions  Session Id  Attendance Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/outcome-gaps": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Acknowledge Gap",
+        "operationId": "acknowledge_gap_api_v1_sessions__session_id__outcome_gaps_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GapAcknowledgementCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Acknowledge Gap Api V1 Sessions  Session Id  Outcome Gaps Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rounds/{round_id}/outcomes": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Add Outcome",
+        "operationId": "add_outcome_api_v1_rounds__round_id__outcomes_post",
+        "parameters": [
+          {
+            "name": "round_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Round Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutcomeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutcomeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/outcomes/{outcome_id}/publication-proposals": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Propose Outcome",
+        "operationId": "propose_outcome_api_v1_outcomes__outcome_id__publication_proposals_post",
+        "parameters": [
+          {
+            "name": "outcome_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Outcome Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/placementos__schemas__lifecycle__ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/outcomes": {
+      "get": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "List Outcomes",
+        "operationId": "list_outcomes_api_v1_drives__drive_id__outcomes_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OutcomeResponse"
+                  },
+                  "title": "Response List Outcomes Api V1 Drives  Drive Id  Outcomes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/result-proposals/{proposal_id}/decisions": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Decide Result",
+        "operationId": "decide_result_api_v1_result_proposals__proposal_id__decisions_post",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/placementos__schemas__lifecycle__ProposalDecisionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/placementos__schemas__lifecycle__ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/complete": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Complete Session",
+        "operationId": "complete_session_api_v1_sessions__session_id__complete_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/cancel": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Cancel Session",
+        "operationId": "cancel_session_api_v1_sessions__session_id__cancel_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/student/schedule-results": {
+      "get": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Student Schedule Results",
+        "operationId": "student_schedule_results_api_v1_student_schedule_results_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "title": "Response Student Schedule Results Api V1 Student Schedule Results Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/registration-close": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Close Registration",
+        "operationId": "close_registration_api_v1_drives__drive_id__registration_close_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Close Registration Api V1 Drives  Drive Id  Registration Close Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/reports": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Freeze Report",
+        "operationId": "freeze_report_api_v1_drives__drive_id__reports_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "List Reports",
+        "operationId": "list_reports_api_v1_drives__drive_id__reports_get",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReportResponse"
+                  },
+                  "title": "Response List Reports Api V1 Drives  Drive Id  Reports Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/{report_id}/export-grants": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Export Grant",
+        "operationId": "export_grant_api_v1_reports__report_id__export_grants_post",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportGrantResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/report-exports/{token}.csv": {
+      "get": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Download Report",
+        "operationId": "download_report_api_v1_report_exports__token__csv_get",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/close": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Close Drive",
+        "operationId": "close_drive_api_v1_drives__drive_id__close_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/reopen": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Reopen Drive",
+        "operationId": "reopen_drive_api_v1_drives__drive_id__reopen_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drives/{drive_id}/cancel": {
+      "post": {
+        "tags": [
+          "Scheduling, results, reports & closure"
+        ],
+        "summary": "Cancel Drive",
+        "operationId": "cancel_drive_api_v1_drives__drive_id__cancel_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3841,6 +5014,60 @@
           "created_at"
         ],
         "title": "AcademicRevisionDTO"
+      },
+      "AttendanceCreate": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AttendanceItem"
+            },
+            "type": "array",
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "AttendanceCreate"
+      },
+      "AttendanceItem": {
+        "properties": {
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "present",
+              "absent",
+              "excused"
+            ],
+            "title": "Status"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_profile_id",
+          "status"
+        ],
+        "title": "AttendanceItem"
       },
       "AudienceRecipientResponse": {
         "properties": {
@@ -6008,6 +7235,25 @@
         ],
         "title": "ExceptionCaseResponse"
       },
+      "ExportGrantResponse": {
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "title": "Download Url"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "download_url",
+          "expires_at"
+        ],
+        "title": "ExportGrantResponse"
+      },
       "FindingResponse": {
         "properties": {
           "code": {
@@ -6046,6 +7292,27 @@
           "message"
         ],
         "title": "FindingResponse"
+      },
+      "GapAcknowledgementCreate": {
+        "properties": {
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_profile_id",
+          "reason"
+        ],
+        "title": "GapAcknowledgementCreate"
       },
       "HTTPValidationError": {
         "properties": {
@@ -6333,6 +7600,186 @@
           "expected_run_revision"
         ],
         "title": "OperationalHoldRelease"
+      },
+      "OutcomeCreate": {
+        "properties": {
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "advanced",
+              "rejected",
+              "waitlisted",
+              "selected",
+              "withdrawn"
+            ],
+            "title": "Outcome"
+          },
+          "source_type": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Source Type"
+          },
+          "source_reference": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source Reference"
+          },
+          "source_evidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Source Evidence"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "offer_status": {
+            "type": "string",
+            "enum": [
+              "not_recorded",
+              "issued"
+            ],
+            "title": "Offer Status",
+            "default": "not_recorded"
+          },
+          "acceptance_status": {
+            "type": "string",
+            "enum": [
+              "not_recorded",
+              "accepted",
+              "declined"
+            ],
+            "title": "Acceptance Status",
+            "default": "not_recorded"
+          },
+          "joining_status": {
+            "type": "string",
+            "enum": [
+              "not_recorded",
+              "joined",
+              "not_joined",
+              "deferred"
+            ],
+            "title": "Joining Status",
+            "default": "not_recorded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "student_profile_id",
+          "outcome",
+          "source_type",
+          "source_reference"
+        ],
+        "title": "OutcomeCreate"
+      },
+      "OutcomeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "round_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Round Id"
+          },
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "source_reference": {
+            "type": "string",
+            "title": "Source Reference"
+          },
+          "source_evidence": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Source Evidence"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "offer_status": {
+            "type": "string",
+            "title": "Offer Status"
+          },
+          "acceptance_status": {
+            "type": "string",
+            "title": "Acceptance Status"
+          },
+          "joining_status": {
+            "type": "string",
+            "title": "Joining Status"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "round_id",
+          "student_profile_id",
+          "revision_number",
+          "outcome",
+          "source_type",
+          "source_reference",
+          "source_evidence",
+          "note",
+          "offer_status",
+          "acceptance_status",
+          "joining_status",
+          "published_at"
+        ],
+        "title": "OutcomeResponse"
       },
       "ParticipantListResponse": {
         "properties": {
@@ -6659,131 +8106,6 @@
         ],
         "title": "PredicateFindingResponse"
       },
-      "ProposalDecisionCreate": {
-        "properties": {
-          "expected_revision": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Expected Revision"
-          },
-          "expected_hash": {
-            "type": "string",
-            "maxLength": 64,
-            "minLength": 64,
-            "title": "Expected Hash"
-          },
-          "decision": {
-            "type": "string",
-            "enum": [
-              "approved",
-              "rejected",
-              "revision_requested"
-            ],
-            "title": "Decision"
-          },
-          "comment": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 1000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Comment"
-          }
-        },
-        "type": "object",
-        "required": [
-          "expected_revision",
-          "expected_hash",
-          "decision"
-        ],
-        "title": "ProposalDecisionCreate"
-      },
-      "ProposalResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "drive_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Drive Id"
-          },
-          "action_type": {
-            "type": "string",
-            "title": "Action Type"
-          },
-          "target_type": {
-            "type": "string",
-            "title": "Target Type"
-          },
-          "target_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Target Id"
-          },
-          "revision_number": {
-            "type": "integer",
-            "title": "Revision Number"
-          },
-          "payload": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Payload"
-          },
-          "dependencies": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Dependencies"
-          },
-          "canonical_hash": {
-            "type": "string",
-            "title": "Canonical Hash"
-          },
-          "state": {
-            "type": "string",
-            "title": "State"
-          },
-          "expires_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expires At"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "drive_id",
-          "action_type",
-          "target_type",
-          "target_id",
-          "revision_number",
-          "payload",
-          "dependencies",
-          "canonical_hash",
-          "state",
-          "expires_at",
-          "created_at"
-        ],
-        "title": "ProposalResponse"
-      },
       "PublicationDecisionCreate": {
         "properties": {
           "expected_revision": {
@@ -6936,6 +8258,21 @@
         ],
         "title": "PublicationProposalResponse"
       },
+      "ReasonCreate": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ReasonCreate"
+      },
       "RegistrationResponse": {
         "properties": {
           "id": {
@@ -7015,6 +8352,84 @@
           "concurrency_revision"
         ],
         "title": "RegistrationResponse"
+      },
+      "ReportCreate": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Reason"
+          },
+          "report_kind": {
+            "type": "string",
+            "const": "operational",
+            "title": "Report Kind",
+            "default": "operational"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "ReportCreate"
+      },
+      "ReportResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "report_kind": {
+            "type": "string",
+            "title": "Report Kind"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "snapshot_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Snapshot Payload"
+          },
+          "snapshot_hash": {
+            "type": "string",
+            "title": "Snapshot Hash"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "revision_number",
+          "report_kind",
+          "status",
+          "snapshot_payload",
+          "snapshot_hash",
+          "reason",
+          "created_at"
+        ],
+        "title": "ReportResponse"
       },
       "RequirementCreate": {
         "properties": {
@@ -7372,6 +8787,272 @@
           "created_at"
         ],
         "title": "ReviewRequestResponse"
+      },
+      "RoundCreate": {
+        "properties": {
+          "sequence_number": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Sequence Number"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "round_type": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Round Type"
+          },
+          "requires_previous_round_outcome": {
+            "type": "boolean",
+            "title": "Requires Previous Round Outcome",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "sequence_number",
+          "name",
+          "round_type"
+        ],
+        "title": "RoundCreate"
+      },
+      "RoundResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "sequence_number": {
+            "type": "integer",
+            "title": "Sequence Number"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "round_type": {
+            "type": "string",
+            "title": "Round Type"
+          },
+          "requires_previous_round_outcome": {
+            "type": "boolean",
+            "title": "Requires Previous Round Outcome"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "sequence_number",
+          "name",
+          "round_type",
+          "requires_previous_round_outcome",
+          "status"
+        ],
+        "title": "RoundResponse"
+      },
+      "SessionCreate": {
+        "properties": {
+          "start_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start At"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End At"
+          },
+          "timezone": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Timezone"
+          },
+          "buffer_minutes": {
+            "type": "integer",
+            "maximum": 1440.0,
+            "minimum": 0.0,
+            "title": "Buffer Minutes",
+            "default": 0
+          },
+          "capacity": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Capacity"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue"
+          },
+          "meeting_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Url"
+          },
+          "panel_members": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Panel Members"
+          },
+          "student_profile_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Student Profile Ids"
+          },
+          "document_override_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Override Reason"
+          },
+          "change_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start_at",
+          "end_at",
+          "timezone",
+          "capacity",
+          "student_profile_ids"
+        ],
+        "title": "SessionCreate"
+      },
+      "SessionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "round_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Round Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "current_revision_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Revision Id"
+          },
+          "published_revision_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published Revision Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "assignments": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Assignments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "round_id",
+          "status",
+          "current_revision_id",
+          "published_revision_id",
+          "revision",
+          "assignments"
+        ],
+        "title": "SessionResponse"
       },
       "SourceArtifactResponse": {
         "properties": {
@@ -8715,6 +10396,231 @@
         ],
         "title": "ReadinessResponse",
         "description": "Readiness probe response payload indicating downstream dependency health."
+      },
+      "placementos__schemas__intelligence__ProposalDecisionCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Expected Hash"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "revision_requested"
+            ],
+            "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_hash",
+          "decision"
+        ],
+        "title": "ProposalDecisionCreate"
+      },
+      "placementos__schemas__intelligence__ProposalResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "action_type": {
+            "type": "string",
+            "title": "Action Type"
+          },
+          "target_type": {
+            "type": "string",
+            "title": "Target Type"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "dependencies": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dependencies"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "drive_id",
+          "action_type",
+          "target_type",
+          "target_id",
+          "revision_number",
+          "payload",
+          "dependencies",
+          "canonical_hash",
+          "state",
+          "expires_at",
+          "created_at"
+        ],
+        "title": "ProposalResponse"
+      },
+      "placementos__schemas__lifecycle__ProposalDecisionCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Expected Hash"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "revision_requested"
+            ],
+            "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_hash",
+          "decision"
+        ],
+        "title": "ProposalDecisionCreate"
+      },
+      "placementos__schemas__lifecycle__ProposalResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "action_type": {
+            "type": "string",
+            "title": "Action Type"
+          },
+          "target_type": {
+            "type": "string",
+            "title": "Target Type"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "dependencies": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dependencies"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "action_type",
+          "target_type",
+          "target_id",
+          "revision_number",
+          "canonical_hash",
+          "state",
+          "payload",
+          "dependencies"
+        ],
+        "title": "ProposalResponse"
       },
       "placementos__schemas__participation__ReadinessResponse": {
         "properties": {

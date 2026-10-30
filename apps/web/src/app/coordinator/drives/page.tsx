@@ -261,6 +261,7 @@ export default function CoordinatorDrivesPage() {
                     <div className="flex justify-end gap-2">
                       <Link href={`/coordinator/drives/${d.id}/eligibility`} className="inline-flex items-center px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-medium rounded-lg transition">Eligibility</Link>
                       <Link href={`/coordinator/drives/${d.id}/workflow`} className="inline-flex items-center px-3 py-1.5 bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-medium rounded-lg transition">Workflow</Link>
+                      {["published", "active", "completed", "cancelled"].includes(d.status) && <Link href={`/coordinator/drives/${d.id}/lifecycle`} className="inline-flex items-center px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium rounded-lg transition">Schedule &amp; close</Link>}
                       {d.status === "published" && <Link href={`/coordinator/drives/${d.id}/communications`} className="inline-flex items-center px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-medium rounded-lg transition">Communications</Link>}
                       <Link
                         href={`/coordinator/drives/${d.id}/intake`}

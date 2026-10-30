@@ -35,6 +35,17 @@ from placementos.models.intelligence import (
     JDInterpretationRevision,
     JDReviewCorrection,
 )
+from placementos.models.lifecycle import (
+    AttendanceRevision,
+    DriveReportRevision,
+    OutcomeGapAcknowledgement,
+    OutcomeRevision,
+    RecruitmentRound,
+    RecruitmentSession,
+    ReportExportGrant,
+    SessionAssignment,
+    SessionRevision,
+)
 from placementos.models.participation import (
     DocumentRevision,
     DocumentValidationRun,
@@ -99,4 +110,13 @@ __all__ = [
     "WorkflowCommand",
     "WorkflowEvent",
     "WorkflowRun",
+    "AttendanceRevision",
+    "DriveReportRevision",
+    "OutcomeGapAcknowledgement",
+    "OutcomeRevision",
+    "RecruitmentRound",
+    "RecruitmentSession",
+    "ReportExportGrant",
+    "SessionAssignment",
+    "SessionRevision",
 ]

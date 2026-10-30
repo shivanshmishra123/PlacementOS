@@ -88,6 +88,16 @@ class Drive(TimestampedUUIDModel):
     )
     publication_proposal_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    registration_closed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    latest_report_revision_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    closed_by_membership_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("memberships.id", ondelete="SET NULL"), nullable=True
+    )
     concurrency_revision: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     # Relationships
