@@ -1,6 +1,6 @@
 # PlacementOS: Architecture and Technical Reference
 
-> Status: implementation baseline, updated 30 October 2026. This file is the canonical technical reference; implemented routes and schema currently extend through P07, while later sections remain target contracts.
+> Status: implementation baseline, synchronized 2 November 2026. The evidenced local implementation extends through P10 and is synthetic-demo ready only. P11 live connectors, P12 advanced recovery, and P13 measured expansion remain target contracts.
 
 ## 1. Architectural intent
 
@@ -122,7 +122,7 @@ No vector database, Kubernetes, Kafka, service mesh, autonomous browser agent, o
 
 ## 5. Repository layout
 
-This structure was established in P01 and has since been extended through P07. The source inputs and four canonical reference documents remain preserved at the repository root; current implementation status is tracked in `PLAN.md`.
+This structure was established in P01 and has since been extended through P10. The source inputs and four canonical reference documents remain preserved at the repository root; current implementation status and real-data blockers are tracked in `PLAN.md`.
 
 ```text
 PlacementOS/
@@ -378,7 +378,7 @@ LangGraph checkpoint tables need their own protected adapter/access path because
 
 ### 9.2 Endpoint inventory
 
-This is the representative contract inventory. Routes through P07 are implemented; later rows remain target contracts, with exact current paths generated in `packages/api-client/openapi.json`.
+This is the representative contract inventory. The implemented phase scope extends through P10, while some rows intentionally show P11/P12 extension contracts. Exact current paths are generated in `packages/api-client/openapi.json`; live connector and advanced recovery endpoints must not be presented as implemented until their phases pass.
 
 | Area | Representative endpoints | Important behavior |
 | --- | --- | --- |
@@ -401,6 +401,7 @@ This is the representative contract inventory. Routes through P07 are implemente
 | Exceptions | `GET /exceptions`, `POST /exceptions/{id}/resolution-plans` | Structured plan; later agent can draft it. |
 | Closure | `POST /drives/{id}/close`, `POST /drives/{id}/reopen`, `GET /drives/{id}/reports` | Preconditions, reason, snapshot, history. |
 | Jobs/audit | `GET /jobs/{id}`, `GET /drives/{id}/audit` | Scoped polling and restricted detail. |
+| Operations | `GET /operations/health`, `GET /operations/pilot-readiness` | Capability-scoped aggregate health and fail-closed real-data readiness without secret values. |
 
 ### 9.3 Error shape
 
@@ -787,14 +788,16 @@ The intended root-level developer interface is:
 ```text
 docker compose up -d postgres redis object-store mailpit
 pnpm install
-uv sync --project backend
+uv sync --project backend --all-extras
 uv run --project backend alembic -c backend/alembic.ini upgrade head
+uv run --project backend python scripts/setup_workflow_checkpoints.py
 pnpm dev
-uv run --project backend uvicorn placementos.main:app --reload
+uv run --project backend python scripts/run_api.py
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
+uv run --project backend celery -A placementos.workers.celery_app beat --loglevel=info
 ```
 
-These commands were established in P01. Alembic's script path is relative to its config and the `backend/src` application is packaged so imports resolve. Root scripts explicitly select the web workspace. The verified current interface and Windows/WSL worker boundary are documented in `docs/developer-setup.md`; relay/scheduler and production scanner commands remain later-phase work.
+These commands were established incrementally through P08. Alembic's script path is relative to its config and the `backend/src` application is packaged so imports resolve. Root scripts explicitly select the web workspace. The verified current interface and Windows/WSL worker boundary are documented in `docs/developer-setup.md`; the worker and beat perform the implemented relay/scheduler work. A production scanner adapter and configuration remain real-data blockers recorded by the P10 readiness gate.
 
 ### 21.2 Pilot deployment
 

@@ -1,6 +1,6 @@
 # PlacementOS: Implementation Plan
 
-> Baseline dated 28 October 2026; implementation status updated 30 October 2026. The repository now contains the verified P00-P08 application slices and local infrastructure. Live provider integrations remain deferred.
+> Baseline dated 28 October 2026; implementation status synchronized 2 November 2026. The repository contains the evidenced P00-P10 local application and hardening slices. Release 0.10.0 is synthetic-demo ready only; live providers, real-data operation, and later integrations remain blocked or deferred as recorded below.
 
 ## 1. How to execute this plan
 
@@ -8,7 +8,7 @@ Read [Agents.md](Agents.md), [PROJ_SPECIFICATION.md](PROJ_SPECIFICATION.md), and
 
 Use task IDs in change summaries and review notes. Complete dependency-ready tasks in small, working slices. A checked box means the deliverable exists and its verification passed. It does not mean a design was discussed, a UI was mocked, or a dependency was installed.
 
-The current request creates these references only. Do not interpret the checklist as authorization to start implementation, create provider accounts, spend money, deploy infrastructure, or send real messages. Once implementation is requested, routine reversible coding and local verification within that scope can proceed without repeated approval questions. Product approval gates are implemented application behavior.
+These references record implemented and planned work; they do not authorize provider accounts, spending, deployment, real student data, or messages to real recipients. Once implementation is requested, routine reversible coding and local verification within that scope can proceed without repeated approval questions. Product approval gates are implemented application behavior.
 
 ### 1.1 Status and evidence convention
 
@@ -18,6 +18,7 @@ The current request creates these references only. Do not interpret the checklis
 - If scope changes, update requirements and architecture before marking an incompatible implementation complete.
 - Record blocked dependencies with a concrete owner/input and continue independent authorized work.
 - Maintain concise phase evidence: change reference, commands/checks and result, demonstrated scenario, open limitations, and next task.
+- Treat each phase completion record as a historical snapshot taken when that phase closed. The phase summary and the latest completion record define current status; earlier "next task" and "not started" notes preserve handoff history rather than overriding later evidence.
 
 Checked tasks below are backed by the corresponding implementation and phase completion record. Unchecked phases remain plans and must not be presented as working behavior.
 
@@ -74,8 +75,8 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P06 | Completed; revisioned documents, exact publication, readiness, and registration | FR-DOC, FR-REG | Functional student participation journey. |
 | P07 | Completed; frozen audiences/content, exact approval, durable outbox, Mailpit dispatch, and uncertainty reconciliation | FR-COM, FR-APP, FR-DISP | Exact approved communications and durable dispatch. |
 | P08 | Completed; protected PostgreSQL checkpoints, authenticated resume outbox, bounded monitoring, holds, and baseline cases | FR-WF, baseline FR-EXC | Persistent end-to-end orchestration. |
-| P09 | Not started | FR-SCHED, FR-RESULT, FR-REPORT, FR-CLOSE | Complete local recruitment lifecycle. |
-| P10 | Not started | Cross-cutting NFRs, privacy, real-data gate | Verified MVP release and documented pilot readiness. |
+| P09 | Completed; scheduling, results, reports, closure, and lifecycle views established | FR-SCHED, FR-RESULT, FR-REPORT, FR-CLOSE | Complete local recruitment lifecycle. |
+| P10 | Completed for synthetic-demo hardening; explicit real-data readiness remains blocked by listed institution/provider inputs | Cross-cutting NFRs, privacy, real-data gate | Verified synthetic MVP release and documented fail-closed pilot gate. |
 | P11 | Not started; post-MVP | FR-INT-03 through FR-INT-09 | Reconciled live Google integrations. |
 | P12 | Not started; advanced | FR-EXC-04 through FR-EXC-07 | Approved recovery plans for changing information. |
 | P13 | Not started; demand-driven | Measured expansion | Reliable operation at demonstrated additional demand. |
@@ -426,6 +427,8 @@ Next dependency-ready task: P09-T01 (Model rounds and session revisions).
 
 **Exit gate:** M3 is complete only when scheduling, results, and closure work alongside intake, eligibility, registration, documents, approvals, and durable workflow. A polished intake dashboard alone is not an MVP.
 
+### P09 Completion Record
+
 ```text
 Task/phase: P09 (complete local recruitment lifecycle)
 Behavior delivered: Immutable rounds/session revisions and assignments; serialized half-open conflict and current participation checks; exact schedule and result approvals; separate attendance and revisioned employer outcomes; coordinator/student lifecycle views; deterministic frozen reports and private CSV export grants; closure blockers; cancellation and attributable reopening; institutional RLS and audit coverage.
@@ -447,7 +450,7 @@ Next dependency-ready task: P10-T01 (risk-based authorization/security checks).
 - [x] **P10-T04: Complete accessibility and usability review.** Exercise keyboard-only coordinator/student journeys, approval evidence, file errors, deadlines, and responsive layouts. Evidence: core interaction defects are fixed and limits are stated without unsupported certification claims.
 - [x] **P10-T05: Configure observability and runbooks.** Add actionable metrics/alerts, redacted traces, health checks, and recovery procedures. Evidence: an operator can locate a stuck job/unknown send and follow a safe documented resolution.
 - [x] **P10-T06: Demonstrate backup and retention procedures.** Restore database plus objects/checkpoints, reconcile pending work, reapply deletion records, and measure recovery objectives. Evidence: successful drill and institution-configured retention rather than untested backup settings.
-- [x] **P10-T07: Resolve real-data configuration.** Establish OIDC/membership ownership, branch/scale trust, real scanner, selected model policy/provider, production sender, privacy/retention policy, host/region, and operational owners. Evidence: no development identity/scanner/mail/model fixture can masquerade as production.
+- [x] **P10-T07: Assess and gate real-data configuration.** Identify the required OIDC/membership ownership, branch/scale trust, real scanner, model policy/provider, production sender, privacy/retention policy, host/region, and operational owners; fail closed while any are missing. Evidence: blockers are explicit and no development identity/scanner/mail/model fixture can masquerade as production readiness.
 - [x] **P10-T08: Prepare and verify deployment artifacts.** Build images, migration job, secret injection, network restrictions, release/rollback sequence, and compatible workflow handling. Evidence: staging smoke test; actual deployment occurs only when authorized.
 - [x] **P10-T09: Record release evidence.** Re-run the main acceptance journey on the release candidate and document feature status, deferred connectors, known limits, and pilot readiness. Evidence: a future agent/operator can distinguish local MVP completion from a live pilot launch.
 - [x] **P10-T10: Phase completion testing and verification.** Execute pilot hardening and security verification suite: cross-tenant IDOR tests, worker scope checks, secret leak scan in logs/checkpoints, fault injection at persistence boundaries, 5,000-student performance benchmark, keyboard accessibility audit, backup/tombstone restore drill, and pilot readiness signoff checklist. Evidence: documented pilot readiness gate report.

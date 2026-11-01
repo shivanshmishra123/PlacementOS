@@ -1,6 +1,6 @@
 # PlacementOS: Instructions for AI Coding Agents
 
-> Status: implementation baseline, updated 30 October 2026. The repository contains a working local application through Phase P08; `PLAN.md` is authoritative for current completion evidence and remaining phases.
+> Status: implementation baseline, synchronized 2 November 2026. The repository contains the evidenced local implementation through Phase P10 and is synthetic-demo ready only; `PLAN.md` is authoritative for completion evidence, real-data blockers, and remaining phases.
 
 ## 1. Purpose and reading order
 
@@ -196,17 +196,18 @@ Run targeted tests first. Broaden testing when integration changes or unresolved
 
 ## 10. Working locally and delivering changes
 
-The commands below are a required future developer interface, not commands that exist in this initial planning repository. Establish and verify them during Phase P01:
+The commands below are the established local developer interface. The current Windows-specific API launcher and additional worker/beat guidance are documented in `docs/developer-setup.md`:
 
 ```text
 docker compose up -d postgres redis object-store mailpit
 pnpm install
-uv sync --project backend
+uv sync --project backend --all-extras
 uv run --project backend alembic -c backend/alembic.ini upgrade head
 uv run --project backend python scripts/setup_workflow_checkpoints.py
 pnpm dev
-uv run --project backend uvicorn placementos.main:app --reload
+uv run --project backend python scripts/run_api.py
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
+uv run --project backend celery -A placementos.workers.celery_app beat --loglevel=info
 ```
 
 On Windows, use Linux containers or WSL for Celery workers; document the supported setup. Do not imply native Windows worker support without validating the selected version and pool. Run API/worker commands from the documented directory and configure migration paths consistently.
