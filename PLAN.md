@@ -1,6 +1,6 @@
 # PlacementOS: Implementation Plan
 
-> Baseline dated 28 October 2026; implementation status synchronized 2 November 2026. The repository contains the evidenced P00-P10 local application and hardening slices. Release 0.10.0 is synthetic-demo ready only; live providers, real-data operation, and later integrations remain blocked or deferred as recorded below.
+> Baseline dated 28 October 2026; implementation status synchronized 2 November 2026. The repository contains the evidenced P00-P11 local implementation slices. Release 0.11.0 is synthetic-demo ready only; live-account provider acceptance, real-data operation, and later phases remain blocked or deferred as recorded below.
 
 ## 1. How to execute this plan
 
@@ -77,7 +77,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P08 | Completed; protected PostgreSQL checkpoints, authenticated resume outbox, bounded monitoring, holds, and baseline cases | FR-WF, baseline FR-EXC | Persistent end-to-end orchestration. |
 | P09 | Completed; scheduling, results, reports, closure, and lifecycle views established | FR-SCHED, FR-RESULT, FR-REPORT, FR-CLOSE | Complete local recruitment lifecycle. |
 | P10 | Completed for synthetic-demo hardening; explicit real-data readiness remains blocked by listed institution/provider inputs | Cross-cutting NFRs, privacy, real-data gate | Verified synthetic MVP release and documented fail-closed pilot gate. |
-| P11 | Not started; post-MVP | FR-INT-03 through FR-INT-09 | Reconciled live Google integrations. |
+| P11 | Local connector implementation complete; isolated live-account acceptance blocked on explicit credentials/authorization | FR-INT-03 through FR-INT-09 | Controlled Google connectors with local contract evidence; live acceptance pending. |
 | P12 | Not started; advanced | FR-EXC-04 through FR-EXC-07 | Approved recovery plans for changing information. |
 | P13 | Not started; demand-driven | Measured expansion | Reliable operation at demonstrated additional demand. |
 
@@ -474,17 +474,19 @@ Next dependency-ready task: P11-T01 provider contract/scope validation (read-onl
 
 **Objective:** Reduce tool switching while preserving the same approval/data boundaries. **Dependencies:** P10 and explicit authorization for the actual account connections/external test actions. **Requirements:** FR-INT-03 through FR-INT-09.
 
-- [ ] **P11-T01: Validate provider contracts and scopes.** Check current official APIs, minimal per-feature scopes, consent/verification requirements, quotas, and supported reconciliation behavior. Evidence: documented permissions match enabled features; no broad scope is requested by habit.
-- [ ] **P11-T02: Implement encrypted connection lifecycle.** Add connect, status, refresh, disconnect, revocation, scope/version changes, and audit. Evidence: token material never enters browser storage, checkpoints, logs, or fixtures.
-- [ ] **P11-T03: Add explicit Gmail source selection.** Let a coordinator choose a message/attachment, capture immutable content and provenance, and feed existing intake services. Evidence: no default whole-inbox ingestion and disconnect blocks subsequent reads.
-- [ ] **P11-T04: Add Sheets import preview/commit.** Select a spreadsheet/range, map fields, fingerprint the source, and detect concurrent academic/source changes. Evidence: a changed sheet or newer academic revision cannot be overwritten silently.
-- [ ] **P11-T05: Add approved Sheets export/write.** Freeze target, range/schema, snapshot and content, and execute through controlled integration work. Evidence: incorrect scope/target and duplicate queue delivery do not create unauthorized writes.
-- [ ] **P11-T06: Add approved Calendar create/update.** Capture schedule/attendee/notification options, use stable mapping, and reconcile provider IDs/versions. Evidence: duplicate attempts do not silently duplicate events and invite side effects are shown before approval.
-- [ ] **P11-T07: Handle external change/webhook events.** Verify signatures/tokens where supported, deduplicate, reconcile missed events, and open discrepancies for external edits. Evidence: an untrusted callback cannot change approved internal facts.
-- [ ] **P11-T08: Run isolated connector acceptance.** Exercise expired tokens, disconnect, 429/backoff, partial failures, unknown outcomes, external edits, and safe manual fallback. Evidence: only explicitly authorized test accounts/recipients are touched and connector limits are documented.
-- [ ] **P11-T09: Phase completion testing and verification.** Execute external connector test suite: isolated Google OAuth flow, token encryption, Gmail intake, Sheets sync preview/commit, Calendar event creation, webhook signature validation, and network failure backoff/reconciliation. Evidence: connector integration suite passing against isolated test accounts.
+- [x] **P11-T01: Validate provider contracts and scopes.** Official OAuth, Gmail, Sheets, and Calendar contracts and minimal feature scopes are recorded in `docs/p11-google-connectors-verification.md`; Gmail sending, unrestricted Drive, and whole-mailbox scopes are not requested.
+- [x] **P11-T02: Implement encrypted connection lifecycle.** Connect/status/refresh/disconnect, scope and connection revision checks, AES-GCM token envelopes, production key validation, stale-operation invalidation, and audit are implemented and locally tested.
+- [x] **P11-T03: Add explicit Gmail source selection.** Coordinators submit an exact message and optional attachment ID; immutable content/provenance enters the existing private source/extraction pipeline. There is no inbox enumeration endpoint.
+- [x] **P11-T04: Add Sheets import preview/commit.** Exact ranges, mapping, content fingerprint, preview expiry, source re-read, and academic-revision conflict detection are implemented and locally tested.
+- [x] **P11-T05: Add approved Sheets export/write.** Target, range, RAW values, report snapshot, and content hash are frozen; final freshness/authority checks and database idempotency protect provider execution.
+- [x] **P11-T06: Add approved Calendar create/update.** Published session revision, stable event ID, attendee snapshot, notification choice, local-provider mapping, ETag conflict, and exact approval are implemented.
+- [x] **P11-T07: Handle external change/webhook events.** Server-generated signed channel IDs, hashed channel tokens, resource checks, expiry, message deduplication, and discrepancy marking are implemented and locally tested.
+- [ ] **P11-T08: Run isolated connector acceptance.** Local deterministic adapter acceptance covers disconnect, 429/backoff, unknown write outcomes, stale source, tenant isolation, webhook rejection/deduplication, and safe retry. Live execution remains blocked pending an explicitly authorized isolated Google test account, OAuth client, and HTTPS callback.
+- [ ] **P11-T09: Phase completion testing and verification.** Local connector suite, migration, contract, backend and frontend checks are recorded in `docs/p11-google-connectors-verification.md`. The required isolated live Google OAuth/Gmail/Sheets/Calendar run has not been authorized and is not claimed.
 
 **Exit gate:** advertise each connector separately only after its tests pass. Internal scheduling and uploaded-source intake continue to work when Google is unavailable.
+
+Implementation record: release 0.11.0 provides the disabled-by-default connector boundary and coordinator UI. No Google account was connected and no external provider write occurred. Next dependency-ready P11 action is the owner-authorized isolated live-provider acceptance run (P11-T08/T09); P12 may proceed independently for non-connector exception cases.
 
 ## 16. P12: Add structured exception impact analysis and recovery
 

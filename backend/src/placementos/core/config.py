@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
-    RELEASE_VERSION: str = "0.10.0"
+    RELEASE_VERSION: str = "0.11.0"
 
     # Security
     SECRET_KEY: str = Field(
@@ -92,6 +92,18 @@ class Settings(BaseSettings):
     LIVE_SEND_ENABLED: bool = False
     PRODUCTION_SENDER_VERIFIED: bool = False
     PUBLIC_WEB_URL: str = "http://localhost:3000"
+
+    # Google Workspace connectors (P11). Tokens remain encrypted server-side.
+    GOOGLE_CONNECTORS_ENABLED: bool = False
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/integrations/google/callback"
+    INTEGRATION_TOKEN_ENCRYPTION_KEY: str = ""
+    GOOGLE_OAUTH_AUTHORIZE_URL: str = "https://accounts.google.com/o/oauth2/v2/auth"
+    GOOGLE_OAUTH_TOKEN_URL: str = "https://oauth2.googleapis.com/token"
+    GOOGLE_OAUTH_REVOKE_URL: str = "https://oauth2.googleapis.com/revoke"
+    GOOGLE_API_TIMEOUT_SECONDS: int = 20
+    INTEGRATION_WEBHOOK_BASE_URL: str = ""
 
     # Institution-owned pilot configuration. Empty values deliberately block real-data readiness.
     INSTITUTION_TIMEZONE_CONFIRMED: bool = False
@@ -200,6 +212,16 @@ class Settings(BaseSettings):
             not self.LIVE_SEND_ENABLED or not self.PRODUCTION_SENDER_VERIFIED
         ):
             errors.append("live SMTP requires an explicitly verified sender and enable flag")
+        if self.GOOGLE_CONNECTORS_ENABLED and (
+            not self.GOOGLE_CLIENT_ID
+            or not self.GOOGLE_CLIENT_SECRET
+            or not self.GOOGLE_REDIRECT_URI.startswith("https://")
+            or not self.INTEGRATION_TOKEN_ENCRYPTION_KEY
+            or "replace" in self.INTEGRATION_TOKEN_ENCRYPTION_KEY.lower()
+        ):
+            errors.append(
+                "enabled Google connectors require OAuth credentials, an HTTPS redirect, and an external token-encryption key"
+            )
         if not self.RETENTION_POLICY_ID or not self.RECORD_RETENTION_DAYS or not self.DELETION_OWNER:
             errors.append("an institution retention policy is required")
         if not self.BACKUP_RETENTION_DAYS or not self.BACKUP_ENCRYPTION_KEY_ID:

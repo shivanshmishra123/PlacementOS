@@ -852,3 +852,92 @@ export interface OperationalHealthResponse {
   exception_cases: { open_or_acknowledged: number };
   alerts: OperationalAlert[];
 }
+
+// ==========================================
+// Phase 11: Controlled Google Workspace Connectors
+// ==========================================
+
+export type GoogleConnectorFeature =
+  | "gmail_intake"
+  | "sheets_import"
+  | "sheets_export"
+  | "calendar_events";
+
+export interface GoogleAuthorizationResponse {
+  authorization_url: string;
+  expires_at: string;
+}
+
+export interface IntegrationConnectionResponse {
+  id: string;
+  provider: string;
+  external_account_email: string;
+  status: string;
+  granted_scopes: string[];
+  connection_revision: number;
+  access_token_expires_at: string | null;
+  last_error_code: string | null;
+  disconnected_at: string | null;
+  created_at: string;
+}
+
+export interface GmailCaptureResponse {
+  id: string;
+  source_artifact_id: string;
+  message_id: string;
+  attachment_id: string | null;
+  subject: string | null;
+  sender: string | null;
+  content_hash: string;
+  extraction_job_id: string;
+}
+
+export interface SheetImportPreviewResponse {
+  id: string;
+  spreadsheet_id: string;
+  selected_range: string;
+  source_fingerprint: string;
+  status: string;
+  expires_at: string;
+  report: Record<string, unknown>;
+}
+
+export interface SheetImportCommitResponse {
+  preview_id: string;
+  status: string;
+  result: Record<string, unknown>;
+}
+
+export interface IntegrationProposalResponse {
+  id: string;
+  action_type: string;
+  target_type: string;
+  target_id: string;
+  revision_number: number;
+  state: string;
+  canonical_hash: string;
+  payload: Record<string, unknown>;
+  dependencies: Record<string, unknown>;
+}
+
+export interface IntegrationOperationResponse {
+  id: string;
+  proposal_id: string;
+  operation_kind: string;
+  status: string;
+  attempt_count: number;
+  provider_resource_id: string | null;
+  provider_version: string | null;
+  last_error_code: string | null;
+  last_error_detail: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface CalendarChannelResponse {
+  id: string;
+  channel_id: string;
+  resource_id: string;
+  status: string;
+  expires_at: string | null;
+}

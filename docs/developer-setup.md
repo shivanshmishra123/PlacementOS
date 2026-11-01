@@ -93,8 +93,8 @@ node scripts/accessibility_audit.mjs
 `.env.pilot.example` is a non-runnable template; production validation rejects every `replace-*`/example value. An institution-approved secret/configuration service must provide `.env.pilot`, the Compose-level database/Redis bootstrap secrets, OIDC ownership, academic/permission decisions, provider choices, retention, region, and named operational owners.
 
 ```text
-docker build -f infra/docker/api.Dockerfile -t placementos-api:0.10.0 .
-docker build -f infra/docker/web.Dockerfile -t placementos-web:0.10.0 .
+docker build -f infra/docker/api.Dockerfile -t placementos-api:0.11.0 .
+docker build -f infra/docker/web.Dockerfile -t placementos-web:0.11.0 .
 docker compose -f compose.pilot.yaml config --quiet
 ```
 

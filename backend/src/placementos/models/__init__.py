@@ -27,6 +27,17 @@ from placementos.models.identity import (
     StudentProfile,
     User,
 )
+from placementos.models.integrations import (
+    GmailSourceCapture,
+    IntegrationAttempt,
+    IntegrationConnection,
+    IntegrationOperation,
+    IntegrationWebhookChannel,
+    IntegrationWebhookEvent,
+    OAuthAuthorizationState,
+    ProviderResourceMapping,
+    SheetImportPreview,
+)
 from placementos.models.intelligence import (
     ActionProposal,
     ApprovalDecision,
@@ -94,10 +105,18 @@ __all__ = [
     "EvaluationCohortMember",
     "EvaluationRun",
     "Institution",
+    "IntegrationAttempt",
+    "IntegrationConnection",
+    "IntegrationOperation",
+    "IntegrationWebhookChannel",
+    "IntegrationWebhookEvent",
     "JDInterpretationRevision",
     "JDReviewCorrection",
+    "GmailSourceCapture",
     "Membership",
     "OutboxEvent",
+    "OAuthAuthorizationState",
+    "ProviderResourceMapping",
     "Registration",
     "RegistrationEvent",
     "SourceArtifact",
@@ -119,4 +138,5 @@ __all__ = [
     "ReportExportGrant",
     "SessionAssignment",
     "SessionRevision",
+    "SheetImportPreview",
 ]

@@ -3,7 +3,7 @@
   "info": {
     "title": "PlacementOS API",
     "description": "Campus recruitment operations platform API.",
-    "version": "0.10.0"
+    "version": "0.11.0"
   },
   "paths": {
     "/health": {
@@ -4957,6 +4957,607 @@
           }
         }
       }
+    },
+    "/api/v1/integrations/google/authorization": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Begin Google Authorization",
+        "operationId": "begin_google_authorization_api_v1_integrations_google_authorization_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAuthorizationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleAuthorizationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/google/callback": {
+      "get": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Google Authorization Callback",
+        "operationId": "google_authorization_callback_api_v1_integrations_google_callback_get",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "title": "State"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Code"
+            }
+          }
+        ],
+        "responses": {
+          "307": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/connections": {
+      "get": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "List Connections",
+        "operationId": "list_connections_api_v1_integrations_connections_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationConnectionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Connections Api V1 Integrations Connections Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/connections/{connection_id}/disconnect": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Disconnect Google Connection",
+        "operationId": "disconnect_google_connection_api_v1_integrations_connections__connection_id__disconnect_post",
+        "parameters": [
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Connection Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/connections/{connection_id}/calendar-watches": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Create Calendar Watch",
+        "operationId": "create_calendar_watch_api_v1_integrations_connections__connection_id__calendar_watches_post",
+        "parameters": [
+          {
+            "name": "connection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Connection Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarWatchCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarChannelResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/drives/{drive_id}/gmail-source-captures": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Select Gmail Source",
+        "operationId": "select_gmail_source_api_v1_integrations_drives__drive_id__gmail_source_captures_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GmailCaptureCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GmailCaptureResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/sheets/import-previews": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Preview Sheet Import",
+        "operationId": "preview_sheet_import_api_v1_integrations_sheets_import_previews_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SheetImportPreviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SheetImportPreviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/sheets/import-previews/{preview_id}/commit": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Commit Sheet Import",
+        "operationId": "commit_sheet_import_api_v1_integrations_sheets_import_previews__preview_id__commit_post",
+        "parameters": [
+          {
+            "name": "preview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Preview Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SheetImportCommitResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/drives/{drive_id}/sheets/export-proposals": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Propose Sheet Export",
+        "operationId": "propose_sheet_export_api_v1_integrations_drives__drive_id__sheets_export_proposals_post",
+        "parameters": [
+          {
+            "name": "drive_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Drive Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SheetExportProposalCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/session-revisions/{revision_id}/calendar-proposals": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Propose Calendar Event",
+        "operationId": "propose_calendar_event_api_v1_integrations_session_revisions__revision_id__calendar_proposals_post",
+        "parameters": [
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Revision Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarProposalCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/proposals/{proposal_id}/decisions": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Decide Google Write",
+        "operationId": "decide_google_write_api_v1_integrations_proposals__proposal_id__decisions_post",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationDecisionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/IntegrationOperationResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Decide Google Write Api V1 Integrations Proposals  Proposal Id  Decisions Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/operations": {
+      "get": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "List Integration Operations",
+        "operationId": "list_integration_operations_api_v1_integrations_operations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntegrationOperationResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Integration Operations Api V1 Integrations Operations Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integrations/google/calendar/webhook": {
+      "post": {
+        "tags": [
+          "Google Workspace Integrations"
+        ],
+        "summary": "Google Calendar Webhook",
+        "operationId": "google_calendar_webhook_api_v1_integrations_google_calendar_webhook_post",
+        "parameters": [
+          {
+            "name": "X-Goog-Channel-ID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Goog-Channel-Id"
+            }
+          },
+          {
+            "name": "X-Goog-Channel-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Goog-Channel-Token"
+            }
+          },
+          {
+            "name": "X-Goog-Resource-ID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Goog-Resource-Id"
+            }
+          },
+          {
+            "name": "X-Goog-Resource-State",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Goog-Resource-State"
+            }
+          },
+          {
+            "name": "X-Goog-Message-Number",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Goog-Message-Number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5190,6 +5791,94 @@
           "csv_content"
         ],
         "title": "CSVPreviewRequest"
+      },
+      "CalendarChannelResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id"
+          },
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "channel_id",
+          "resource_id",
+          "status",
+          "expires_at"
+        ],
+        "title": "CalendarChannelResponse"
+      },
+      "CalendarProposalCreate": {
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Connection Id"
+          },
+          "calendar_id": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Calendar Id"
+          },
+          "send_updates": {
+            "type": "string",
+            "enum": [
+              "none",
+              "externalOnly",
+              "all"
+            ],
+            "title": "Send Updates",
+            "default": "none"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connection_id",
+          "calendar_id"
+        ],
+        "title": "CalendarProposalCreate"
+      },
+      "CalendarWatchCreate": {
+        "properties": {
+          "calendar_id": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Calendar Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "calendar_id"
+        ],
+        "title": "CalendarWatchCreate"
       },
       "CancellationCreate": {
         "properties": {
@@ -7360,6 +8049,158 @@
         ],
         "title": "GapAcknowledgementCreate"
       },
+      "GmailCaptureCreate": {
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Connection Id"
+          },
+          "message_id": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Message Id"
+          },
+          "attachment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attachment Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connection_id",
+          "message_id"
+        ],
+        "title": "GmailCaptureCreate"
+      },
+      "GmailCaptureResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "source_artifact_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Artifact Id"
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id"
+          },
+          "attachment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attachment Id"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "sender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender"
+          },
+          "content_hash": {
+            "type": "string",
+            "title": "Content Hash"
+          },
+          "extraction_job_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Extraction Job Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "source_artifact_id",
+          "message_id",
+          "attachment_id",
+          "subject",
+          "sender",
+          "content_hash",
+          "extraction_job_id"
+        ],
+        "title": "GmailCaptureResponse"
+      },
+      "GoogleAuthorizationCreate": {
+        "properties": {
+          "features": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "gmail_intake",
+                "sheets_import",
+                "sheets_export",
+                "calendar_events"
+              ]
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Features"
+          },
+          "redirect_after": {
+            "type": "string",
+            "title": "Redirect After",
+            "default": "/coordinator/integrations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "features"
+        ],
+        "title": "GoogleAuthorizationCreate"
+      },
+      "GoogleAuthorizationResponse": {
+        "properties": {
+          "authorization_url": {
+            "type": "string",
+            "title": "Authorization Url"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "authorization_url",
+          "expires_at"
+        ],
+        "title": "GoogleAuthorizationResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -7412,6 +8253,293 @@
         ],
         "title": "HealthResponse",
         "description": "Liveness probe response payload."
+      },
+      "IntegrationConnectionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "external_account_email": {
+            "type": "string",
+            "title": "External Account Email"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "granted_scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Granted Scopes"
+          },
+          "connection_revision": {
+            "type": "integer",
+            "title": "Connection Revision"
+          },
+          "access_token_expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Token Expires At"
+          },
+          "last_error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error Code"
+          },
+          "disconnected_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disconnected At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "provider",
+          "external_account_email",
+          "status",
+          "granted_scopes",
+          "connection_revision",
+          "access_token_expires_at",
+          "last_error_code",
+          "disconnected_at",
+          "created_at"
+        ],
+        "title": "IntegrationConnectionResponse"
+      },
+      "IntegrationDecisionCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "title": "Expected Revision"
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Expected Hash"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "revision_requested"
+            ],
+            "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_hash",
+          "decision"
+        ],
+        "title": "IntegrationDecisionCreate"
+      },
+      "IntegrationOperationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "proposal_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Proposal Id"
+          },
+          "operation_kind": {
+            "type": "string",
+            "title": "Operation Kind"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "provider_resource_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Resource Id"
+          },
+          "provider_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Version"
+          },
+          "last_error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error Code"
+          },
+          "last_error_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error Detail"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "proposal_id",
+          "operation_kind",
+          "status",
+          "attempt_count",
+          "provider_resource_id",
+          "provider_version",
+          "last_error_code",
+          "last_error_detail",
+          "created_at",
+          "completed_at"
+        ],
+        "title": "IntegrationOperationResponse"
+      },
+      "IntegrationProposalResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "action_type": {
+            "type": "string",
+            "title": "Action Type"
+          },
+          "target_type": {
+            "type": "string",
+            "title": "Target Type"
+          },
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "dependencies": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Dependencies"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "action_type",
+          "target_type",
+          "target_id",
+          "revision_number",
+          "state",
+          "canonical_hash",
+          "payload",
+          "dependencies"
+        ],
+        "title": "IntegrationProposalResponse"
       },
       "InterpretationCorrectionCreate": {
         "properties": {
@@ -9105,6 +10233,146 @@
           "assignments"
         ],
         "title": "SessionResponse"
+      },
+      "SheetExportProposalCreate": {
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Connection Id"
+          },
+          "report_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Report Id"
+          },
+          "spreadsheet_id": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Spreadsheet Id"
+          },
+          "target_range": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Target Range"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connection_id",
+          "report_id",
+          "spreadsheet_id",
+          "target_range"
+        ],
+        "title": "SheetExportProposalCreate"
+      },
+      "SheetImportCommitResponse": {
+        "properties": {
+          "preview_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Preview Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "result": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Result"
+          }
+        },
+        "type": "object",
+        "required": [
+          "preview_id",
+          "status",
+          "result"
+        ],
+        "title": "SheetImportCommitResponse"
+      },
+      "SheetImportPreviewCreate": {
+        "properties": {
+          "connection_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Connection Id"
+          },
+          "spreadsheet_id": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Spreadsheet Id"
+          },
+          "selected_range": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Selected Range"
+          },
+          "mapping": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Mapping"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connection_id",
+          "spreadsheet_id",
+          "selected_range"
+        ],
+        "title": "SheetImportPreviewCreate"
+      },
+      "SheetImportPreviewResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "spreadsheet_id": {
+            "type": "string",
+            "title": "Spreadsheet Id"
+          },
+          "selected_range": {
+            "type": "string",
+            "title": "Selected Range"
+          },
+          "source_fingerprint": {
+            "type": "string",
+            "title": "Source Fingerprint"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "report": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Report"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "spreadsheet_id",
+          "selected_range",
+          "source_fingerprint",
+          "status",
+          "expires_at",
+          "report"
+        ],
+        "title": "SheetImportPreviewResponse"
       },
       "SourceArtifactResponse": {
         "properties": {

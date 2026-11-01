@@ -1,6 +1,6 @@
 # PlacementOS: Architecture and Technical Reference
 
-> Status: implementation baseline, synchronized 2 November 2026. The evidenced local implementation extends through P10 and is synthetic-demo ready only. P11 live connectors, P12 advanced recovery, and P13 measured expansion remain target contracts.
+> Status: implementation baseline, synchronized 2 November 2026. The evidenced local implementation extends through the P11 controlled connector infrastructure and is synthetic-demo ready only. P11 live-account acceptance, P12 advanced recovery, and P13 measured expansion remain gated work.
 
 ## 1. Architectural intent
 
@@ -378,7 +378,7 @@ LangGraph checkpoint tables need their own protected adapter/access path because
 
 ### 9.2 Endpoint inventory
 
-This is the representative contract inventory. The implemented phase scope extends through P10, while some rows intentionally show P11/P12 extension contracts. Exact current paths are generated in `packages/api-client/openapi.json`; live connector and advanced recovery endpoints must not be presented as implemented until their phases pass.
+This is the representative contract inventory. The implemented local phase scope extends through the P11 connector infrastructure, while some rows intentionally show later P12 extension contracts. Exact current paths are generated in `packages/api-client/openapi.json`; live-account connector acceptance and advanced recovery must not be presented as complete until their gates pass.
 
 | Area | Representative endpoints | Important behavior |
 | --- | --- | --- |
@@ -740,6 +740,14 @@ Use explicit source selection/range, schema mapping, preview, content/version fi
 Store local-to-provider mappings and use stable provider-compatible event IDs where supported to help reconcile retries. Include notification options in the approved action: calendar insertion/update can send attendee emails. Approval of that exact calendar operation includes those disclosed invite effects; any separate PlacementOS email remains a separate communication proposal. [Google Calendar event creation](https://developers.google.com/workspace/calendar/api/guides/create-events).
 
 External event edits become discrepancies requiring reconciliation. Do not silently replace the internal approved schedule with whatever the external calendar currently contains. Connection revocation or scope change stales affected pending actions and creates an operational case.
+
+### 18.5 Implemented P11 connector boundary
+
+Release 0.11.0 adds capability-scoped OAuth connection lifecycle, AES-GCM token envelopes, explicit Gmail message/attachment capture, Sheets import preview/commit, frozen approved Sheets exports, approved Calendar event upserts, server-generated Calendar watch channels, durable operations, bounded retries, unknown-outcome handling, and provider-resource mappings. Provider writes run only from an immutable approved proposal and perform a final connection, reviewer, dependency, drive, and expiry check.
+
+The connector UI is `/coordinator/integrations`; the API is under `/api/v1/integrations`. Gmail never performs default mailbox enumeration. Sheets commits re-read and fingerprint the selected range and compare expected academic revisions. Calendar callback channel identifiers are signed before tenant scope is established; tokens and provider resource identifiers are then verified and messages deduplicated. External Calendar notifications mark mapped events for reconciliation but never mutate the approved internal schedule.
+
+The local deterministic acceptance suite uses fake provider boundaries and no external account. Live OAuth/provider acceptance remains blocked until the owner supplies an explicitly authorized isolated Google Workspace test account, OAuth client, encryption key, and HTTPS webhook endpoint. See `docs/p11-google-connectors-verification.md`.
 
 ## 19. Security and privacy controls
 

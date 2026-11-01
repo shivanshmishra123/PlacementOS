@@ -76,6 +76,12 @@ export default function RootLayout({
                     Operations
                   </Link>
                   <Link
+                    href="/coordinator/integrations"
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
+                  >
+                    Integrations
+                  </Link>
+                  <Link
                     href="/student/portal"
                     className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
                   >
@@ -104,7 +110,7 @@ export default function RootLayout({
 
               <div className="flex items-center gap-4">
                 <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  Phase 10 Hardened MVP
+                  Phase 11 Connectors
                 </span>
                 <PersonaSwitcher />
               </div>

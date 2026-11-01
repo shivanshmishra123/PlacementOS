@@ -13,6 +13,7 @@ celery_app = Celery(
         "placementos.workers.eligibility_tasks",
         "placementos.workers.dispatch_tasks",
         "placementos.workers.workflow_tasks",
+        "placementos.workers.integration_tasks",
     ],
 )
 
@@ -32,6 +33,10 @@ celery_app.conf.update(
         },
         "relay-workflow-commands": {
             "task": "placementos.workers.relay_workflow_commands",
+            "schedule": 5.0,
+        },
+        "relay-integration-operations": {
+            "task": "placementos.workers.relay_integration_operations",
             "schedule": 5.0,
         },
     },

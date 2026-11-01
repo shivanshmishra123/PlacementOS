@@ -57,6 +57,15 @@ import type {
   OutcomeRevisionResponse,
   PilotReadinessResponse,
   OperationalHealthResponse,
+  GoogleConnectorFeature,
+  GoogleAuthorizationResponse,
+  IntegrationConnectionResponse,
+  GmailCaptureResponse,
+  SheetImportPreviewResponse,
+  SheetImportCommitResponse,
+  IntegrationProposalResponse,
+  IntegrationOperationResponse,
+  CalendarChannelResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -925,6 +934,135 @@ export class PlacementOSClient {
 
   public async getOperationalHealth(): Promise<OperationalHealthResponse> {
     return this.request<OperationalHealthResponse>("/api/v1/operations/health");
+  }
+
+  // ==========================================
+  // Controlled Google Workspace Connectors (Phase 11)
+  // ==========================================
+
+  public async beginGoogleAuthorization(
+    features: GoogleConnectorFeature[]
+  ): Promise<GoogleAuthorizationResponse> {
+    return this.request<GoogleAuthorizationResponse>("/api/v1/integrations/google/authorization", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ features, redirect_after: "/coordinator/integrations" }),
+    });
+  }
+
+  public async listIntegrationConnections(): Promise<IntegrationConnectionResponse[]> {
+    return this.request<IntegrationConnectionResponse[]>("/api/v1/integrations/connections");
+  }
+
+  public async disconnectIntegrationConnection(connectionId: string): Promise<void> {
+    await this.request(`/api/v1/integrations/connections/${connectionId}/disconnect`, {
+      method: "POST",
+    });
+  }
+
+  public async registerCalendarWatch(
+    connectionId: string,
+    calendarId: string
+  ): Promise<CalendarChannelResponse> {
+    return this.request<CalendarChannelResponse>(
+      `/api/v1/integrations/connections/${connectionId}/calendar-watches`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ calendar_id: calendarId }),
+      }
+    );
+  }
+
+  public async captureGmailSource(
+    driveId: string,
+    request: { connection_id: string; message_id: string; attachment_id?: string }
+  ): Promise<GmailCaptureResponse> {
+    return this.request<GmailCaptureResponse>(
+      `/api/v1/integrations/drives/${driveId}/gmail-source-captures`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  public async previewSheetImport(request: {
+    connection_id: string;
+    spreadsheet_id: string;
+    selected_range: string;
+    mapping?: Record<string, string>;
+  }): Promise<SheetImportPreviewResponse> {
+    return this.request<SheetImportPreviewResponse>("/api/v1/integrations/sheets/import-previews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+  }
+
+  public async commitSheetImport(previewId: string): Promise<SheetImportCommitResponse> {
+    return this.request<SheetImportCommitResponse>(
+      `/api/v1/integrations/sheets/import-previews/${previewId}/commit`,
+      { method: "POST" }
+    );
+  }
+
+  public async proposeSheetExport(
+    driveId: string,
+    request: {
+      connection_id: string;
+      report_id: string;
+      spreadsheet_id: string;
+      target_range: string;
+    }
+  ): Promise<IntegrationProposalResponse> {
+    return this.request<IntegrationProposalResponse>(
+      `/api/v1/integrations/drives/${driveId}/sheets/export-proposals`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  public async proposeCalendarEvent(
+    revisionId: string,
+    request: { connection_id: string; calendar_id: string; send_updates: "none" | "externalOnly" | "all" }
+  ): Promise<IntegrationProposalResponse> {
+    return this.request<IntegrationProposalResponse>(
+      `/api/v1/integrations/session-revisions/${revisionId}/calendar-proposals`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  public async decideIntegrationProposal(
+    proposal: IntegrationProposalResponse,
+    decision: "approved" | "rejected" | "revision_requested",
+    comment?: string
+  ): Promise<IntegrationOperationResponse | null> {
+    return this.request<IntegrationOperationResponse | null>(
+      `/api/v1/integrations/proposals/${proposal.id}/decisions`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          expected_revision: proposal.revision_number,
+          expected_hash: proposal.canonical_hash,
+          decision,
+          comment,
+        }),
+      }
+    );
+  }
+
+  public async listIntegrationOperations(): Promise<IntegrationOperationResponse[]> {
+    return this.request<IntegrationOperationResponse[]>("/api/v1/integrations/operations");
   }
 }
 
