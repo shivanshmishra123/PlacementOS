@@ -1,0 +1,136 @@
+name: placementos-pilot
+
+x-backend: &backend
+  image: placementos-api:${PLACEMENTOS_IMAGE_TAG:-0.10.0}
+  build:
+    context: .
+    dockerfile: infra/docker/api.Dockerfile
+  env_file:
+    - ${PLACEMENTOS_PILOT_ENV_FILE:-.env.pilot}
+  restart: unless-stopped
+  networks:
+    - private
+    - egress
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: placementos
+      POSTGRES_PASSWORD: ${PLACEMENTOS_POSTGRES_ADMIN_PASSWORD:?set in the deployment secret store}
+      POSTGRES_DB: placementos
+      PLACEMENTOS_APP_DB_PASSWORD: ${PLACEMENTOS_APP_DB_PASSWORD:?set in the deployment secret store}
+      PLACEMENTOS_WORKFLOW_DB_PASSWORD: ${PLACEMENTOS_WORKFLOW_DB_PASSWORD:?set in the deployment secret store}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/pilot-init.sh:/docker-entrypoint-initdb.d/01-placementos-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U placementos -d placementos"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    networks:
+      - private
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${PLACEMENTOS_REDIS_PASSWORD:?set in the deployment secret store}"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$PLACEMENTOS_REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    environment:
+      PLACEMENTOS_REDIS_PASSWORD: ${PLACEMENTOS_REDIS_PASSWORD:?set in the deployment secret store}
+    restart: unless-stopped
+    networks:
+      - private
+
+  migrate:
+    <<: *backend
+    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  checkpoints:
+    <<: *backend
+    command: ["python", "scripts/setup_workflow_checkpoints.py"]
+    restart: "no"
+    volumes:
+      - ./scripts:/app/scripts:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  api:
+    <<: *backend
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      checkpoints:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  worker:
+    <<: *backend
+    command: ["celery", "-A", "placementos.workers.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      checkpoints:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  beat:
+    <<: *backend
+    command: ["celery", "-A", "placementos.workers.celery_app", "beat", "--loglevel=INFO"]
+    depends_on:
+      worker:
+        condition: service_started
+
+  web:
+    image: placementos-web:${PLACEMENTOS_IMAGE_TAG:-0.10.0}
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+    networks:
+      - private
+
+  gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./infra/nginx/placementos.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - private
+
+networks:
+  private:
+    internal: true
+  egress:
+
+volumes:
+  postgres_data:
+  redis_data:

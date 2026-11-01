@@ -2,8 +2,11 @@
 
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+OIDC_ADAPTER_IMPLEMENTED = False
+CLAMAV_ADAPTER_IMPLEMENTED = False
 
 
 class Settings(BaseSettings):
@@ -20,6 +23,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
+    RELEASE_VERSION: str = "0.10.0"
 
     # Security
     SECRET_KEY: str = Field(
@@ -28,6 +32,10 @@ class Settings(BaseSettings):
     )
     SESSION_COOKIE_NAME: str = "placementos_session"
     SESSION_MAX_AGE_SECONDS: int = 86400  # 24 hours
+    IDENTITY_MODE: Literal["development_personas", "oidc"] = "development_personas"
+    OIDC_ISSUER_URL: str = ""
+    OIDC_CLIENT_ID: str = ""
+    OIDC_MEMBERSHIP_OWNER: str = ""
 
     # Database
     DATABASE_URL: str = Field(
@@ -61,6 +69,15 @@ class Settings(BaseSettings):
     S3_SECURE: bool = False
     MALWARE_SCANNER_MODE: Literal["development_fixture", "clamav"] = "development_fixture"
     MODEL_INTERPRETER_MODE: Literal["fixture", "disabled"] = "fixture"
+    MODEL_PROVIDER_NAME: str = ""
+    MODEL_ID: str = ""
+    MODEL_DATA_REGION: str = ""
+    MODEL_POLICY_REVIEWED: bool = False
+    MODEL_MAX_CALLS_PER_DRIVE: int = 10
+    MODEL_MAX_INPUT_TOKENS_PER_DRIVE: int = 100_000
+    MAX_UPLOAD_BYTES: int = 15 * 1024 * 1024
+    MAX_PDF_PAGES: int = 50
+    MAX_EXTRACTED_TEXT_CHARS: int = 2_000_000
 
     # Email Transport (Mailpit local sink in dev)
     SMTP_HOST: str = "127.0.0.1"
@@ -72,7 +89,25 @@ class Settings(BaseSettings):
     EMAIL_ADAPTER_MODE: Literal["mailpit", "smtp", "disabled"] = "mailpit"
     EMAIL_RECIPIENT_ALLOWLIST_DOMAINS: list[str] = ["apex.edu", "beacon.edu"]
     EMAIL_SEND_TIMEOUT_SECONDS: int = 10
+    LIVE_SEND_ENABLED: bool = False
+    PRODUCTION_SENDER_VERIFIED: bool = False
     PUBLIC_WEB_URL: str = "http://localhost:3000"
+
+    # Institution-owned pilot configuration. Empty values deliberately block real-data readiness.
+    INSTITUTION_TIMEZONE_CONFIRMED: bool = False
+    ACADEMIC_CONFIGURATION_REVIEWED: bool = False
+    PERMISSIONS_MATRIX_REVIEWED: bool = False
+    RETENTION_POLICY_ID: str = ""
+    RECORD_RETENTION_DAYS: int | None = None
+    BACKUP_RETENTION_DAYS: int | None = None
+    DELETION_OWNER: str = ""
+    DEPLOYMENT_REGION: str = ""
+    OPERATIONS_OWNER: str = ""
+    SECURITY_OWNER: str = ""
+    BACKUP_OWNER: str = ""
+    INCIDENT_CONTACT: str = ""
+    BACKUP_ENCRYPTION_KEY_ID: str = ""
+    BACKUP_RESTORE_TESTED: bool = False
 
     # CORS & Web
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
@@ -124,6 +159,85 @@ class Settings(BaseSettings):
         if environment == "production" and "_dev_password" in v:
             raise ValueError("Production requires a separately provisioned workflow database role")
         return v
+
+    @model_validator(mode="after")
+    def production_must_not_masquerade_as_ready(self) -> "Settings":
+        """Fail startup when production selects unsafe development identities or effects."""
+        if self.ENVIRONMENT != "production":
+            return self
+        errors: list[str] = []
+        if self.DEBUG:
+            errors.append("DEBUG must be disabled")
+        if (
+            self.SECRET_KEY.startswith("dev_")
+            or "placementos" in self.SECRET_KEY.lower()
+            or "replace" in self.SECRET_KEY.lower()
+        ):
+            errors.append("SECRET_KEY must be externally generated")
+        if (
+            self.IDENTITY_MODE != "oidc"
+            or not self.OIDC_ISSUER_URL.startswith("https://")
+            or not self.OIDC_CLIENT_ID
+        ):
+            errors.append("OIDC identity configuration is required")
+        if not self.OIDC_MEMBERSHIP_OWNER:
+            errors.append("OIDC membership ownership is required")
+        if self.MALWARE_SCANNER_MODE != "clamav":
+            errors.append("a real malware scanner is required")
+        if not OIDC_ADAPTER_IMPLEMENTED:
+            errors.append("the production OIDC adapter is not implemented")
+        if not CLAMAV_ADAPTER_IMPLEMENTED:
+            errors.append("the production ClamAV adapter is not implemented")
+        if "_dev_password" in self.DATABASE_URL or "_dev_password" in self.MIGRATION_DATABASE_URL:
+            errors.append("production database roles must use externally provisioned credentials")
+        if (
+            not self.S3_ENDPOINT_URL.startswith("https://")
+            or self.S3_ACCESS_KEY_ID.startswith("dev_")
+            or self.S3_BUCKET_NAME == "placementos-dev"
+        ):
+            errors.append("private production object storage is required")
+        if self.EMAIL_ADAPTER_MODE == "smtp" and (
+            not self.LIVE_SEND_ENABLED or not self.PRODUCTION_SENDER_VERIFIED
+        ):
+            errors.append("live SMTP requires an explicitly verified sender and enable flag")
+        if not self.RETENTION_POLICY_ID or not self.RECORD_RETENTION_DAYS or not self.DELETION_OWNER:
+            errors.append("an institution retention policy is required")
+        if not self.BACKUP_RETENTION_DAYS or not self.BACKUP_ENCRYPTION_KEY_ID:
+            errors.append("encrypted backup retention is required")
+        if not self.DEPLOYMENT_REGION:
+            errors.append("deployment region is required")
+        if not all(
+            [self.OPERATIONS_OWNER, self.SECURITY_OWNER, self.BACKUP_OWNER, self.INCIDENT_CONTACT]
+        ):
+            errors.append("named operational, security, backup, and incident owners are required")
+        pilot_strings = [
+            self.OIDC_ISSUER_URL,
+            self.OIDC_CLIENT_ID,
+            self.OIDC_MEMBERSHIP_OWNER,
+            self.DATABASE_URL,
+            self.MIGRATION_DATABASE_URL,
+            self.WORKFLOW_DATABASE_URL,
+            self.S3_ENDPOINT_URL,
+            self.S3_ACCESS_KEY_ID,
+            self.S3_SECRET_ACCESS_KEY,
+            self.S3_BUCKET_NAME,
+            self.PUBLIC_WEB_URL,
+            self.RETENTION_POLICY_ID,
+            self.DELETION_OWNER,
+            self.DEPLOYMENT_REGION,
+            self.OPERATIONS_OWNER,
+            self.SECURITY_OWNER,
+            self.BACKUP_OWNER,
+            self.INCIDENT_CONTACT,
+            self.BACKUP_ENCRYPTION_KEY_ID,
+        ]
+        if any("replace" in value.lower() or "example." in value.lower() for value in pilot_strings):
+            errors.append("placeholder pilot values must be replaced")
+        if any(not origin.startswith("https://") for origin in self.ALLOWED_ORIGINS):
+            errors.append("production browser origins must use HTTPS")
+        if errors:
+            raise ValueError("Unsafe production configuration: " + "; ".join(errors))
+        return self
 
 
 # Cached global settings instance

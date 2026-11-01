@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import Link from "next/link";
 import { AuthProvider } from "../context/AuthContext";
 import { PersonaSwitcher } from "../components/PersonaSwitcher";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "PlacementOS | Campus Recruitment Operations Platform",
@@ -21,7 +18,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} min-h-full flex flex-col antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100`}>
+      <body className="min-h-full flex flex-col font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-slate-900 focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <AuthProvider>
           <header className="sticky top-0 z-50 glass-panel border-b border-slate-200 dark:border-slate-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -35,7 +38,7 @@ export default function RootLayout({
                   </span>
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-5 text-sm font-medium">
+                <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-5 text-sm font-medium">
                   <Link
                     href="/"
                     className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition"
@@ -67,6 +70,12 @@ export default function RootLayout({
                     Exceptions
                   </Link>
                   <Link
+                    href="/coordinator/operations"
+                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
+                  >
+                    Operations
+                  </Link>
+                  <Link
                     href="/student/portal"
                     className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
                   >
@@ -95,14 +104,14 @@ export default function RootLayout({
 
               <div className="flex items-center gap-4">
                 <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  Phase 9 Complete Lifecycle
+                  Phase 10 Hardened MVP
                 </span>
                 <PersonaSwitcher />
               </div>
             </div>
           </header>
 
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </main>
 

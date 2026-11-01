@@ -1,0 +1,23 @@
+{
+  "checked_at": "2026-11-01T01:30:00Z",
+  "compose_configuration_valid": true,
+  "api_image": {
+    "id": "sha256:29138da8286b6b3a2196abc46c730489905a77e88b74f864aee3872a5bfa13d3",
+    "non_root_user": "placementos",
+    "size_bytes": 117382512,
+    "smoke_health": true,
+    "smoke_readiness": true,
+    "tag": "placementos-api:0.10.0"
+  },
+  "web_image": {
+    "id": "sha256:5835542e7dac169cdf81c27a914c654efcc73c4d2f269976ddb2497a56cea4fc",
+    "non_root_user": "placementos",
+    "size_bytes": 75224306,
+    "smoke_http_200": true,
+    "tag": "placementos-web:0.10.0"
+  },
+  "migration_image_head": "p09_complete_lifecycle",
+  "isolated_empty_database_upgrade": true,
+  "isolated_downgrade_upgrade_cycle": true,
+  "passed": true
+}

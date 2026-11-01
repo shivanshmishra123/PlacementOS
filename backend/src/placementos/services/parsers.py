@@ -116,10 +116,10 @@ class ExtractionResult:
 class DocumentScanner:
     """Pre-scan validation for file limits, magic headers, and compression safety."""
 
-    MAX_FILE_BYTES = 15 * 1024 * 1024  # 15 MB
+    MAX_FILE_BYTES = settings.MAX_UPLOAD_BYTES
     MAX_UNCOMPRESSED_BYTES = 30 * 1024 * 1024  # 30 MB
     MAX_COMPRESSION_RATIO = 25.0
-    MAX_PDF_PAGES = 50
+    MAX_PDF_PAGES = settings.MAX_PDF_PAGES
     MAX_DOCX_PARAGRAPHS = 5000
 
     @classmethod
@@ -262,6 +262,11 @@ class TextExtractor:
                     total_chars = p_end + 2  # newline separation
 
         joined_text = "\n\n".join(full_text_chunks)
+        if len(joined_text) > settings.MAX_EXTRACTED_TEXT_CHARS:
+            raise OversizedFileError(
+                "Extracted text exceeds the configured character limit of "
+                f"{settings.MAX_EXTRACTED_TEXT_CHARS}"
+            )
         is_empty_or_scanned = total_meaningful_chars < 20
 
         return ExtractionResult(
@@ -308,6 +313,11 @@ class TextExtractor:
             total_chars = end + 2
 
         joined_text = "\n\n".join(full_text_chunks)
+        if len(joined_text) > settings.MAX_EXTRACTED_TEXT_CHARS:
+            raise OversizedFileError(
+                "Extracted text exceeds the configured character limit of "
+                f"{settings.MAX_EXTRACTED_TEXT_CHARS}"
+            )
         is_empty = len(joined_text.strip()) == 0
 
         return ExtractionResult(
@@ -354,6 +364,11 @@ class TextExtractor:
             total_chars = end + 2
 
         joined = "\n\n".join(full_text_chunks)
+        if len(joined) > settings.MAX_EXTRACTED_TEXT_CHARS:
+            raise OversizedFileError(
+                "Extracted text exceeds the configured character limit of "
+                f"{settings.MAX_EXTRACTED_TEXT_CHARS}"
+            )
         return ExtractionResult(
             extracted_text=joined,
             locators=locators,

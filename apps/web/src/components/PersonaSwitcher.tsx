@@ -32,6 +32,8 @@ export function PersonaSwitcher() {
               className="ml-1 p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition text-slate-500"
               title="Switch Persona"
               aria-label="Switch Persona"
+              aria-expanded={isOpen}
+              aria-controls="persona-menu"
             >
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
@@ -51,6 +53,8 @@ export function PersonaSwitcher() {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium shadow-sm transition"
+          aria-expanded={isOpen}
+          aria-controls="persona-menu"
         >
           <UserCheck className="w-3.5 h-3.5" />
           Select Dev Persona
@@ -59,7 +63,7 @@ export function PersonaSwitcher() {
       )}
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 rounded-2xl glass-panel shadow-2xl border border-slate-200 dark:border-slate-700 p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+        <div id="persona-menu" role="menu" className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl glass-panel shadow-2xl border border-slate-200 dark:border-slate-700 p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
           <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 mb-1">
             <div className="text-xs font-semibold text-slate-900 dark:text-white">
               Switch Development Persona
@@ -80,6 +84,7 @@ export function PersonaSwitcher() {
                     setIsOpen(false);
                   }}
                   disabled={loading}
+                  role="menuitem"
                   className={`w-full text-left p-2.5 rounded-xl text-xs transition flex items-start gap-2.5 ${
                     isCurrent
                       ? "bg-brand-50 dark:bg-brand-950/60 border border-brand-200 dark:border-brand-800"

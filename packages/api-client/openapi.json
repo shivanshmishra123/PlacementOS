@@ -3,7 +3,7 @@
   "info": {
     "title": "PlacementOS API",
     "description": "Campus recruitment operations platform API.",
-    "version": "0.1.0"
+    "version": "0.10.0"
   },
   "paths": {
     "/health": {
@@ -4911,6 +4911,52 @@
           }
         }
       }
+    },
+    "/api/v1/operations/pilot-readiness": {
+      "get": {
+        "tags": [
+          "Operations & pilot readiness"
+        ],
+        "summary": "Get Pilot Readiness",
+        "operationId": "get_pilot_readiness_api_v1_operations_pilot_readiness_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Pilot Readiness Api V1 Operations Pilot Readiness Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/operations/health": {
+      "get": {
+        "tags": [
+          "Operations & pilot readiness"
+        ],
+        "summary": "Get Operational Health",
+        "operationId": "get_operational_health_api_v1_operations_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Operational Health Api V1 Operations Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7526,6 +7572,11 @@
             "type": "array",
             "title": "Validation Findings"
           },
+          "usage_metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Usage Metadata"
+          },
           "clarifications": {
             "items": {
               "$ref": "#/components/schemas/ClarificationResponse"
@@ -7554,6 +7605,7 @@
           "reviewed_facts",
           "evidence",
           "validation_findings",
+          "usage_metadata",
           "clarifications",
           "created_at"
         ],

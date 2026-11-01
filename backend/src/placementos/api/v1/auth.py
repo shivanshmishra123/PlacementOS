@@ -78,6 +78,7 @@ SYNTHETIC_PERSONAS: dict[str, dict] = {
             "drive:close",
             "drive:reopen",
             "drive:cancel",
+            "ops:view",
             "student:read",
             "student:import",
             "eligibility:run",
@@ -91,7 +92,7 @@ SYNTHETIC_PERSONAS: dict[str, dict] = {
         "institution_slug": "apex-tech",
         "institution_name": "Apex Institute of Technology",
         "institution_domain": "apex.edu",
-        "capabilities": ["member:manage", "config:manage", "audit:view"],
+        "capabilities": ["member:manage", "config:manage", "audit:view", "ops:view"],
         "description": "Apex Institution Administrator",
     },
     "coord_beacon": {

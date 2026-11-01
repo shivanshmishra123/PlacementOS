@@ -48,6 +48,8 @@ async def test_review_clarify_compile_and_approve_exact_policy(client: AsyncClie
     )
     assert interpretation_response.status_code == 201
     interpretation = interpretation_response.json()
+    assert interpretation["usage_metadata"]["calls"] == 1
+    assert interpretation["usage_metadata"]["provider"] == "fixture"
     assert interpretation["reviewed_facts"]["eligibility_draft"]["minimum_cgpa"] == "7.50"
     assert interpretation["reviewed_facts"]["eligibility_draft"]["graduation_years"] == [2027]
     assert interpretation["clarifications"][0]["reason_code"] == "DEADLINE_TIMEZONE_MISSING"

@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "backend" / "src
 
 from placementos.main import app
 
+
 def check_drift() -> int:
     contract_path = Path(__file__).parent.parent / "packages" / "api-client" / "openapi.json"
     if not contract_path.exists():
@@ -25,6 +26,7 @@ def check_drift() -> int:
     else:
         print("Contract drift detected! OpenAPI schema has changed. Run export_openapi.py to update.")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(check_drift())

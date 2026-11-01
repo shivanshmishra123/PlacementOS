@@ -770,6 +770,12 @@ Provide liveness separately from readiness. A model outage should degrade interp
 
 Initial runbooks must cover stuck outbox/jobs, unknown email outcome, revoked integration, stale approval, workflow resume failure, parser/scanner failure, policy rollback via new revision, backup restoration, and drive cancellation. Alert on growing outbox age, repeated failures, uncertain sends, and scanner unavailability before a deadline.
 
+### 20.1 Implemented P10 operational baseline
+
+Release 0.10.0 exposes authenticated, capability-scoped aggregate projections at `/api/v1/operations/health` and `/api/v1/operations/pilot-readiness`. The former reports institutional outbox/dispatch/job/workflow/approval/case counts and threshold alerts without content or recipient fields. The latter evaluates configuration without returning secret values and distinguishes `synthetic_demo_only` from `real_data_ready`.
+
+Access events use an allowlisted structured payload: correlation ID, method, route path without query text, status, duration, and scoped actor/institution identifiers. Private routes add no-store and browser hardening headers. `/health` is process liveness; `/ready` checks PostgreSQL and Redis. Operator procedures live under `docs/runbooks/`.
+
 ## 21. Local and deployment topology
 
 ### 21.1 Development

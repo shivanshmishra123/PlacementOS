@@ -39,7 +39,7 @@ uv run --project backend python scripts/setup_workflow_checkpoints.py
 pnpm dev
 
 # 8. Start the FastAPI backend server (http://localhost:8000)
-uv run --project backend uvicorn placementos.main:app --reload --port 8000
+uv run --project backend python scripts/run_api.py
 
 # 9. Start the Celery worker from Linux or WSL
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
@@ -53,7 +53,7 @@ uv run --project backend celery -A placementos.workers.celery_app beat --logleve
 
 Mailpit is available at `http://127.0.0.1:8025`. SMTP acceptance is shown as provider acceptance, not confirmed inbox delivery. The default recipient-domain allowlist is configured with `PLACEMENTOS_EMAIL_RECIPIENT_ALLOWLIST_DOMAINS`.
 
-On Windows, run step 8 inside WSL or a Linux worker container. Native Windows Celery pools are not a supported PlacementOS runtime. The web/API commands may run in PowerShell while the shared infrastructure remains in Docker Desktop.
+Native Windows Celery pools are not a supported PlacementOS runtime; run worker and beat in WSL or Linux containers. The web and API may run in PowerShell. `scripts/run_api.py` selects the Windows event loop required by async psycopg; the ordinary Uvicorn CLI may otherwise select an incompatible Proactor loop.
 
 All backend environment variables use the `PLACEMENTOS_` prefix. `PLACEMENTOS_DATABASE_URL` is the restricted runtime role; only Alembic and administrative migration checks use `PLACEMENTOS_MIGRATION_DATABASE_URL`. `PLACEMENTOS_WORKFLOW_DATABASE_URL` uses a separate restricted role whose search path is the private `workflow_checkpoints` schema. Run the checkpoint setup command after every P08 migration upgrade and never grant browser/API callers direct access to that role or its opaque thread IDs. The local `development_fixture` scanner and `fixture` interpreter are visibly synthetic and configuration validation rejects them in production.
 
@@ -77,11 +77,32 @@ uv run --project backend python scripts/check_contracts_drift.py
 
 # P08 checkpoint package setup is idempotent
 uv run --project backend python scripts/setup_workflow_checkpoints.py
+
+# P10 synthetic-release evidence (requires the local API/web/services where noted)
+uv run --project backend python scripts/release_smoke.py
+uv run --project backend python scripts/benchmark_pilot_envelope.py
+uv run --project backend python scripts/backup_restore_drill.py
+uv run --project backend python scripts/scan_release_secrets.py
+node scripts/accessibility_audit.mjs
 ```
+
+`uv run --project backend python scripts/pilot_preflight.py` deliberately exits nonzero in the default development environment. That is the expected result: development personas, fixture scanning/interpretation, Mailpit, and local object storage are synthetic-only.
+
+## 4. Pilot artifact validation
+
+`.env.pilot.example` is a non-runnable template; production validation rejects every `replace-*`/example value. An institution-approved secret/configuration service must provide `.env.pilot`, the Compose-level database/Redis bootstrap secrets, OIDC ownership, academic/permission decisions, provider choices, retention, region, and named operational owners.
+
+```text
+docker build -f infra/docker/api.Dockerfile -t placementos-api:0.10.0 .
+docker build -f infra/docker/web.Dockerfile -t placementos-web:0.10.0 .
+docker compose -f compose.pilot.yaml config --quiet
+```
+
+Follow `docs/runbooks/release-and-rollback.md`; never use the pilot template as authorization to deploy, connect accounts, load real student data, or enable live sending.
 
 ---
 
-## 4. Local Service Ports
+## 5. Local Service Ports
 
 | Service | Host Port | Internal Port | Web Console / UI |
 | :--- | :--- | :--- | :--- |

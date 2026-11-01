@@ -199,6 +199,12 @@ export default function DriveReviewPage() {
             <article className="rounded-xl border bg-white p-5 shadow-sm">
               <h2 className="text-xl font-semibold">2. Reviewed facts</h2>
               <p className="text-sm text-slate-500">Revision {current.revision_number} · {current.adapter_id} · {current.status}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Usage: {String(current.usage_metadata.calls ?? 0)} call(s), {String(current.usage_metadata.repair_attempts ?? 0)} repair(s)
+                {current.usage_metadata.input_characters !== undefined
+                  ? `, ${String(current.usage_metadata.input_characters)} input characters`
+                  : ""}
+              </p>
               <pre className="mt-3 max-h-[34rem] overflow-auto rounded bg-slate-950 p-4 text-xs text-slate-100">{JSON.stringify(current.reviewed_facts, null, 2)}</pre>
             </article>
             <article className="rounded-xl border bg-white p-5 shadow-sm">

@@ -1,0 +1,33 @@
+{
+  "checkpoint_tables_included_in_database_dump": true,
+  "database_counts_match": true,
+  "drill_completed_at": "2026-11-01T01:00:34.743402+00:00",
+  "drill_started_at": "2026-11-01T00:59:45.556033+00:00",
+  "duration_seconds": 49.187,
+  "object_count": 389,
+  "object_hashes_match": true,
+  "passed": true,
+  "pending_work_reconciliation_required_before_promotion": true,
+  "restored_counts": {
+    "action_proposals": 495,
+    "audit_logs": 4175,
+    "dispatch_operations": 87,
+    "drives": 382,
+    "institutions": 2,
+    "student_profiles": 557,
+    "workflow_runs": 30
+  },
+  "rpo_objective_hours": 24,
+  "rto_objective_hours": 8,
+  "rto_observed_hours": 0.013663,
+  "source_counts": {
+    "action_proposals": 495,
+    "audit_logs": 4175,
+    "dispatch_operations": 87,
+    "drives": 382,
+    "institutions": 2,
+    "student_profiles": 557,
+    "workflow_runs": 30
+  },
+  "tombstone_reapplied": true
+}

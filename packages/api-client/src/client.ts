@@ -55,6 +55,8 @@ import type {
   DriveReportResponse,
   StudentScheduleResult,
   OutcomeRevisionResponse,
+  PilotReadinessResponse,
+  OperationalHealthResponse,
 } from "./types";
 
 export class ApiError extends Error {
@@ -911,6 +913,18 @@ export class PlacementOSClient {
 
   public async listMyScheduleResults(): Promise<StudentScheduleResult[]> {
     return this.request<StudentScheduleResult[]>("/api/v1/student/schedule-results");
+  }
+
+  // ==========================================
+  // Operations & Pilot Readiness (Phase 10)
+  // ==========================================
+
+  public async getPilotReadiness(): Promise<PilotReadinessResponse> {
+    return this.request<PilotReadinessResponse>("/api/v1/operations/pilot-readiness");
+  }
+
+  public async getOperationalHealth(): Promise<OperationalHealthResponse> {
+    return this.request<OperationalHealthResponse>("/api/v1/operations/health");
   }
 }
 

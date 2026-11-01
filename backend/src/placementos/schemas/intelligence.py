@@ -59,6 +59,7 @@ class InterpretationResponse(BaseModel):
     reviewed_facts: dict[str, Any]
     evidence: list[dict[str, Any]]
     validation_findings: list[dict[str, Any]]
+    usage_metadata: dict[str, Any]
     clarifications: list[ClarificationResponse]
     created_at: datetime
 

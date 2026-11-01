@@ -283,6 +283,7 @@ export interface InterpretationResponse {
   reviewed_facts: Record<string, unknown>;
   evidence: Record<string, unknown>[];
   validation_findings: Record<string, unknown>[];
+  usage_metadata: Record<string, unknown>;
   clarifications: ClarificationResponse[];
   created_at: string;
 }
@@ -808,4 +809,46 @@ export interface StudentScheduleResult {
   venue: string | null;
   meeting_url: string | null;
   outcome: { outcome: string; revision_number: number; offer_status: string; acceptance_status: string; joining_status: string } | null;
+}
+
+// ==========================================
+// Phase 10: Operations & Pilot Readiness
+// ==========================================
+
+export interface PilotReadinessCheck {
+  key: string;
+  ready: boolean;
+  classification:
+    | "configured"
+    | "implementation_required"
+    | "institution_configuration_required";
+}
+
+export interface PilotReadinessResponse {
+  release_version: string;
+  environment: string;
+  synthetic_demo_ready: boolean;
+  real_data_pilot_ready: boolean;
+  status: "real_data_ready" | "synthetic_demo_only";
+  checks: PilotReadinessCheck[];
+  blockers: string[];
+  development_adapters: Record<string, boolean>;
+}
+
+export interface OperationalAlert {
+  code: string;
+  severity: "warning" | "critical";
+  count?: number;
+  age_seconds?: number;
+}
+
+export interface OperationalHealthResponse {
+  generated_at: string;
+  outbox: { counts: Record<string, number>; oldest_age_seconds: number | null };
+  dispatch: { counts: Record<string, number> };
+  jobs: { counts: Record<string, number> };
+  workflows: { counts: Record<string, number>; pending_commands: number };
+  approvals: { pending: number };
+  exception_cases: { open_or_acknowledged: number };
+  alerts: OperationalAlert[];
 }

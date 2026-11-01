@@ -9,6 +9,7 @@ from placementos.api.v1.eligibility import router as eligibility_router
 from placementos.api.v1.health import router as health_router
 from placementos.api.v1.intelligence import router as intelligence_router
 from placementos.api.v1.lifecycle import router as lifecycle_router
+from placementos.api.v1.operations import router as operations_router
 from placementos.api.v1.participation import router as participation_router
 from placementos.api.v1.sources import router as sources_router
 from placementos.api.v1.students import router as students_router
@@ -38,3 +39,5 @@ api_v1_router.include_router(communications_router)
 api_v1_router.include_router(workflows_router)
 # Mount P09 scheduling, results, reports, and lifecycle completion routes
 api_v1_router.include_router(lifecycle_router)
+# Mount P10 privacy-safe operations and pilot readiness projections
+api_v1_router.include_router(operations_router)

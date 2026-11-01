@@ -95,6 +95,7 @@ async def _interpretation_response(
         reviewed_facts=item.reviewed_facts,
         evidence=item.evidence,
         validation_findings=item.validation_findings,
+        usage_metadata=item.usage_metadata,
         clarifications=[_clarification_response(task) for task in clarifications],
         created_at=item.created_at,
     )

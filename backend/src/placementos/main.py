@@ -13,7 +13,11 @@ from placementos.core.errors import (
     app_exception_handler,
     unhandled_exception_handler,
 )
-from placementos.core.security import BrowserWriteProtectionMiddleware, CorrelationIdMiddleware
+from placementos.core.security import (
+    BrowserWriteProtectionMiddleware,
+    CorrelationIdMiddleware,
+    SecurityHeadersMiddleware,
+)
 
 
 @asynccontextmanager
@@ -29,7 +33,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="PlacementOS API",
         description="Campus recruitment operations platform API.",
-        version="0.1.0",
+        version=settings.RELEASE_VERSION,
         openapi_url="/api/v1/openapi.json",
         docs_url="/docs",
         redoc_url="/redoc",
@@ -38,6 +42,7 @@ def create_app() -> FastAPI:
 
     # 1. Register Core Security & Observability Middlewares
     app.add_middleware(CorrelationIdMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(BrowserWriteProtectionMiddleware)
     app.add_middleware(
         CORSMiddleware,

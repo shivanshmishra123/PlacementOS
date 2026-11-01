@@ -1,0 +1,59 @@
+{
+  "api": {
+    "endpoint": "/api/v1/drives?limit=20",
+    "logical_sessions": 100,
+    "observed_drive_count": 382,
+    "ordinary_latency_ms": {
+      "max": 283.92,
+      "median": 107.86,
+      "p95": 151.19
+    },
+    "ordinary_peak_inflight_requests": 2,
+    "passed": true,
+    "status_counts": {
+      "200": 100
+    },
+    "synchronized_100_request_burst": {
+      "classification": "stress observation; not the ordinary-load release gate",
+      "latency_ms": {
+        "max": 6724.14,
+        "median": 4676.74,
+        "p95": 6650.38
+      },
+      "status_counts": {
+        "200": 100
+      }
+    },
+    "target_p95_ms": 500
+  },
+  "cost_note": "Eligibility is deterministic and makes zero model calls; model usage is bounded by configuration.",
+  "eligibility": {
+    "drives": 20,
+    "duration_ms": {
+      "max": 218.42,
+      "median": 160.46,
+      "min": 141.4,
+      "p95": 206.09
+    },
+    "evaluations": 100000,
+    "outcomes_across_all_drives": {
+      "eligible": 57700,
+      "ineligible": 37000,
+      "needs_review": 5300
+    },
+    "passed": true,
+    "students": 5000,
+    "target_each_drive_ms": 60000
+  },
+  "environment": {
+    "max_extracted_text_chars": 2000000,
+    "max_pdf_pages": 50,
+    "max_upload_bytes": 15728640,
+    "model_call_cap_per_drive": 10,
+    "model_input_token_cap_per_drive": 100000,
+    "model_mode": "fixture",
+    "release_version": "0.10.0"
+  },
+  "measured_at": "2026-11-01T01:02:18.697009+00:00",
+  "passed": true
+}

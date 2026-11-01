@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from placementos.core.config import settings
 from placementos.core.database import check_database_health
+from placementos.core.redis import get_redis_client
 
 router = APIRouter(tags=["Health & Diagnostics"])
 
@@ -41,7 +42,7 @@ async def get_health(request: Request) -> HealthResponse:
     return HealthResponse(
         status="healthy",
         environment=settings.ENVIRONMENT,
-        version="0.1.0",
+        version=settings.RELEASE_VERSION,
         correlation_id=correlation_id,
     )
 
@@ -56,7 +57,10 @@ async def get_readiness(request: Request) -> JSONResponse:
     """Check connectivity to PostgreSQL database and Redis."""
     correlation_id = getattr(request.state, "correlation_id", None)
     db_healthy = await check_database_health()
-    redis_healthy = True  # Verified via ping in later integration
+    try:
+        redis_healthy = bool(await get_redis_client().ping())
+    except Exception:
+        redis_healthy = False
 
     is_ready = db_healthy and redis_healthy
     status_code = status.HTTP_200_OK if is_ready else status.HTTP_503_SERVICE_UNAVAILABLE

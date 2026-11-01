@@ -1,0 +1,15 @@
+{
+  "base_url": "http://127.0.0.1:8000",
+  "checked_at": "2026-11-01T01:07:22.740928+00:00",
+  "checks": {
+    "correlation_id": true,
+    "dependencies_ready": true,
+    "honest_pilot_gate": true,
+    "liveness": true,
+    "operational_projection": true,
+    "private_cache_control": true,
+    "student_operations_denied": true,
+    "synthetic_coordinator_login": true
+  },
+  "passed": true
+}
