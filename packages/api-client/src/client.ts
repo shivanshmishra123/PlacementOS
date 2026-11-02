@@ -49,6 +49,10 @@ import type {
   DispatchOperationResponse,
   WorkflowRunResponse,
   ExceptionCaseResponse,
+  ExceptionImpactCreate,
+  ExceptionImpactResponse,
+  RecoveryExecutionResponse,
+  RecoveryPlanResponse,
   RecruitmentRoundResponse,
   RecruitmentSessionResponse,
   LifecycleProposalResponse,
@@ -819,6 +823,98 @@ export class PlacementOSClient {
         expected_run_revision: expectedRunRevision || null,
       }),
     });
+  }
+
+  public async analyzeExceptionImpact(
+    caseId: string,
+    request: ExceptionImpactCreate
+  ): Promise<ExceptionImpactResponse> {
+    return this.request<ExceptionImpactResponse>(
+      `/api/v1/exception-cases/${caseId}/impact-analyses`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  public async listExceptionImpacts(caseId: string): Promise<ExceptionImpactResponse[]> {
+    return this.request<ExceptionImpactResponse[]>(
+      `/api/v1/exception-cases/${caseId}/impact-analyses`
+    );
+  }
+
+  public async createRecoveryPlan(
+    analysisId: string,
+    request:
+      | { planner_mode: "fixture"; rationale: string }
+      | {
+          planner_mode: "manual";
+          rationale: string;
+          manual_steps: Array<{
+            operation_type: "record_manual_followup";
+            exact_payload: { note: string };
+            expected_effects: string[];
+            approval_type: "manual_evidence";
+            irreversible_effects: string[];
+          }>;
+        }
+  ): Promise<RecoveryPlanResponse> {
+    return this.request<RecoveryPlanResponse>(
+      `/api/v1/impact-analyses/${analysisId}/recovery-plans`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  public async listRecoveryPlans(caseId: string): Promise<RecoveryPlanResponse[]> {
+    return this.request<RecoveryPlanResponse[]>(
+      `/api/v1/exception-cases/${caseId}/recovery-plans`
+    );
+  }
+
+  public async decideRecoveryPlan(
+    plan: RecoveryPlanResponse,
+    decision: "approved" | "rejected" | "revision_requested",
+    comment?: string
+  ): Promise<RecoveryExecutionResponse | null> {
+    return this.request<RecoveryExecutionResponse | null>(
+      `/api/v1/recovery-plans/${plan.id}/decisions`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          expected_revision: plan.revision_number,
+          expected_hash: plan.approval_hash,
+          decision,
+          comment,
+        }),
+      }
+    );
+  }
+
+  public async listRecoveryExecutions(caseId: string): Promise<RecoveryExecutionResponse[]> {
+    return this.request<RecoveryExecutionResponse[]>(
+      `/api/v1/exception-cases/${caseId}/recovery-executions`
+    );
+  }
+
+  public async cancelRecoveryExecution(
+    executionId: string,
+    reason: string
+  ): Promise<RecoveryExecutionResponse> {
+    return this.request<RecoveryExecutionResponse>(
+      `/api/v1/recovery-executions/${executionId}/cancel`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      }
+    );
   }
 
   // ==========================================

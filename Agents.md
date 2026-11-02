@@ -1,6 +1,6 @@
 # PlacementOS: Instructions for AI Coding Agents
 
-> Status: implementation baseline, synchronized 2 November 2026. The repository contains the evidenced local implementation through P11 connector infrastructure and remains synthetic-demo ready only; live-account acceptance is still gated in `PLAN.md`.
+> Status: implementation baseline, synchronized 3 November 2026. The repository contains the evidenced local implementation through P12 structured exception recovery and remains synthetic-demo ready only; live-account acceptance and real-data operation are still gated in `PLAN.md`.
 
 ## 1. Purpose and reading order
 

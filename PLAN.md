@@ -1,6 +1,6 @@
 # PlacementOS: Implementation Plan
 
-> Baseline dated 28 October 2026; implementation status synchronized 2 November 2026. The repository contains the evidenced P00-P11 local implementation slices. Release 0.11.0 is synthetic-demo ready only; live-account provider acceptance, real-data operation, and later phases remain blocked or deferred as recorded below.
+> Baseline dated 28 October 2026; implementation status synchronized 3 November 2026. The repository contains the evidenced P00-P12 local implementation slices. Release 0.12.0 is synthetic-demo ready only; live-account provider acceptance, real-data operation, and later measured expansion remain blocked or deferred as recorded below.
 
 ## 1. How to execute this plan
 
@@ -78,7 +78,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P09 | Completed; scheduling, results, reports, closure, and lifecycle views established | FR-SCHED, FR-RESULT, FR-REPORT, FR-CLOSE | Complete local recruitment lifecycle. |
 | P10 | Completed for synthetic-demo hardening; explicit real-data readiness remains blocked by listed institution/provider inputs | Cross-cutting NFRs, privacy, real-data gate | Verified synthetic MVP release and documented fail-closed pilot gate. |
 | P11 | Local connector implementation complete; isolated live-account acceptance blocked on explicit credentials/authorization | FR-INT-03 through FR-INT-09 | Controlled Google connectors with local contract evidence; live acceptance pending. |
-| P12 | Not started; advanced | FR-EXC-04 through FR-EXC-07 | Approved recovery plans for changing information. |
+| P12 | Completed locally; deterministic fixture/manual planner and synthetic provider evidence only | FR-EXC-04 through FR-EXC-07 | Approved recovery plans for changing information. |
 | P13 | Not started; demand-driven | Measured expansion | Reliable operation at demonstrated additional demand. |
 
 Do not assign calendar dates before the developer's capacity and providers are known. Estimate each phase after its dependencies work. A sequence of verified milestones is more useful than unsupported delivery promises.
@@ -492,17 +492,19 @@ Implementation record: release 0.11.0 provides the disabled-by-default connector
 
 **Objective:** Adapt to changing drive information with reviewable, controlled plans. **Dependencies:** P10; P11 only for connector-specific cases. **Requirements:** advanced FR-EXC.
 
-- [ ] **P12-T01: Define supported exception schemas.** Start with criteria change, verified academic correction, deadline/schedule revision, and notification failure. Evidence: each type has explicit inputs, impact rules, and manual fallback; avoid unrestricted problem solving.
-- [ ] **P12-T02: Build deterministic impact analysis.** Compare old/new policy/evaluation and identify affected notified students, registrations, schedules, proposals, and external mappings. Evidence: an agent's wording cannot alter the computed affected set.
-- [ ] **P12-T03: Define typed recovery operations.** Allow only versioned domain commands with preconditions, expected revisions, dependencies, approval type, and irreversible-effect notes. Evidence: unsupported actions fail validation.
-- [ ] **P12-T04: Add proposal-only exception agent.** Supply scoped evidence/impact summaries and validate its structured plan. Evidence: the model cannot send, mutate records, expand permissions, or mark a case resolved.
-- [ ] **P12-T05: Deliver plan review and approval.** Show step ordering, affected students, exact communications/external effects, and reasons. Evidence: approval binds the exact plan and required action proposals; stale inputs block execution.
-- [ ] **P12-T06: Execute bounded plans through services.** Revalidate each step, deduplicate operations, preserve partial completion, and stop stale/cancelled remaining steps. Evidence: a mid-plan failure does not replay already completed external effects.
-- [ ] **P12-T07: Verify change scenarios.** Demonstrate CGPA 7.50 -> 8.00, a corrected student record, a changed deadline after announcement, and an uncertain notification outcome. Evidence: no silent registration deletion or automatic correction mail.
-- [ ] **P12-T08: Evaluate usefulness and fallback.** Compare proposed plans against curated expected plans and coordinator edits; cap model cost/attempts. Evidence: manual resolution works for every supported case when the model is unavailable.
-- [ ] **P12-T09: Phase completion testing and verification.** Execute adaptive exception recovery test suite: CGPA criteria change (7.50 -> 8.00) impact analysis, corrected academic record scenario, changed deadline after announcement scenario, structured plan approval and allowlisted execution test, and manual resolution fallback test. Evidence: exception recovery scenarios passing with verified partial-completion safety.
+- [x] **P12-T01: Define supported exception schemas.** Criteria change, verified academic correction, deadline/schedule revision, and notification failure use discriminated typed inputs, deterministic rules, and explicit manual fallback. Evidence: `schemas/recovery.py` and scenario tests reject unsupported categories/actions.
+- [x] **P12-T02: Build deterministic impact analysis.** Old/new revisions and evaluations determine affected students, registrations, schedules, proposals, dispatch state, and provider mappings independently of planner wording. Evidence: revisioned dependency snapshots/fingerprints and four integration scenarios.
+- [x] **P12-T03: Define typed recovery operations.** Five allowlisted versioned domain commands freeze payloads, preconditions, ordering dependencies, approval type, expected effects, and irreversible-effect notes. Evidence: unit validation rejects direct send and invalid dependency ordering.
+- [x] **P12-T04: Add proposal-only exception agent.** The visible deterministic development fixture consumes the stored impact and emits validated plan steps without mutation/provider tools; production rejects the fixture and manual planning remains available. Evidence: unit tests assert no send/calendar operations and zero model-provider calls.
+- [x] **P12-T05: Deliver plan review and approval.** `/coordinator/exceptions/[id]` shows the affected set, fallback, exact ordered payloads/effects, approval class, irreversible notes, decisions, and execution state. Evidence: approval binds the immutable plan/proposal hashes and stale dependencies fail closed.
+- [x] **P12-T06: Execute bounded plans through services.** Durable outbox execution rechecks authority/freshness per step, commits atomic attempts, deduplicates completed work, preserves partial completion, and cancels/stales remaining steps. Evidence: success replay, cancellation, and mid-plan precondition-failure tests.
+- [x] **P12-T07: Verify change scenarios.** CGPA 7.50 -> 8.00, verified student correction, changed deadline after a prior immutable revision, and unknown notification outcome are demonstrated. Evidence: registrations and dispatch state remain intact and correction work never auto-sends.
+- [x] **P12-T08: Evaluate usefulness and fallback.** Curated fixture expectations assert exact step types; plans are capped at ten steps and record fixture/manual usage with zero repair attempts. Evidence: typed manual follow-up works without the fixture and all supported analyses carry instructions for manual resolution.
+- [x] **P12-T09: Phase completion testing and verification.** Nine focused P12 tests and the 111-test backend regression pass with Ruff, mypy, zero OpenAPI drift, frontend lint/typecheck/production build, empty/populated migration verification, and release secret scan. Evidence: `docs/p12-exception-recovery-verification.md`.
 
 **Exit gate:** M6 demonstrates concrete adaptive recovery with deterministic impact and exact approvals. An impressive free-text plan without safe execution/recovery is incomplete.
+
+Implementation record: release 0.12.0 provides revisioned deterministic impact evidence, proposal-only fixture/manual planning, exact approval, bounded execution/cancellation, partial-completion safety, and the coordinator review surface. No live model or provider action ran, no correction message was sent, and no case was automatically resolved. P11 live-account acceptance remains separately blocked; the next demand-driven phase is P13 only after measured pilot evidence and an explicit requested expansion.
 
 ## 17. P13: Expand only from measured needs
 

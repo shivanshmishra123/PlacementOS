@@ -1,7 +1,7 @@
 name: placementos-pilot
 
 x-backend: &backend
-  image: placementos-api:${PLACEMENTOS_IMAGE_TAG:-0.11.0}
+  image: placementos-api:${PLACEMENTOS_IMAGE_TAG:-0.12.0}
   build:
     context: .
     dockerfile: infra/docker/api.Dockerfile
@@ -101,7 +101,7 @@ services:
         condition: service_started
 
   web:
-    image: placementos-web:${PLACEMENTOS_IMAGE_TAG:-0.11.0}
+    image: placementos-web:${PLACEMENTOS_IMAGE_TAG:-0.12.0}
     build:
       context: .
       dockerfile: infra/docker/web.Dockerfile

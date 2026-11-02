@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
-    RELEASE_VERSION: str = "0.11.0"
+    RELEASE_VERSION: str = "0.12.0"
 
     # Security
     SECRET_KEY: str = Field(
@@ -75,6 +75,7 @@ class Settings(BaseSettings):
     MODEL_POLICY_REVIEWED: bool = False
     MODEL_MAX_CALLS_PER_DRIVE: int = 10
     MODEL_MAX_INPUT_TOKENS_PER_DRIVE: int = 100_000
+    EXCEPTION_PLANNER_MODE: Literal["fixture", "disabled"] = "fixture"
     MAX_UPLOAD_BYTES: int = 15 * 1024 * 1024
     MAX_PDF_PAGES: int = 50
     MAX_EXTRACTED_TEXT_CHARS: int = 2_000_000
@@ -196,6 +197,8 @@ class Settings(BaseSettings):
             errors.append("OIDC membership ownership is required")
         if self.MALWARE_SCANNER_MODE != "clamav":
             errors.append("a real malware scanner is required")
+        if self.EXCEPTION_PLANNER_MODE == "fixture":
+            errors.append("production cannot use the deterministic exception-planner fixture")
         if not OIDC_ADAPTER_IMPLEMENTED:
             errors.append("the production OIDC adapter is not implemented")
         if not CLAMAV_ADAPTER_IMPLEMENTED:

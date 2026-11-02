@@ -3,7 +3,7 @@
   "info": {
     "title": "PlacementOS API",
     "description": "Campus recruitment operations platform API.",
-    "version": "0.11.0"
+    "version": "0.12.0"
   },
   "paths": {
     "/health": {
@@ -5558,10 +5558,479 @@
           }
         }
       }
+    },
+    "/api/v1/exception-cases/{case_id}/impact-analyses": {
+      "post": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "Analyze Exception Impact",
+        "operationId": "analyze_exception_impact_api_v1_exception_cases__case_id__impact_analyses_post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CriteriaChangeImpactCreate"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AcademicCorrectionImpactCreate"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DeadlineScheduleImpactCreate"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NotificationFailureImpactCreate"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "category",
+                  "mapping": {
+                    "criteria_change": "#/components/schemas/CriteriaChangeImpactCreate",
+                    "academic_correction": "#/components/schemas/AcademicCorrectionImpactCreate",
+                    "deadline_schedule_change": "#/components/schemas/DeadlineScheduleImpactCreate",
+                    "notification_failure": "#/components/schemas/NotificationFailureImpactCreate"
+                  }
+                },
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExceptionImpactResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "List Exception Impact Analyses",
+        "operationId": "list_exception_impact_analyses_api_v1_exception_cases__case_id__impact_analyses_get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExceptionImpactResponse"
+                  },
+                  "title": "Response List Exception Impact Analyses Api V1 Exception Cases  Case Id  Impact Analyses Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/impact-analyses/{analysis_id}/recovery-plans": {
+      "post": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "Propose Recovery Plan",
+        "operationId": "propose_recovery_plan_api_v1_impact_analyses__analysis_id__recovery_plans_post",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryPlanCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryPlanResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exception-cases/{case_id}/recovery-plans": {
+      "get": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "List Recovery Plans",
+        "operationId": "list_recovery_plans_api_v1_exception_cases__case_id__recovery_plans_get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecoveryPlanResponse"
+                  },
+                  "title": "Response List Recovery Plans Api V1 Exception Cases  Case Id  Recovery Plans Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recovery-plans/{plan_id}": {
+      "get": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "Get Recovery Plan",
+        "operationId": "get_recovery_plan_api_v1_recovery_plans__plan_id__get",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryPlanResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recovery-plans/{plan_id}/decisions": {
+      "post": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "Decide Plan",
+        "operationId": "decide_plan_api_v1_recovery_plans__plan_id__decisions_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Plan Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryDecisionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RecoveryExecutionResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Decide Plan Api V1 Recovery Plans  Plan Id  Decisions Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exception-cases/{case_id}/recovery-executions": {
+      "get": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "List Recovery Executions",
+        "operationId": "list_recovery_executions_api_v1_exception_cases__case_id__recovery_executions_get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecoveryExecutionResponse"
+                  },
+                  "title": "Response List Recovery Executions Api V1 Exception Cases  Case Id  Recovery Executions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recovery-executions/{execution_id}/cancel": {
+      "post": {
+        "tags": [
+          "Adaptive Exception Recovery"
+        ],
+        "summary": "Cancel Execution",
+        "operationId": "cancel_execution_api_v1_recovery_executions__execution_id__cancel_post",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Execution Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecoveryCancellationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryExecutionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AcademicCorrectionImpactCreate": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "const": "academic_correction",
+            "title": "Category"
+          },
+          "student_profile_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Student Profile Id"
+          },
+          "old_academic_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Old Academic Revision Id"
+          },
+          "new_academic_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "New Academic Revision Id"
+          },
+          "old_evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Old Evaluation Run Id"
+          },
+          "new_evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "New Evaluation Run Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "student_profile_id",
+          "old_academic_revision_id",
+          "new_academic_revision_id",
+          "old_evaluation_run_id",
+          "new_evaluation_run_id"
+        ],
+        "title": "AcademicCorrectionImpactCreate"
+      },
       "AcademicRevisionDTO": {
         "properties": {
           "id": {
@@ -6617,6 +7086,67 @@
           "created_at"
         ],
         "title": "CorrectionProposalDTO"
+      },
+      "CriteriaChangeImpactCreate": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "const": "criteria_change",
+            "title": "Category"
+          },
+          "old_evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Old Evaluation Run Id"
+          },
+          "new_evaluation_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "New Evaluation Run Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "old_evaluation_run_id",
+          "new_evaluation_run_id"
+        ],
+        "title": "CriteriaChangeImpactCreate"
+      },
+      "DeadlineScheduleImpactCreate": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "const": "deadline_schedule_change",
+            "title": "Category"
+          },
+          "change_kind": {
+            "type": "string",
+            "enum": [
+              "deadline",
+              "schedule"
+            ],
+            "title": "Change Kind"
+          },
+          "old_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Old Revision Id"
+          },
+          "new_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "New Revision Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "change_kind",
+          "old_revision_id",
+          "new_revision_id"
+        ],
+        "title": "DeadlineScheduleImpactCreate"
       },
       "DecisionResponse": {
         "properties": {
@@ -7970,6 +8500,93 @@
         ],
         "title": "ExceptionCaseResponse"
       },
+      "ExceptionImpactResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "case_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Case Id"
+          },
+          "drive_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Drive Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "input_references": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Input References"
+          },
+          "dependency_fingerprint": {
+            "type": "string",
+            "title": "Dependency Fingerprint"
+          },
+          "impact_summary": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Impact Summary"
+          },
+          "affected_students": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Affected Students"
+          },
+          "affected_resources": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Affected Resources"
+          },
+          "manual_fallback": {
+            "type": "string",
+            "title": "Manual Fallback"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "case_id",
+          "drive_id",
+          "revision_number",
+          "category",
+          "status",
+          "input_references",
+          "dependency_fingerprint",
+          "impact_summary",
+          "affected_students",
+          "affected_resources",
+          "manual_fallback",
+          "created_at"
+        ],
+        "title": "ExceptionImpactResponse"
+      },
       "ExportGrantResponse": {
         "properties": {
           "download_url": {
@@ -8739,6 +9356,26 @@
         ],
         "title": "InterpretationResponse"
       },
+      "NotificationFailureImpactCreate": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "const": "notification_failure",
+            "title": "Category"
+          },
+          "dispatch_operation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Dispatch Operation Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "dispatch_operation_id"
+        ],
+        "title": "NotificationFailureImpactCreate"
+      },
       "OperationalHoldCreate": {
         "properties": {
           "reason": {
@@ -9452,6 +10089,487 @@
           "reason"
         ],
         "title": "ReasonCreate"
+      },
+      "RecoveryCancellationCreate": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "RecoveryCancellationCreate"
+      },
+      "RecoveryDecisionCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Revision"
+          },
+          "expected_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Expected Hash"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected",
+              "revision_requested"
+            ],
+            "title": "Decision"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "expected_hash",
+          "decision"
+        ],
+        "title": "RecoveryDecisionCreate"
+      },
+      "RecoveryExecutionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Plan Id"
+          },
+          "proposal_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Proposal Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "current_step_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Step Number"
+          },
+          "completed_step_count": {
+            "type": "integer",
+            "title": "Completed Step Count"
+          },
+          "pending_step_count": {
+            "type": "integer",
+            "title": "Pending Step Count"
+          },
+          "failed_step_count": {
+            "type": "integer",
+            "title": "Failed Step Count"
+          },
+          "irreversible_step_count": {
+            "type": "integer",
+            "title": "Irreversible Step Count"
+          },
+          "last_error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error Code"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "plan_id",
+          "proposal_id",
+          "status",
+          "current_step_number",
+          "completed_step_count",
+          "pending_step_count",
+          "failed_step_count",
+          "irreversible_step_count",
+          "last_error_code",
+          "started_at",
+          "completed_at",
+          "created_at"
+        ],
+        "title": "RecoveryExecutionResponse"
+      },
+      "RecoveryPlanCreate": {
+        "properties": {
+          "planner_mode": {
+            "type": "string",
+            "enum": [
+              "fixture",
+              "manual"
+            ],
+            "title": "Planner Mode"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 3,
+            "title": "Rationale"
+          },
+          "manual_steps": {
+            "items": {
+              "$ref": "#/components/schemas/RecoveryStepCreate"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Manual Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "planner_mode",
+          "rationale"
+        ],
+        "title": "RecoveryPlanCreate"
+      },
+      "RecoveryPlanResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "case_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Case Id"
+          },
+          "analysis_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Analysis Id"
+          },
+          "proposal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "planner_mode": {
+            "type": "string",
+            "title": "Planner Mode"
+          },
+          "planner_id": {
+            "type": "string",
+            "title": "Planner Id"
+          },
+          "planner_version": {
+            "type": "string",
+            "title": "Planner Version"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale"
+          },
+          "canonical_hash": {
+            "type": "string",
+            "title": "Canonical Hash"
+          },
+          "approval_hash": {
+            "type": "string",
+            "title": "Approval Hash"
+          },
+          "dependency_fingerprint": {
+            "type": "string",
+            "title": "Dependency Fingerprint"
+          },
+          "usage_metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Usage Metadata"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/RecoveryPlanStepResponse"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "case_id",
+          "analysis_id",
+          "proposal_id",
+          "revision_number",
+          "planner_mode",
+          "planner_id",
+          "planner_version",
+          "status",
+          "rationale",
+          "canonical_hash",
+          "approval_hash",
+          "dependency_fingerprint",
+          "usage_metadata",
+          "steps",
+          "created_at"
+        ],
+        "title": "RecoveryPlanResponse"
+      },
+      "RecoveryPlanStepResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "step_number": {
+            "type": "integer",
+            "title": "Step Number"
+          },
+          "operation_type": {
+            "type": "string",
+            "title": "Operation Type"
+          },
+          "exact_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Exact Payload"
+          },
+          "preconditions": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Preconditions"
+          },
+          "dependencies": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Dependencies"
+          },
+          "expected_effects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Expected Effects"
+          },
+          "approval_type": {
+            "type": "string",
+            "title": "Approval Type"
+          },
+          "irreversible_effects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Irreversible Effects"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempt_count": {
+            "type": "integer",
+            "title": "Attempt Count"
+          },
+          "result": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Result"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Detail"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "step_number",
+          "operation_type",
+          "exact_payload",
+          "preconditions",
+          "dependencies",
+          "expected_effects",
+          "approval_type",
+          "irreversible_effects",
+          "status",
+          "attempt_count",
+          "result",
+          "error_code",
+          "error_detail",
+          "completed_at"
+        ],
+        "title": "RecoveryPlanStepResponse"
+      },
+      "RecoveryStepCreate": {
+        "properties": {
+          "operation_type": {
+            "type": "string",
+            "enum": [
+              "place_drive_hold",
+              "stale_pending_proposals",
+              "prepare_correction_draft",
+              "mark_external_reconciliation",
+              "record_manual_followup"
+            ],
+            "title": "Operation Type"
+          },
+          "exact_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Exact Payload"
+          },
+          "dependencies": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Dependencies"
+          },
+          "expected_effects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Expected Effects"
+          },
+          "approval_type": {
+            "type": "string",
+            "enum": [
+              "recovery_plan",
+              "separate_action_approval",
+              "manual_evidence"
+            ],
+            "title": "Approval Type"
+          },
+          "irreversible_effects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Irreversible Effects"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operation_type",
+          "exact_payload",
+          "expected_effects",
+          "approval_type"
+        ],
+        "title": "RecoveryStepCreate"
       },
       "RegistrationResponse": {
         "properties": {

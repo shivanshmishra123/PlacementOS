@@ -50,6 +50,7 @@ export default function ExceptionInboxPage() {
           <article key={item.id} className="rounded-xl border bg-white p-5 shadow-sm dark:bg-slate-900">
             <div className="flex flex-wrap justify-between gap-3"><div><p className="text-xs font-semibold uppercase text-slate-500">{item.category.replaceAll("_", " ")}</p><h2 className="mt-1 font-semibold">{item.proposed_next_action}</h2></div><span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold capitalize text-amber-800">{item.severity} · {item.status}</span></div>
             <p className="mt-3 text-sm text-slate-600">Evidence: {JSON.stringify(item.evidence)}</p>
+            <Link href={`/coordinator/exceptions/${item.id}`} className="mt-2 mr-4 inline-block text-sm font-medium text-brand-700 underline">Analyze impact and recovery</Link>
             <Link href={`/coordinator/drives/${item.drive_id}/workflow`} className="mt-2 inline-block text-sm font-medium text-brand-700 underline">Open drive workflow</Link>
             {item.status !== "resolved" && item.status !== "dismissed" && (
               <form className="mt-4 flex flex-col gap-2 border-t pt-4 sm:flex-row">

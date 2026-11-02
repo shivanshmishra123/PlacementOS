@@ -15,7 +15,7 @@ async def run(base_url: str) -> dict[str, object]:
     checks: dict[str, bool] = {}
     async with httpx.AsyncClient(base_url=base_url, timeout=30) as client:
         health = await client.get("/health", headers={"X-Correlation-ID": "p10-release-smoke"})
-        checks["liveness"] = health.status_code == 200 and health.json()["version"] == "0.11.0"
+        checks["liveness"] = health.status_code == 200 and health.json()["version"] == "0.12.0"
         checks["correlation_id"] = health.headers.get("x-correlation-id") == "p10-release-smoke"
 
         ready = await client.get("/ready")

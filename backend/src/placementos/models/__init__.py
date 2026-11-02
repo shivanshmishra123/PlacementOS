@@ -65,6 +65,13 @@ from placementos.models.participation import (
     RegistrationEvent,
     StudentDocument,
 )
+from placementos.models.recovery import (
+    ExceptionImpactAnalysis,
+    RecoveryExecution,
+    RecoveryPlan,
+    RecoveryPlanStep,
+    RecoveryStepAttempt,
+)
 from placementos.models.recruitment import (
     Company,
     Drive,
@@ -97,6 +104,11 @@ __all__ = [
     "Drive",
     "DriveAssignment",
     "DriveRevision",
+    "ExceptionImpactAnalysis",
+    "RecoveryPlan",
+    "RecoveryPlanStep",
+    "RecoveryExecution",
+    "RecoveryStepAttempt",
     "DriveDocumentRequirement",
     "EligibilityPolicyVersion",
     "EligibilityResult",

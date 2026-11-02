@@ -45,7 +45,7 @@ uv run --project backend python scripts/run_api.py
 uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=info
 ```
 
-Run Celery beat separately so the P07 dispatch outbox and P08 workflow-command outbox are relayed:
+Run Celery beat separately so dispatch, workflow-command, connector-operation, and P12 recovery-execution outboxes are relayed:
 
 ```text
 uv run --project backend celery -A placementos.workers.celery_app beat --loglevel=info
@@ -55,7 +55,7 @@ Mailpit is available at `http://127.0.0.1:8025`. SMTP acceptance is shown as pro
 
 Native Windows Celery pools are not a supported PlacementOS runtime; run worker and beat in WSL or Linux containers. The web and API may run in PowerShell. `scripts/run_api.py` selects the Windows event loop required by async psycopg; the ordinary Uvicorn CLI may otherwise select an incompatible Proactor loop.
 
-All backend environment variables use the `PLACEMENTOS_` prefix. `PLACEMENTOS_DATABASE_URL` is the restricted runtime role; only Alembic and administrative migration checks use `PLACEMENTOS_MIGRATION_DATABASE_URL`. `PLACEMENTOS_WORKFLOW_DATABASE_URL` uses a separate restricted role whose search path is the private `workflow_checkpoints` schema. Run the checkpoint setup command after every P08 migration upgrade and never grant browser/API callers direct access to that role or its opaque thread IDs. The local `development_fixture` scanner and `fixture` interpreter are visibly synthetic and configuration validation rejects them in production.
+All backend environment variables use the `PLACEMENTOS_` prefix. `PLACEMENTOS_DATABASE_URL` is the restricted runtime role; only Alembic and administrative migration checks use `PLACEMENTOS_MIGRATION_DATABASE_URL`. `PLACEMENTOS_WORKFLOW_DATABASE_URL` uses a separate restricted role whose search path is the private `workflow_checkpoints` schema. Run the checkpoint setup command after every P08 migration upgrade and never grant browser/API callers direct access to that role or its opaque thread IDs. The local `development_fixture` scanner, `fixture` interpreter, and deterministic exception-planner fixture are visibly synthetic and configuration validation rejects them in production. Set `PLACEMENTOS_EXCEPTION_PLANNER_MODE=disabled` in a production template unless a separately reviewed provider implementation is added.
 
 ---
 
@@ -93,8 +93,8 @@ node scripts/accessibility_audit.mjs
 `.env.pilot.example` is a non-runnable template; production validation rejects every `replace-*`/example value. An institution-approved secret/configuration service must provide `.env.pilot`, the Compose-level database/Redis bootstrap secrets, OIDC ownership, academic/permission decisions, provider choices, retention, region, and named operational owners.
 
 ```text
-docker build -f infra/docker/api.Dockerfile -t placementos-api:0.11.0 .
-docker build -f infra/docker/web.Dockerfile -t placementos-web:0.11.0 .
+docker build -f infra/docker/api.Dockerfile -t placementos-api:0.12.0 .
+docker build -f infra/docker/web.Dockerfile -t placementos-web:0.12.0 .
 docker compose -f compose.pilot.yaml config --quiet
 ```
 

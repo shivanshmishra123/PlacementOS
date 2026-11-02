@@ -722,6 +722,113 @@ export interface ExceptionCaseResponse {
   updated_at: string;
 }
 
+export type ExceptionImpactCategory =
+  | "criteria_change"
+  | "academic_correction"
+  | "deadline_schedule_change"
+  | "notification_failure";
+
+export type ExceptionImpactCreate =
+  | {
+      category: "criteria_change";
+      old_evaluation_run_id: string;
+      new_evaluation_run_id: string;
+    }
+  | {
+      category: "academic_correction";
+      student_profile_id: string;
+      old_academic_revision_id: string;
+      new_academic_revision_id: string;
+      old_evaluation_run_id: string;
+      new_evaluation_run_id: string;
+    }
+  | {
+      category: "deadline_schedule_change";
+      change_kind: "deadline" | "schedule";
+      old_revision_id: string;
+      new_revision_id: string;
+    }
+  | {
+      category: "notification_failure";
+      dispatch_operation_id: string;
+    };
+
+export interface ExceptionImpactResponse {
+  id: string;
+  case_id: string;
+  drive_id: string;
+  revision_number: number;
+  category: ExceptionImpactCategory;
+  status: string;
+  input_references: Record<string, unknown>;
+  dependency_fingerprint: string;
+  impact_summary: Record<string, unknown>;
+  affected_students: Array<Record<string, unknown>>;
+  affected_resources: Array<Record<string, unknown>>;
+  manual_fallback: string;
+  created_at: string;
+}
+
+export type RecoveryOperationType =
+  | "place_drive_hold"
+  | "stale_pending_proposals"
+  | "prepare_correction_draft"
+  | "mark_external_reconciliation"
+  | "record_manual_followup";
+
+export interface RecoveryPlanStepResponse {
+  id: string;
+  step_number: number;
+  operation_type: RecoveryOperationType;
+  exact_payload: Record<string, unknown>;
+  preconditions: Record<string, unknown>;
+  dependencies: number[];
+  expected_effects: string[];
+  approval_type: string;
+  irreversible_effects: string[];
+  status: string;
+  attempt_count: number;
+  result: Record<string, unknown>;
+  error_code: string | null;
+  error_detail: string | null;
+  completed_at: string | null;
+}
+
+export interface RecoveryPlanResponse {
+  id: string;
+  case_id: string;
+  analysis_id: string;
+  proposal_id: string | null;
+  revision_number: number;
+  planner_mode: "fixture" | "manual";
+  planner_id: string;
+  planner_version: string;
+  status: string;
+  rationale: string;
+  canonical_hash: string;
+  approval_hash: string;
+  dependency_fingerprint: string;
+  usage_metadata: Record<string, unknown>;
+  steps: RecoveryPlanStepResponse[];
+  created_at: string;
+}
+
+export interface RecoveryExecutionResponse {
+  id: string;
+  plan_id: string;
+  proposal_id: string;
+  status: string;
+  current_step_number: number | null;
+  completed_step_count: number;
+  pending_step_count: number;
+  failed_step_count: number;
+  irreversible_step_count: number;
+  last_error_code: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
 // ==========================================
 // Phase 9: Scheduling, Results & Closure
 // ==========================================

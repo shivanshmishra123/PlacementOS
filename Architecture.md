@@ -1,6 +1,6 @@
 # PlacementOS: Architecture and Technical Reference
 
-> Status: implementation baseline, synchronized 2 November 2026. The evidenced local implementation extends through the P11 controlled connector infrastructure and is synthetic-demo ready only. P11 live-account acceptance, P12 advanced recovery, and P13 measured expansion remain gated work.
+> Status: implementation baseline, synchronized 3 November 2026. The evidenced local implementation extends through P12 structured exception recovery and is synthetic-demo ready only. P11 live-account acceptance, real-data operation, and P13 measured expansion remain gated work.
 
 ## 1. Architectural intent
 
@@ -378,7 +378,7 @@ LangGraph checkpoint tables need their own protected adapter/access path because
 
 ### 9.2 Endpoint inventory
 
-This is the representative contract inventory. The implemented local phase scope extends through the P11 connector infrastructure, while some rows intentionally show later P12 extension contracts. Exact current paths are generated in `packages/api-client/openapi.json`; live-account connector acceptance and advanced recovery must not be presented as complete until their gates pass.
+This is the representative contract inventory. The implemented local phase scope extends through P12 structured exception recovery. Exact current paths are generated in `packages/api-client/openapi.json`; live-account connector acceptance must not be presented as complete until its gates pass.
 
 | Area | Representative endpoints | Important behavior |
 | --- | --- | --- |
@@ -748,6 +748,16 @@ Release 0.11.0 adds capability-scoped OAuth connection lifecycle, AES-GCM token 
 The connector UI is `/coordinator/integrations`; the API is under `/api/v1/integrations`. Gmail never performs default mailbox enumeration. Sheets commits re-read and fingerprint the selected range and compare expected academic revisions. Calendar callback channel identifiers are signed before tenant scope is established; tokens and provider resource identifiers are then verified and messages deduplicated. External Calendar notifications mark mapped events for reconciliation but never mutate the approved internal schedule.
 
 The local deterministic acceptance suite uses fake provider boundaries and no external account. Live OAuth/provider acceptance remains blocked until the owner supplies an explicitly authorized isolated Google Workspace test account, OAuth client, encryption key, and HTTPS webhook endpoint. See `docs/p11-google-connectors-verification.md`.
+
+### 18.6 Implemented P12 exception recovery boundary
+
+Release 0.12.0 adds revisioned deterministic impact analysis for criteria changes, verified academic corrections, deadline or schedule revisions, and failed or uncertain notifications. Analyses reference immutable domain records, store dependency fingerprints, minimize student context, enumerate affected registrations, published assignments, proposals, dispatches, and provider mappings, and always include a manual fallback. A changed dependency supersedes the evidence rather than letting planner wording redefine the affected set.
+
+Recovery plans contain only the allowlisted operations `place_drive_hold`, `stale_pending_proposals`, `prepare_correction_draft`, `mark_external_reconciliation`, and `record_manual_followup`. Each step freezes its payload, preconditions, ordering dependencies, expected effects, approval type, and irreversible-effect notes. The development fixture is visibly deterministic, has no execution tools, and is rejected in production; coordinators can always prepare a typed manual-follow-up plan when the fixture is disabled or unsuitable.
+
+Approval binds the exact plan and dependency fingerprint. A durable outbox queues execution, and the worker rechecks reviewer capability, case and drive state, proposal hash, expiry, and source freshness before the plan and before every step. Each completed step is its own atomic, deduplicated transaction. A later failure records partial completion and stops without replaying completed work; coordinator cancellation preserves completed evidence and marks remaining steps cancelled. Correction communication steps create frozen drafts only; they do not propose or send them. Recovery execution never marks the exception case resolved.
+
+The coordinator surface is `/coordinator/exceptions/[id]`; APIs cover impact analyses, recovery plans, exact decisions, and execution status. Local acceptance and remaining synthetic-only constraints are recorded in `docs/p12-exception-recovery-verification.md`.
 
 ## 19. Security and privacy controls
 
