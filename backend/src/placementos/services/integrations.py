@@ -60,6 +60,7 @@ from placementos.schemas.integrations import (
 from placementos.services.audit import record_audit
 from placementos.services.jd_intelligence import canonical_hash
 from placementos.services.parsers import DocumentScanner, MalwareScanner
+from placementos.services.scaling import enforce_export_quota
 from placementos.services.session import AuthContext
 from placementos.services.source_jobs import SourceJobService
 from placementos.services.storage import storage_service
@@ -1117,6 +1118,7 @@ async def create_sheet_export_proposal(
     for key, value in sorted(report.snapshot_payload.items()):
         rendered = json.dumps(value, sort_keys=True) if isinstance(value, (dict, list)) else value
         values.append([_safe_sheet_cell(key), _safe_sheet_cell(rendered)])
+    await enforce_export_quota(session, auth.institution_id, len(values) - 1)
     exact = {
         "connection_id": str(connection.id),
         "spreadsheet_id": payload.spreadsheet_id,

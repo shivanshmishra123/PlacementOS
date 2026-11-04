@@ -1,0 +1,96 @@
+{
+  "checkpoint_tables_included_in_database_dump": true,
+  "database_counts_match": true,
+  "drill_completed_at": "2026-11-02T19:57:25.347746+00:00",
+  "drill_started_at": "2026-11-02T19:55:55.638333+00:00",
+  "duration_seconds": 89.709,
+  "object_count": 575,
+  "object_hashes_match": true,
+  "passed": true,
+  "pending_work_reconciliation_required_before_promotion": true,
+  "restored_counts": {
+    "action_proposals": 951,
+    "audit_logs": 7144,
+    "dispatch_operations": 157,
+    "drives": 651,
+    "exception_cases": 73,
+    "institution_operating_policies": 2,
+    "institutions": 3,
+    "integration_connections": 36,
+    "student_profiles": 814,
+    "workflow_runs": 58
+  },
+  "restored_tenant_counts": {
+    "action_proposals": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 951
+    },
+    "dispatch_operations": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 157
+    },
+    "drives": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 650,
+      "a9bfc90d-9743-48ce-acbb-2a40cc411eae": 1
+    },
+    "exception_cases": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 73
+    },
+    "institution_operating_policies": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 1,
+      "a9bfc90d-9743-48ce-acbb-2a40cc411eae": 1
+    },
+    "integration_connections": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 36
+    },
+    "student_profiles": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 814
+    },
+    "workflow_runs": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 58
+    }
+  },
+  "rpo_objective_hours": 24,
+  "rto_objective_hours": 8,
+  "rto_observed_hours": 0.024919,
+  "source_counts": {
+    "action_proposals": 951,
+    "audit_logs": 7144,
+    "dispatch_operations": 157,
+    "drives": 651,
+    "exception_cases": 73,
+    "institution_operating_policies": 2,
+    "institutions": 3,
+    "integration_connections": 36,
+    "student_profiles": 814,
+    "workflow_runs": 58
+  },
+  "source_tenant_counts": {
+    "action_proposals": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 951
+    },
+    "dispatch_operations": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 157
+    },
+    "drives": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 650,
+      "a9bfc90d-9743-48ce-acbb-2a40cc411eae": 1
+    },
+    "exception_cases": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 73
+    },
+    "institution_operating_policies": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 1,
+      "a9bfc90d-9743-48ce-acbb-2a40cc411eae": 1
+    },
+    "integration_connections": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 36
+    },
+    "student_profiles": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 814
+    },
+    "workflow_runs": {
+      "79917617-2dc4-4273-bc25-edf84f7bcef2": 58
+    }
+  },
+  "tenant_partition_counts_match": true,
+  "tombstone_reapplied": true
+}

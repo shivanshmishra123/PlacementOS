@@ -84,6 +84,10 @@ uv run --project backend python scripts/benchmark_pilot_envelope.py
 uv run --project backend python scripts/backup_restore_drill.py
 uv run --project backend python scripts/scan_release_secrets.py
 node scripts/accessibility_audit.mjs
+
+# P13 measured expansion evidence (requires the local API for the benchmark)
+uv run --project backend python scripts/benchmark_p13_scaling.py
+uv run --project backend python scripts/backup_restore_drill.py --output docs/evidence/p13-backup-restore.json
 ```
 
 `uv run --project backend python scripts/pilot_preflight.py` deliberately exits nonzero in the default development environment. That is the expected result: development personas, fixture scanning/interpretation, Mailpit, and local object storage are synthetic-only.
@@ -93,8 +97,8 @@ node scripts/accessibility_audit.mjs
 `.env.pilot.example` is a non-runnable template; production validation rejects every `replace-*`/example value. An institution-approved secret/configuration service must provide `.env.pilot`, the Compose-level database/Redis bootstrap secrets, OIDC ownership, academic/permission decisions, provider choices, retention, region, and named operational owners.
 
 ```text
-docker build -f infra/docker/api.Dockerfile -t placementos-api:0.12.0 .
-docker build -f infra/docker/web.Dockerfile -t placementos-web:0.12.0 .
+docker build -f infra/docker/api.Dockerfile -t placementos-api:0.13.0 .
+docker build -f infra/docker/web.Dockerfile -t placementos-web:0.13.0 .
 docker compose -f compose.pilot.yaml config --quiet
 ```
 

@@ -13,6 +13,7 @@ from placementos.api.v1.lifecycle import router as lifecycle_router
 from placementos.api.v1.operations import router as operations_router
 from placementos.api.v1.participation import router as participation_router
 from placementos.api.v1.recovery import router as recovery_router
+from placementos.api.v1.scaling import router as scaling_router
 from placementos.api.v1.sources import router as sources_router
 from placementos.api.v1.students import router as students_router
 from placementos.api.v1.workflows import router as workflows_router
@@ -46,3 +47,4 @@ api_v1_router.include_router(operations_router)
 # Mount P11 controlled Google Workspace connector routes
 api_v1_router.include_router(integrations_router)
 api_v1_router.include_router(recovery_router)
+api_v1_router.include_router(scaling_router)

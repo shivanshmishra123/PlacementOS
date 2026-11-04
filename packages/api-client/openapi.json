@@ -3,7 +3,7 @@
   "info": {
     "title": "PlacementOS API",
     "description": "Campus recruitment operations platform API.",
-    "version": "0.12.0"
+    "version": "0.13.0"
   },
   "paths": {
     "/health": {
@@ -801,6 +801,96 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DriveListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/drive-summaries": {
+      "get": {
+        "tags": [
+          "Recruitment Drives"
+        ],
+        "summary": "List Drive Summaries",
+        "description": "Return the projection used by the drive index without loading full history.",
+        "operationId": "list_drive_summaries_api_v1_drive_summaries_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company Id"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriveSummaryListResponse"
                 }
               }
             }
@@ -5983,6 +6073,66 @@
           }
         }
       }
+    },
+    "/api/v1/institution/operating-policy": {
+      "get": {
+        "tags": [
+          "Institution scaling policy"
+        ],
+        "summary": "Get Operating Policy",
+        "operationId": "get_operating_policy_api_v1_institution_operating_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatingPolicyResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Institution scaling policy"
+        ],
+        "summary": "Update Operating Policy",
+        "operationId": "update_operating_policy_api_v1_institution_operating_policy_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperatingPolicyRevisionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatingPolicyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7954,6 +8104,105 @@
         ],
         "title": "DriveRevisionResponse"
       },
+      "DriveSummaryListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DriveSummaryResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "title": "DriveSummaryListResponse"
+      },
+      "DriveSummaryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "institution_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Institution Id"
+          },
+          "company_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Company Id"
+          },
+          "company_name": {
+            "type": "string",
+            "title": "Company Name"
+          },
+          "academic_year": {
+            "type": "string",
+            "title": "Academic Year"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "current_revision_number": {
+            "type": "integer",
+            "title": "Current Revision Number"
+          },
+          "source_artifact_count": {
+            "type": "integer",
+            "title": "Source Artifact Count"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "institution_id",
+          "company_id",
+          "company_name",
+          "academic_year",
+          "status",
+          "title",
+          "current_revision_number",
+          "source_artifact_count",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DriveSummaryResponse"
+      },
       "DriveUpdate": {
         "properties": {
           "title": {
@@ -9375,6 +9624,137 @@
           "dispatch_operation_id"
         ],
         "title": "NotificationFailureImpactCreate"
+      },
+      "OperatingPolicyResponse": {
+        "properties": {
+          "institution_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Institution Id"
+          },
+          "revision_number": {
+            "type": "integer",
+            "title": "Revision Number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "system_default",
+              "institution_revision"
+            ],
+            "title": "Source"
+          },
+          "onboarding_status": {
+            "type": "string",
+            "title": "Onboarding Status"
+          },
+          "max_open_drives": {
+            "type": "integer",
+            "title": "Max Open Drives"
+          },
+          "max_students_per_import": {
+            "type": "integer",
+            "title": "Max Students Per Import"
+          },
+          "max_export_rows": {
+            "type": "integer",
+            "title": "Max Export Rows"
+          },
+          "change_reason": {
+            "type": "string",
+            "title": "Change Reason"
+          },
+          "created_by_membership_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By Membership Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "institution_id",
+          "revision_number",
+          "source",
+          "onboarding_status",
+          "max_open_drives",
+          "max_students_per_import",
+          "max_export_rows",
+          "change_reason",
+          "created_by_membership_id",
+          "created_at"
+        ],
+        "title": "OperatingPolicyResponse"
+      },
+      "OperatingPolicyRevisionCreate": {
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Revision"
+          },
+          "onboarding_status": {
+            "type": "string",
+            "enum": [
+              "configuration_pending",
+              "synthetic_ready",
+              "pilot_ready"
+            ],
+            "title": "Onboarding Status"
+          },
+          "max_open_drives": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Max Open Drives"
+          },
+          "max_students_per_import": {
+            "type": "integer",
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Max Students Per Import"
+          },
+          "max_export_rows": {
+            "type": "integer",
+            "maximum": 1000000.0,
+            "minimum": 1.0,
+            "title": "Max Export Rows"
+          },
+          "change_reason": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Change Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_revision",
+          "onboarding_status",
+          "max_open_drives",
+          "max_students_per_import",
+          "max_export_rows",
+          "change_reason"
+        ],
+        "title": "OperatingPolicyRevisionCreate"
       },
       "OperationalHoldCreate": {
         "properties": {

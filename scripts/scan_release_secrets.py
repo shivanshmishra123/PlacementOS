@@ -78,7 +78,7 @@ def scan_checkpoints() -> tuple[int, list[str]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="docs/evidence/p10-secret-scan.json")
+    parser.add_argument("--output", default="docs/evidence/p13-secret-scan.json")
     args = parser.parse_args()
     files = release_files()
     file_findings = scan_files()

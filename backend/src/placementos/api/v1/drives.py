@@ -26,8 +26,10 @@ from placementos.schemas.drives import (
     DriveUpdate,
     SourceArtifactSummary,
 )
+from placementos.schemas.scaling import DriveSummaryListResponse, DriveSummaryResponse
 from placementos.services.audit import record_audit
 from placementos.services.authorization import load_authorized_drive
+from placementos.services.scaling import enforce_open_drive_quota
 from placementos.services.session import AuthContext
 
 router = APIRouter(tags=["Recruitment Drives"])
@@ -100,6 +102,8 @@ async def create_drive(
     company = (await session.execute(company_stmt)).scalar_one_or_none()
     if not company:
         raise NotFoundException(f"Company '{payload.company_id}' not found in active institution")
+
+    await enforce_open_drive_quota(session, auth.institution_id)
 
     drive = Drive(
         institution_id=auth.institution_id,
@@ -199,6 +203,93 @@ async def list_drives(
         items.append(_format_drive(d))
 
     return DriveListResponse(items=items, total=total, page=page, limit=limit)
+
+
+@router.get("/drive-summaries", response_model=DriveSummaryListResponse)
+async def list_drive_summaries(
+    status: str | None = None,
+    company_id: uuid.UUID | None = None,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    auth: AuthContext = Depends(get_current_auth),
+    session: AsyncSession = Depends(get_db),
+) -> DriveSummaryListResponse:
+    """Return the projection used by the drive index without loading full history."""
+    auth.require_coordinator()
+    assigned = (
+        select(DriveAssignment.id)
+        .where(
+            DriveAssignment.drive_id == Drive.id,
+            DriveAssignment.institution_id == auth.institution_id,
+            DriveAssignment.membership_id == auth.membership_id,
+        )
+        .exists()
+    )
+    access_filter = or_(
+        Drive.created_by_membership_id == auth.membership_id,
+        Drive.assigned_coordinator_membership_id == auth.membership_id,
+        assigned,
+    )
+    filters = [Drive.institution_id == auth.institution_id, access_filter]
+    if status:
+        filters.append(Drive.status == status)
+    if company_id:
+        filters.append(Drive.company_id == company_id)
+
+    source_count = (
+        select(func.count(SourceArtifact.id))
+        .where(
+            SourceArtifact.institution_id == Drive.institution_id,
+            SourceArtifact.drive_id == Drive.id,
+        )
+        .correlate(Drive)
+        .scalar_subquery()
+    )
+    total = int(
+        await session.scalar(select(func.count(Drive.id)).where(*filters)) or 0
+    )
+    rows = (
+        await session.execute(
+            select(
+                Drive.id,
+                Drive.institution_id,
+                Drive.company_id,
+                Company.name.label("company_name"),
+                Drive.status,
+                Drive.title,
+                Drive.concurrency_revision.label("current_revision_number"),
+                DriveRevision.compensation_details,
+                source_count.label("source_artifact_count"),
+                Drive.created_at,
+                Drive.updated_at,
+            )
+            .join(Company, Company.id == Drive.company_id)
+            .outerjoin(DriveRevision, DriveRevision.id == Drive.current_drive_revision_id)
+            .where(*filters)
+            .order_by(desc(Drive.created_at), desc(Drive.id))
+            .offset((page - 1) * limit)
+            .limit(limit)
+        )
+    ).mappings()
+    items = []
+    for row in rows:
+        compensation = row["compensation_details"] or {}
+        items.append(
+            DriveSummaryResponse(
+                id=row["id"],
+                institution_id=row["institution_id"],
+                company_id=row["company_id"],
+                company_name=row["company_name"],
+                academic_year=compensation.get("academic_year", "2026-2027"),
+                status=row["status"],
+                title=row["title"],
+                current_revision_number=row["current_revision_number"],
+                source_artifact_count=row["source_artifact_count"],
+                created_at=row["created_at"],
+                updated_at=row["updated_at"],
+            )
+        )
+    return DriveSummaryListResponse(items=items, total=total, page=page, limit=limit)
 
 
 @router.get("/drives/{drive_id}", response_model=DriveResponse)

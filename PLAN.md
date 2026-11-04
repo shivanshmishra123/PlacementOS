@@ -1,6 +1,6 @@
 # PlacementOS: Implementation Plan
 
-> Baseline dated 28 October 2026; implementation status synchronized 3 November 2026. The repository contains the evidenced P00-P12 local implementation slices. Release 0.12.0 is synthetic-demo ready only; live-account provider acceptance, real-data operation, and later measured expansion remain blocked or deferred as recorded below.
+> Baseline dated 28 October 2026; implementation status synchronized 3 November 2026. The repository contains the evidenced P00-P13 local implementation slices. Release 0.13.0 is synthetic-demo ready only; live-account provider acceptance and real-data operation remain blocked or deferred as recorded below.
 
 ## 1. How to execute this plan
 
@@ -79,7 +79,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P10 | Completed for synthetic-demo hardening; explicit real-data readiness remains blocked by listed institution/provider inputs | Cross-cutting NFRs, privacy, real-data gate | Verified synthetic MVP release and documented fail-closed pilot gate. |
 | P11 | Local connector implementation complete; isolated live-account acceptance blocked on explicit credentials/authorization | FR-INT-03 through FR-INT-09 | Controlled Google connectors with local contract evidence; live acceptance pending. |
 | P12 | Completed locally; deterministic fixture/manual planner and synthetic provider evidence only | FR-EXC-04 through FR-EXC-07 | Approved recovery plans for changing information. |
-| P13 | Not started; demand-driven | Measured expansion | Reliable operation at demonstrated additional demand. |
+| P13 | Complete locally; synthetic evidence | Measured expansion | Reliable operation at demonstrated additional demand. |
 
 Do not assign calendar dates before the developer's capacity and providers are known. Estimate each phase after its dependencies work. A sequence of verified milestones is more useful than unsupported delivery promises.
 
@@ -504,19 +504,21 @@ Implementation record: release 0.11.0 provides the disabled-by-default connector
 
 **Exit gate:** M6 demonstrates concrete adaptive recovery with deterministic impact and exact approvals. An impressive free-text plan without safe execution/recovery is incomplete.
 
-Implementation record: release 0.12.0 provides revisioned deterministic impact evidence, proposal-only fixture/manual planning, exact approval, bounded execution/cancellation, partial-completion safety, and the coordinator review surface. No live model or provider action ran, no correction message was sent, and no case was automatically resolved. P11 live-account acceptance remains separately blocked; the next demand-driven phase is P13 only after measured pilot evidence and an explicit requested expansion.
+Implementation record: release 0.12.0 provides revisioned deterministic impact evidence, proposal-only fixture/manual planning, exact approval, bounded execution/cancellation, partial-completion safety, and the coordinator review surface. No live model or provider action ran, no correction message was sent, and no case was automatically resolved. P11 live-account acceptance remains separately blocked.
 
 ## 17. P13: Expand only from measured needs
 
 **Objective:** Improve operation or scope based on pilot evidence. **Dependencies:** relevant P10/P11/P12 capabilities and explicit requested expansion. This phase is not necessary for the initial MVP.
 
-- [ ] **P13-T01: Review pilot evidence.** Identify coordinator friction, extraction corrections, unresolved cases, delivery issues, and operating cost. Evidence: prioritized problems tied to observed usage rather than speculative features.
-- [ ] **P13-T02: Optimize demonstrated bottlenecks.** Consider indexed projections, chunking, queue separation, or incremental invalidation. Evidence: before/after measurements and preserved correctness/recovery tests.
-- [ ] **P13-T03: Validate additional institution/tenant operation.** Test configuration isolation, onboarding, access administration, quotas, exports, and restore scope. Evidence: operating multiple institutions does not weaken isolation.
-- [ ] **P13-T04: Add requested policy or scheduling extensions.** Version new criteria/operators/normalizations and conflicts with explicit institution rules. Evidence: no silent change to old policy semantics.
-- [ ] **P13-T05: Review stronger availability and recovery needs.** Adopt HA/managed services only when goals require them; test failover and outbox behavior. Evidence: revised objectives are measured and supported operationally.
-- [ ] **P13-T06: Refresh documentation and maintenance policy.** Review dependencies, API compatibility, retention, graph upgrades, runbooks, and feature status. Evidence: a clean environment and current references reproduce the intended release.
-- [ ] **P13-T07: Phase completion testing and verification.** Execute scale and expansion test suite: multi-institution tenant load test, query index performance verification, configuration isolation verification, and disaster recovery SLA measurement. Evidence: documented benchmark and multi-tenant isolation evidence.
+- [x] **P13-T01: Review pilot evidence.** Identify coordinator friction, extraction corrections, unresolved cases, delivery issues, and operating cost. Evidence: P10 showed the full drive-list hydration as the only failed capacity signal; eligibility and restore objectives were already within target. The prioritized review is recorded in `docs/p13-measured-expansion-verification.md`.
+- [x] **P13-T02: Optimize demonstrated bottlenecks.** Consider indexed projections, chunking, queue separation, or incremental invalidation. Evidence: the additive summary projection reduced ordinary p95 from 891.41 ms to 56.34 ms and burst p95 by 38.88%, with compatibility and authorization tests preserved.
+- [x] **P13-T03: Validate additional institution/tenant operation.** Test configuration isolation, onboarding, access administration, quotas, exports, and restore scope. Evidence: revisioned tenant operating policy, explicit admin capability, enforced quotas, RLS/service tests, mixed-tenant load, and per-tenant restore counts pass.
+- [x] **P13-T04: Add requested policy or scheduling extensions.** Version new criteria/operators/normalizations and conflicts with explicit institution rules. Evidence: no institution supplied an extension request, so no semantics were invented; the explicit review and unchanged-version decision are recorded in the P13 verification report.
+- [x] **P13-T05: Review stronger availability and recovery needs.** Adopt HA/managed services only when goals require them; test failover and outbox behavior. Evidence: no observed goal required HA; durable outbox/retry acceptance remains green and the expanded isolated restore completed in 89.709 seconds against the 8-hour objective.
+- [x] **P13-T06: Refresh documentation and maintenance policy.** Review dependencies, API compatibility, retention, graph upgrades, runbooks, and feature status. Evidence: architecture, setup, backup runbook, OpenAPI, release status, and `docs/maintenance-policy.md` describe the current reproducible boundary.
+- [x] **P13-T07: Phase completion testing and verification.** Execute scale and expansion test suite: multi-institution tenant load test, query index performance verification, configuration isolation verification, and disaster recovery SLA measurement. Evidence: `docs/evidence/p13-scaling.json` and `docs/evidence/p13-backup-restore.json` pass with zero tenant violations, required indexes present, matching tenant partitions, hashes, and tombstone replay.
+
+Implementation record: release 0.13.0 preserves P00-P12 semantics and adds only the measured drive summary projection, composite access indexes, and revisioned institution operating limits. One hundred mixed-tenant sessions passed with zero isolation violations, and the isolated restore stayed within the existing objective. No live account, real record, provider write, policy semantic extension, HA claim, or deployment was introduced.
 
 **Exit gate:** each expansion has a measurable benefit, a bounded scope, and passing guarantees. A more complicated deployment alone is not progress.
 

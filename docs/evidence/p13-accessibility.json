@@ -1,0 +1,37 @@
+{
+  "measured_at": "2026-11-04T06:20:31.492Z",
+  "method": "Headless Microsoft Edge keyboard and rendered-DOM audit through the Chrome DevTools Protocol",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "checks": {
+    "skip_link_first": true,
+    "skip_link_targets_main": true,
+    "persona_trigger_keyboard": true,
+    "persona_menu_semantics": true,
+    "coordinator_login_keyboard": true,
+    "operations_heading": true,
+    "synthetic_only_warning": true,
+    "refresh_keyboard": true,
+    "approval_evidence_heading": true,
+    "form_controls_named": true,
+    "student_switch_keyboard": true,
+    "student_login_keyboard": true,
+    "student_status_separation": true,
+    "deadline_semantics": true,
+    "file_controls_named": true,
+    "mobile_no_page_overflow": true,
+    "touch_targets_present": true,
+    "named_interactive_tree": true
+  },
+  "notes": [
+    "This is an engineering audit, not a WCAG certification.",
+    "The synchronized 100-request API burst is a documented capacity limit; it is unrelated to keyboard conformance."
+  ],
+  "accessibility_tree": {
+    "nodes": 77,
+    "named_interactive_nodes": 4
+  },
+  "passed": true
+}

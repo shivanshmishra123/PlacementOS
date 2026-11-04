@@ -133,7 +133,11 @@ try {
   await waitFor(cdp, "document.querySelectorAll('[role=menuitem]').length >= 4", "Persona menu did not open");
   report.checks.persona_menu_semantics = await evaluate(cdp, "document.querySelector('[role=menu]') !== null && document.querySelectorAll('[role=menuitem]').length >= 4");
   report.checks.coordinator_login_keyboard = await focusAndEnter(cdp, "document.querySelector('[role=menuitem]')");
-  await waitFor(cdp, "document.body.textContent.includes('Priya Sharma')", "Coordinator persona did not become active");
+  await waitFor(
+    cdp,
+    "document.querySelector('button[aria-label=\"Switch Persona\"]') !== null && document.querySelector('[role=menu]') === null && document.body.textContent.includes('Priya Sharma')",
+    "Coordinator persona did not become active",
+  );
 
   await navigate(cdp, "http://localhost:3000/coordinator/operations");
   await waitFor(cdp, "document.body.textContent.includes('Operations and pilot readiness')", "Operations screen did not render");
@@ -158,7 +162,11 @@ try {
     cdp,
     "[...document.querySelectorAll('[role=menuitem]')].find((item) => item.textContent.includes('Aarav Sharma'))",
   );
-  await waitFor(cdp, "document.body.textContent.includes('Aarav Sharma')", "Student persona did not become active");
+  await waitFor(
+    cdp,
+    "document.querySelector('[role=menu]') === null && document.body.textContent.includes('Aarav Sharma') && document.body.textContent.includes('Student')",
+    "Student persona did not become active",
+  );
   await navigate(cdp, "http://localhost:3000/student/drives");
   await waitFor(cdp, "document.querySelector('h1') !== null", "Student drives screen did not render");
   report.checks.student_status_separation = await evaluate(cdp, "document.body.textContent.includes('Eligibility, document readiness, and registration are separate statuses')");
@@ -185,6 +193,11 @@ try {
   if (!report.passed) process.exitCode = 1;
 } catch (error) {
   console.error(error);
+  if (cdp) {
+    try {
+      console.error(await evaluate(cdp, "JSON.stringify({ url: location.href, body: document.body.innerText.slice(0, 2000) })"));
+    } catch {}
+  }
   process.exitCode = 1;
 } finally {
   if (cdp) cdp.close();

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type {
   OperationalHealthResponse,
+  OperatingPolicyResponse,
   PilotReadinessResponse,
 } from "@placementos/api-client";
 import { useAuth } from "../../../context/AuthContext";
@@ -25,6 +26,9 @@ export default function OperationsPage() {
   const { client, user, loading: authLoading } = useAuth();
   const [readiness, setReadiness] = useState<PilotReadinessResponse | null>(null);
   const [health, setHealth] = useState<OperationalHealthResponse | null>(null);
+  const [policy, setPolicy] = useState<OperatingPolicyResponse | null>(null);
+  const [policyReason, setPolicyReason] = useState("");
+  const [savingPolicy, setSavingPolicy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -33,12 +37,14 @@ export default function OperationsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [nextReadiness, nextHealth] = await Promise.all([
+      const [nextReadiness, nextHealth, nextPolicy] = await Promise.all([
         client.getPilotReadiness(),
         client.getOperationalHealth(),
+        client.getOperatingPolicy(),
       ]);
       setReadiness(nextReadiness);
       setHealth(nextHealth);
+      setPolicy(nextPolicy);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load operational status");
     } finally {
@@ -49,6 +55,28 @@ export default function OperationsPage() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  const savePolicy = async () => {
+    if (!policy || policyReason.trim().length < 3) return;
+    setSavingPolicy(true);
+    setError(null);
+    try {
+      const nextPolicy = await client.updateOperatingPolicy({
+        expected_revision: policy.revision_number,
+        onboarding_status: policy.onboarding_status,
+        max_open_drives: policy.max_open_drives,
+        max_students_per_import: policy.max_students_per_import,
+        max_export_rows: policy.max_export_rows,
+        change_reason: policyReason.trim(),
+      });
+      setPolicy(nextPolicy);
+      setPolicyReason("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to update operating policy");
+    } finally {
+      setSavingPolicy(false);
+    }
+  };
 
   if (authLoading || loading) {
     return <p role="status">Loading operational readiness…</p>;
@@ -104,6 +132,47 @@ export default function OperationsPage() {
         </section>
       )}
 
+      {policy && (
+        <section aria-labelledby="policy-heading" className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 id="policy-heading" className="text-lg font-semibold">Institution operating policy</h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Revision {policy.revision_number} · {policy.source.replaceAll("_", " ")}
+              </p>
+            </div>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+              {policy.onboarding_status.replaceAll("_", " ")}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <PolicyNumber label="Open drives" value={policy.max_open_drives} editable={user.capabilities.includes("config:manage")} onChange={(value) => setPolicy({ ...policy, max_open_drives: value })} />
+            <PolicyNumber label="Students per import" value={policy.max_students_per_import} editable={user.capabilities.includes("config:manage")} onChange={(value) => setPolicy({ ...policy, max_students_per_import: value })} />
+            <PolicyNumber label="Rows per export" value={policy.max_export_rows} editable={user.capabilities.includes("config:manage")} onChange={(value) => setPolicy({ ...policy, max_export_rows: value })} />
+          </div>
+          {user.capabilities.includes("config:manage") && (
+            <div className="mt-4 grid gap-3 md:grid-cols-[14rem_1fr_auto]">
+              <label className="text-sm">
+                <span className="block text-xs font-medium text-slate-600 dark:text-slate-300">Onboarding state</span>
+                <select value={policy.onboarding_status} onChange={(event) => setPolicy({ ...policy, onboarding_status: event.target.value as OperatingPolicyResponse["onboarding_status"] })} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-950">
+                  <option value="configuration_pending">Configuration pending</option>
+                  <option value="synthetic_ready">Synthetic ready</option>
+                  <option value="pilot_ready">Pilot ready</option>
+                </select>
+              </label>
+              <label className="text-sm">
+                <span className="block text-xs font-medium text-slate-600 dark:text-slate-300">Attributed change reason</span>
+                <input value={policyReason} onChange={(event) => setPolicyReason(event.target.value)} placeholder="Why are these limits or state changing?" className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-950" />
+              </label>
+              <button type="button" disabled={savingPolicy || policyReason.trim().length < 3} onClick={() => void savePolicy()} className="self-end rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
+                {savingPolicy ? "Saving…" : "Save revision"}
+              </button>
+            </div>
+          )}
+          <p className="mt-3 text-xs text-slate-500">Latest reason: {policy.change_reason}</p>
+        </section>
+      )}
+
       {health && (
         <section aria-labelledby="health-heading" className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
           <h2 id="health-heading" className="text-lg font-semibold">Work queues and recovery signals</h2>
@@ -138,5 +207,14 @@ function Summary({ label, value }: { label: string; value: number }) {
       <dt className="text-xs text-slate-500 dark:text-slate-400">{label}</dt>
       <dd className="mt-1 text-xl font-semibold">{value}</dd>
     </div>
+  );
+}
+
+function PolicyNumber({ label, value, editable, onChange }: { label: string; value: number; editable: boolean; onChange: (value: number) => void }) {
+  return (
+    <label className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+      <span className="block text-xs text-slate-500 dark:text-slate-400">{label}</span>
+      <input type="number" min={1} value={value} disabled={!editable} onChange={(event) => onChange(Number(event.target.value))} className="mt-1 w-full bg-transparent text-xl font-semibold disabled:opacity-100" />
+    </label>
   );
 }

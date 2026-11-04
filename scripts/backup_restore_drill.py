@@ -25,7 +25,21 @@ TABLES = [
     "action_proposals",
     "dispatch_operations",
     "workflow_runs",
+    "exception_cases",
+    "integration_connections",
+    "institution_operating_policies",
     "audit_logs",
+]
+
+INSTITUTION_SCOPED_TABLES = [
+    "student_profiles",
+    "drives",
+    "action_proposals",
+    "dispatch_operations",
+    "workflow_runs",
+    "exception_cases",
+    "integration_connections",
+    "institution_operating_policies",
 ]
 
 
@@ -42,6 +56,19 @@ def count_table(database: str, table: str) -> int:
     query = f"SELECT CASE WHEN to_regclass('public.{table}') IS NULL THEN 0 ELSE (SELECT count(*) FROM {table}) END;"
     result = docker_postgres("psql", "-U", "placementos", "-d", database, "-Atc", query)
     return int(result.stdout.decode().strip())
+
+
+def count_table_by_institution(database: str, table: str) -> dict[str, int]:
+    query = (
+        f"SELECT institution_id::text, count(*) FROM {table} "
+        "GROUP BY institution_id ORDER BY institution_id;"
+    )
+    result = docker_postgres("psql", "-U", "placementos", "-d", database, "-AtF", "|", "-c", query)
+    return {
+        institution_id: int(count)
+        for line in result.stdout.decode().splitlines()
+        for institution_id, count in [line.split("|", 1)]
+    }
 
 
 def object_client():
@@ -63,9 +90,9 @@ def run(output_path: Path) -> dict[str, object]:
     started_at = datetime.now(UTC)
     started = time.perf_counter()
     suffix = uuid.uuid4().hex[:10]
-    restore_database = f"placementos_p10_restore_{suffix}"
-    restore_bucket = f"placementos-p10-restore-{suffix}"
-    tombstone_key = f"p10-restore-drill/{suffix}.txt"
+    restore_database = f"placementos_restore_{suffix}"
+    restore_bucket = f"placementos-restore-{suffix}"
+    tombstone_key = f"restore-drill/{suffix}.txt"
     s3 = object_client()
     source_bucket = settings.S3_BUCKET_NAME
     created_source_fixture = False
@@ -80,6 +107,10 @@ def run(output_path: Path) -> dict[str, object]:
 
         dump = docker_postgres("pg_dump", "-U", "placementos", "-Fc", "-d", "placementos").stdout
         source_counts = {table: count_table("placementos", table) for table in TABLES}
+        source_tenant_counts = {
+            table: count_table_by_institution("placementos", table)
+            for table in INSTITUTION_SCOPED_TABLES
+        }
 
         object_backup: dict[str, bytes] = {}
         paginator = s3.get_paginator("list_objects_v2")
@@ -99,6 +130,10 @@ def run(output_path: Path) -> dict[str, object]:
             input_bytes=dump,
         )
         restored_counts = {table: count_table(restore_database, table) for table in TABLES}
+        restored_tenant_counts = {
+            table: count_table_by_institution(restore_database, table)
+            for table in INSTITUTION_SCOPED_TABLES
+        }
 
         s3.create_bucket(Bucket=restore_bucket)
         for key, data in object_backup.items():
@@ -113,7 +148,12 @@ def run(output_path: Path) -> dict[str, object]:
         s3.delete_object(Bucket=restore_bucket, Key=tombstone_key)
         remaining = s3.list_objects_v2(Bucket=restore_bucket, Prefix=tombstone_key).get("KeyCount", 0)
         duration_seconds = round(time.perf_counter() - started, 3)
-        passed = source_counts == restored_counts and source_hashes == restored_hashes and remaining == 0
+        passed = (
+            source_counts == restored_counts
+            and source_tenant_counts == restored_tenant_counts
+            and source_hashes == restored_hashes
+            and remaining == 0
+        )
         report: dict[str, object] = {
             "drill_started_at": started_at.isoformat(),
             "drill_completed_at": datetime.now(UTC).isoformat(),
@@ -124,6 +164,9 @@ def run(output_path: Path) -> dict[str, object]:
             "database_counts_match": source_counts == restored_counts,
             "source_counts": source_counts,
             "restored_counts": restored_counts,
+            "tenant_partition_counts_match": source_tenant_counts == restored_tenant_counts,
+            "source_tenant_counts": source_tenant_counts,
+            "restored_tenant_counts": restored_tenant_counts,
             "object_count": len(object_backup),
             "object_hashes_match": source_hashes == restored_hashes,
             "checkpoint_tables_included_in_database_dump": True,

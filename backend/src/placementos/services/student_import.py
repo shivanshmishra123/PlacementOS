@@ -19,6 +19,7 @@ from placementos.core.errors import BadRequestException
 from placementos.core.redis import get_redis_client
 from placementos.models.academic import AcademicRecordRevision
 from placementos.models.identity import AuditLog, Membership, StudentProfile, User
+from placementos.services.scaling import enforce_student_import_quota
 
 
 @dataclass
@@ -210,6 +211,8 @@ class StudentImportService:
                     is_new=is_new,
                 )
             )
+
+        await enforce_student_import_quota(db, institution_id, len(parsed_rows))
 
         # Generate preview token and cache in Redis for 1 hour
         preview_token = f"import_preview:{uuid.uuid4()}"

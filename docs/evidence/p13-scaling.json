@@ -1,0 +1,86 @@
+{
+  "api": {
+    "after_summary_projection": {
+      "endpoint": "/api/v1/drive-summaries",
+      "ordinary": {
+        "latency_ms": {
+          "max": 71.9,
+          "median": 46.58,
+          "p95": 56.34
+        },
+        "median_payload_bytes": 4152,
+        "status_counts": {
+          "200": 100
+        },
+        "tenant_isolation_violations": 0
+      },
+      "synchronized_100_request_burst": {
+        "latency_ms": {
+          "max": 2597.67,
+          "median": 1869.12,
+          "p95": 2531.55
+        },
+        "median_payload_bytes": 4152,
+        "status_counts": {
+          "200": 100
+        },
+        "tenant_isolation_violations": 0
+      }
+    },
+    "before_legacy_full_projection": {
+      "endpoint": "/api/v1/drives",
+      "ordinary": {
+        "latency_ms": {
+          "max": 3025.26,
+          "median": 80.13,
+          "p95": 891.41
+        },
+        "median_payload_bytes": 8853,
+        "status_counts": {
+          "200": 100
+        },
+        "tenant_isolation_violations": 0
+      },
+      "synchronized_100_request_burst": {
+        "latency_ms": {
+          "max": 4201.6,
+          "median": 3136.72,
+          "p95": 4141.82
+        },
+        "median_payload_bytes": 8853,
+        "status_counts": {
+          "200": 100
+        },
+        "tenant_isolation_violations": 0
+      }
+    },
+    "burst_p95_improvement_percent": 38.88,
+    "institution_mix": {
+      "apex-tech": 50,
+      "beacon-state": 50
+    },
+    "logical_sessions": 100,
+    "ordinary_peak_inflight_requests": 2,
+    "ordinary_target_p95_ms": 500,
+    "passed": true
+  },
+  "indexes": {
+    "passed": true,
+    "present": [
+      "ix_drive_assignments_inst_member_drive",
+      "ix_drives_inst_assignee_created",
+      "ix_drives_inst_created_id",
+      "ix_drives_inst_creator_created"
+    ],
+    "required": [
+      "ix_drive_assignments_inst_member_drive",
+      "ix_drives_inst_assignee_created",
+      "ix_drives_inst_created_id",
+      "ix_drives_inst_creator_created"
+    ]
+  },
+  "measured_at": "2026-11-02T19:55:48.130805+00:00",
+  "passed": true,
+  "release_version": "0.13.0",
+  "scope": "synthetic local mixed-institution drive-index projection"
+}

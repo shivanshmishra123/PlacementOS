@@ -77,6 +77,7 @@ from placementos.models.recruitment import (
     Drive,
     DriveRevision,
 )
+from placementos.models.scaling import InstitutionOperatingPolicy
 from placementos.models.storage import (
     DomainJob,
     SourceArtifact,
@@ -109,6 +110,7 @@ __all__ = [
     "RecoveryPlanStep",
     "RecoveryExecution",
     "RecoveryStepAttempt",
+    "InstitutionOperatingPolicy",
     "DriveDocumentRequirement",
     "EligibilityPolicyVersion",
     "EligibilityResult",

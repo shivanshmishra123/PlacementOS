@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   api,
   CompanyResponse,
-  DriveResponse,
-  DriveListResponse,
+  DriveSummaryResponse,
+  DriveSummaryListResponse,
 } from "@placementos/api-client";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -15,7 +15,7 @@ export default function CoordinatorDrivesPage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [drives, setDrives] = useState<DriveResponse[]>([]);
+  const [drives, setDrives] = useState<DriveSummaryResponse[]>([]);
   const [total, setTotal] = useState(0);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,7 @@ export default function CoordinatorDrivesPage() {
     try {
       setLoading(true);
       setError(null);
-      const res: DriveListResponse = await api.listDrives({
+      const res: DriveSummaryListResponse = await api.listDriveSummaries({
         status: statusFilter || undefined,
         limit: 50,
       });
@@ -251,10 +251,10 @@ export default function CoordinatorDrivesPage() {
                     Rev #{d.current_revision_number}
                   </td>
                   <td className="px-6 py-4 text-xs text-slate-500">
-                    {d.source_artifacts.length === 0 ? (
+                    {d.source_artifact_count === 0 ? (
                       <span className="text-amber-600 dark:text-amber-400 font-medium">Pending JD</span>
                     ) : (
-                      <span>{d.source_artifacts.length} file(s) attached</span>
+                      <span>{d.source_artifact_count} file(s) attached</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">

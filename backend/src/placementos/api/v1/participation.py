@@ -64,6 +64,7 @@ from placementos.services.participation import (
     validate_current_documents_for_drive,
     validate_document_against_requirement,
 )
+from placementos.services.scaling import enforce_export_quota
 from placementos.services.session import AuthContext
 from placementos.services.storage import StorageSecurityError, storage_service
 
@@ -1273,6 +1274,7 @@ async def export_participants(
     auth.require_capability("export:generate")
     drive = await load_authorized_drive(session, auth, drive_id)
     items = await _participants(session, drive)
+    await enforce_export_quota(session, auth.institution_id, len(items))
     stream = io.StringIO()
     writer = csv.writer(stream, lineterminator="\n")
     writer.writerow(

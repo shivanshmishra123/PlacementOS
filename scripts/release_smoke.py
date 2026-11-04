@@ -14,9 +14,9 @@ import httpx
 async def run(base_url: str) -> dict[str, object]:
     checks: dict[str, bool] = {}
     async with httpx.AsyncClient(base_url=base_url, timeout=30) as client:
-        health = await client.get("/health", headers={"X-Correlation-ID": "p10-release-smoke"})
-        checks["liveness"] = health.status_code == 200 and health.json()["version"] == "0.12.0"
-        checks["correlation_id"] = health.headers.get("x-correlation-id") == "p10-release-smoke"
+        health = await client.get("/health", headers={"X-Correlation-ID": "p13-release-smoke"})
+        checks["liveness"] = health.status_code == 200 and health.json()["version"] == "0.13.0"
+        checks["correlation_id"] = health.headers.get("x-correlation-id") == "p13-release-smoke"
 
         ready = await client.get("/ready")
         checks["dependencies_ready"] = ready.status_code == 200 and ready.json()["status"] == "ready"
@@ -48,7 +48,7 @@ async def run(base_url: str) -> dict[str, object]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
-    parser.add_argument("--output", default="docs/evidence/p10-release-smoke.json")
+    parser.add_argument("--output", default="docs/evidence/p13-release-smoke.json")
     args = parser.parse_args()
     report = asyncio.run(run(args.base_url))
     output = Path(args.output)

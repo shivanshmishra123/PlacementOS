@@ -27,7 +27,7 @@ The local drill is automated by:
 uv run --project backend python scripts/backup_restore_drill.py
 ```
 
-It creates a validated temporary database and bucket, restores database/objects/checkpoints, compares counts and hashes, reapplies a synthetic tombstone only in the restored bucket, records evidence, then removes the isolated targets. It never deletes an application object except the exact synthetic fixture it creates.
+It creates a validated temporary database and bucket, restores database/objects/checkpoints, compares whole-table counts, per-institution partition counts, and object hashes, reapplies a synthetic tombstone only in the restored bucket, records evidence, then removes the isolated targets. It never deletes an application object except the exact synthetic fixture it creates.
 
 ## Retention and deletion
 

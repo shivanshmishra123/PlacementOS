@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
-    RELEASE_VERSION: str = "0.12.0"
+    RELEASE_VERSION: str = "0.13.0"
 
     # Security
     SECRET_KEY: str = Field(

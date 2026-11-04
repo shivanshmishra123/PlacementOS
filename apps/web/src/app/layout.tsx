@@ -110,7 +110,7 @@ export default function RootLayout({
 
               <div className="flex items-center gap-4">
                 <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  Release 0.12 Recovery
+                  Release 0.13 Measured scaling
                 </span>
                 <PersonaSwitcher />
               </div>

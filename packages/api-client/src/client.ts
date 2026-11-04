@@ -17,6 +17,9 @@ import type {
   DriveRevisionResponse,
   DriveResponse,
   DriveListResponse,
+  DriveSummaryListResponse,
+  OperatingPolicyResponse,
+  OperatingPolicyRevisionCreate,
   UploadSessionCreate,
   UploadSessionResponse,
   PastedSourceCreate,
@@ -309,6 +312,37 @@ export class PlacementOSClient {
 
     const qs = searchParams.toString();
     return this.request<DriveListResponse>(`/api/v1/drives${qs ? `?${qs}` : ""}`);
+  }
+
+  public async listDriveSummaries(params?: {
+    status?: string;
+    company_id?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<DriveSummaryListResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set("status", params.status);
+    if (params?.company_id) searchParams.set("company_id", params.company_id);
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.limit) searchParams.set("limit", String(params.limit));
+    const qs = searchParams.toString();
+    return this.request<DriveSummaryListResponse>(
+      `/api/v1/drive-summaries${qs ? `?${qs}` : ""}`
+    );
+  }
+
+  public async getOperatingPolicy(): Promise<OperatingPolicyResponse> {
+    return this.request<OperatingPolicyResponse>("/api/v1/institution/operating-policy");
+  }
+
+  public async updateOperatingPolicy(
+    req: OperatingPolicyRevisionCreate
+  ): Promise<OperatingPolicyResponse> {
+    return this.request<OperatingPolicyResponse>("/api/v1/institution/operating-policy", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
   }
 
   public async getDrive(driveId: string): Promise<DriveResponse> {

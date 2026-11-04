@@ -200,6 +200,49 @@ export interface DriveListResponse {
   limit: number;
 }
 
+export interface DriveSummaryResponse {
+  id: string;
+  institution_id: string;
+  company_id: string;
+  company_name: string;
+  academic_year: string;
+  status: string;
+  title: string;
+  current_revision_number: number;
+  source_artifact_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DriveSummaryListResponse {
+  items: DriveSummaryResponse[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface OperatingPolicyResponse {
+  institution_id: string;
+  revision_number: number;
+  source: "system_default" | "institution_revision";
+  onboarding_status: "configuration_pending" | "synthetic_ready" | "pilot_ready";
+  max_open_drives: number;
+  max_students_per_import: number;
+  max_export_rows: number;
+  change_reason: string;
+  created_by_membership_id?: string | null;
+  created_at?: string | null;
+}
+
+export interface OperatingPolicyRevisionCreate {
+  expected_revision: number;
+  onboarding_status: "configuration_pending" | "synthetic_ready" | "pilot_ready";
+  max_open_drives: number;
+  max_students_per_import: number;
+  max_export_rows: number;
+  change_reason: string;
+}
+
 // ==========================================
 // Phase 3: Storage, Intake & Extractions
 // ==========================================

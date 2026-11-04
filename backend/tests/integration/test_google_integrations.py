@@ -408,7 +408,8 @@ async def test_calendar_webhook_requires_signed_channel_and_deduplicates(
     assert count == 1
 
     invalid = dict(headers)
-    invalid["X-Goog-Channel-ID"] = channel_id[:-1] + "0"
+    invalid_suffix = "1" if channel_id[-1] != "1" else "2"
+    invalid["X-Goog-Channel-ID"] = channel_id[:-1] + invalid_suffix
     assert (
         await client.post("/api/v1/integrations/google/calendar/webhook", headers=invalid)
     ).status_code == 404

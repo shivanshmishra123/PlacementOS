@@ -1,6 +1,6 @@
 # PlacementOS: Architecture and Technical Reference
 
-> Status: implementation baseline, synchronized 3 November 2026. The evidenced local implementation extends through P12 structured exception recovery and is synthetic-demo ready only. P11 live-account acceptance, real-data operation, and P13 measured expansion remain gated work.
+> Status: implementation baseline, synchronized 3 November 2026. The evidenced local implementation extends through P13 measured expansion and is synthetic-demo ready only. P11 live-account acceptance and real-data operation remain gated work.
 
 ## 1. Architectural intent
 
@@ -378,7 +378,7 @@ LangGraph checkpoint tables need their own protected adapter/access path because
 
 ### 9.2 Endpoint inventory
 
-This is the representative contract inventory. The implemented local phase scope extends through P12 structured exception recovery. Exact current paths are generated in `packages/api-client/openapi.json`; live-account connector acceptance must not be presented as complete until its gates pass.
+This is the representative contract inventory. The implemented local phase scope extends through P13 measured expansion. Exact current paths are generated in `packages/api-client/openapi.json`; live-account connector acceptance must not be presented as complete until its gates pass.
 
 | Area | Representative endpoints | Important behavior |
 | --- | --- | --- |
@@ -758,6 +758,14 @@ Recovery plans contain only the allowlisted operations `place_drive_hold`, `stal
 Approval binds the exact plan and dependency fingerprint. A durable outbox queues execution, and the worker rechecks reviewer capability, case and drive state, proposal hash, expiry, and source freshness before the plan and before every step. Each completed step is its own atomic, deduplicated transaction. A later failure records partial completion and stops without replaying completed work; coordinator cancellation preserves completed evidence and marks remaining steps cancelled. Correction communication steps create frozen drafts only; they do not propose or send them. Recovery execution never marks the exception case resolved.
 
 The coordinator surface is `/coordinator/exceptions/[id]`; APIs cover impact analyses, recovery plans, exact decisions, and execution status. Local acceptance and remaining synthetic-only constraints are recorded in `docs/p12-exception-recovery-verification.md`.
+
+### 18.7 Implemented P13 measured expansion boundary
+
+Release 0.13.0 adds the projection endpoint `/api/v1/drive-summaries` for the demonstrated drive-index bottleneck while preserving the legacy full contract. The projection performs tenant and assignment authorization in the query, selects only current summary fields, counts sources without loading extraction history, and uses measured composite indexes. The coordinator drive index consumes this additive contract.
+
+Institution operating policy is an immutable revision stream with one current revision per tenant. It records onboarding state and explicit limits for open drives, import rows, and export rows. Only `config:manage` may revise it with optimistic concurrency and an attributed reason; runtime enforcement remains institution-scoped and audited. These operating limits do not alter eligibility or scheduling semantics.
+
+P13 found no authorized request for a new policy predicate or scheduling operator and no evidence requiring HA. The existing semantics and deployment topology therefore remain unchanged. Mixed-tenant before/after measurements, index inventory, and tenant-partition restore evidence are recorded in `docs/p13-measured-expansion-verification.md`.
 
 ## 19. Security and privacy controls
 

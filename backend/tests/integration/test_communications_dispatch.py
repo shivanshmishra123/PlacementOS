@@ -175,7 +175,7 @@ async def test_exact_approval_creates_outbox_and_duplicate_execution_sends_once(
         raise RuntimeError("fixture broker unavailable")
 
     monkeypatch.setattr(dispatch_operation_task, "delay", broker_down)
-    await relay_pending_outbox()
+    await relay_pending_outbox(limit=10_000)
     await admin_db_session.refresh(outbox)
     assert outbox.status == "pending"
     assert "broker unavailable" in (outbox.last_error or "")
@@ -183,7 +183,7 @@ async def test_exact_approval_creates_outbox_and_duplicate_execution_sends_once(
     await admin_db_session.commit()
 
     monkeypatch.setattr(dispatch_operation_task, "delay", lambda *args, **kwargs: None)
-    await relay_pending_outbox()
+    await relay_pending_outbox(limit=10_000)
     await admin_db_session.refresh(outbox)
     assert outbox.status == "published"
 
