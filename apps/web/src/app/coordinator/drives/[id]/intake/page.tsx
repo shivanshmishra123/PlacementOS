@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   api,
   DriveResponse,
@@ -10,11 +10,13 @@ import {
   TextExtractionResponse,
   TextLocator,
 } from "@placementos/api-client";
-import { useAuth } from "../../../../../context/AuthContext";
+import { CoordinatorShell } from "../../../../../components/CoordinatorShell";
+import { DriveWorkspaceHeader } from "../../../../../components/DriveWorkspaceHeader";
 
 export default function DriveIntakePage() {
-  const { id: driveId } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const params = useParams();
+  const driveId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
+  const router = useRouter();
 
   const [drive, setDrive] = useState<DriveResponse | null>(null);
   const [activeArtifact, setActiveArtifact] = useState<SourceArtifactResponse | null>(null);
@@ -48,7 +50,7 @@ export default function DriveIntakePage() {
       const d = await api.getDrive(driveId);
       setDrive(d);
 
-      if (d.source_artifacts.length > 0) {
+      if (d.source_artifacts && d.source_artifacts.length > 0) {
         const latestArtifactSummary = d.source_artifacts[0];
         const artifactRes = await api.getSourceArtifact(latestArtifactSummary.id);
         setActiveArtifact(artifactRes);
@@ -58,12 +60,12 @@ export default function DriveIntakePage() {
             const extRes = await api.getTextExtraction(artifactRes.id);
             setExtraction(extRes);
           } catch (extErr) {
-            console.warn("Extraction record could not be fetched", extErr);
+            console.error("Text extraction load error:", extErr);
           }
         }
       }
-    } catch (err: any) {
-      setError(err?.message || "Failed to load drive intake details");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load drive intake workspace");
     } finally {
       setLoading(false);
     }
@@ -73,517 +75,456 @@ export default function DriveIntakePage() {
     fetchDriveAndSource();
   }, [fetchDriveAndSource]);
 
-  useEffect(() => {
-    if (activeArtifact?.status !== "processing") return;
-    const timer = window.setInterval(() => void fetchDriveAndSource(), 2000);
-    return () => window.clearInterval(timer);
-  }, [activeArtifact?.status, fetchDriveAndSource]);
-
-  // Handle Drag & Drop / File Select
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selected = e.target.files[0];
-      if (selected.size > 15 * 1024 * 1024) {
-        setUploadError("File exceeds 15MB limit. Please select a smaller document.");
-        return;
-      }
-      setFileToUpload(selected);
-      setUploadError(null);
-    }
-  };
-
-  // Perform S3 Quarantine Upload Flow
-  const handleUploadSubmit = async (e: React.FormEvent) => {
+  const handleUploadFile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fileToUpload || !driveId) return;
 
     try {
-      setUploadProgress("Creating quarantine upload session...");
       setUploadError(null);
+      setUploadProgress("Initiating owner-bound quarantine session...");
 
-      // Step 1: Request presigned quarantine upload session
       const session = await api.createUploadSession({
-        drive_id: driveId,
-        purpose: "jd_intake",
         original_filename: fileToUpload.name,
-        content_type: fileToUpload.type || "application/octet-stream",
         byte_size: fileToUpload.size,
+        content_type: fileToUpload.type || "application/pdf",
+        drive_id: driveId,
+        purpose: "job_description",
       });
 
-      // Step 2: PUT raw bytes to presigned URL
-      setUploadProgress("Transferring bytes directly to secure private storage...");
+      setUploadProgress("Uploading encrypted bytes to secure storage...");
       const putRes = await fetch(session.upload_url, {
         method: "PUT",
         headers: {
-          "Content-Type": fileToUpload.type || "application/octet-stream",
+          "Content-Type": fileToUpload.type || "application/pdf",
         },
         body: fileToUpload,
       });
 
       if (!putRes.ok) {
-        throw new Error(`S3 upload failed with status ${putRes.status}`);
+        throw new Error(`Upload failed with storage status ${putRes.status}`);
       }
 
-      // Step 3: Complete upload session, promote to accepted, scan and extract
-      setUploadProgress("Promoting accepted bytes and scanning document...");
+      setUploadProgress("Verifying checksum & promoting to accepted storage...");
       const artifact = await api.completeUploadSession(session.id);
+
       setActiveArtifact(artifact);
       setFileToUpload(null);
       setUploadProgress(null);
-
-      // Refresh drive and extraction
-      await fetchDriveAndSource();
-    } catch (err: any) {
+      fetchDriveAndSource();
+    } catch (err: unknown) {
       setUploadProgress(null);
-      setUploadError(err?.message || "File upload failed");
+      setUploadError(err instanceof Error ? err.message : "Document upload failed");
     }
   };
 
-  // Handle Pasted Text Intake Flow
-  const handlePasteSubmit = async (e: React.FormEvent) => {
+  const handlePasteText = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pasteText.trim() || !driveId) return;
 
     try {
       setPasting(true);
       setPasteError(null);
+
       const artifact = await api.createPastedSource(driveId, {
-        title: pasteTitle.trim(),
+        title: pasteTitle.trim() || "Pasted Source",
         raw_text: pasteText.trim(),
       });
+
       setActiveArtifact(artifact);
       setPasteText("");
-      await fetchDriveAndSource();
-    } catch (err: any) {
-      setPasteError(err?.message || "Failed to submit pasted text");
+      fetchDriveAndSource();
+    } catch (err: unknown) {
+      setPasteError(err instanceof Error ? err.message : "Pasted text intake failed");
     } finally {
       setPasting(false);
     }
   };
 
-  // Handle Presigned Download
-  const handleDownload = async () => {
-    if (!activeArtifact) return;
+  const handleReExtract = async (artifactId: string) => {
     try {
-      const res = await api.getDownloadUrl(activeArtifact.id);
+      await api.retriggerExtraction(artifactId);
+      fetchDriveAndSource();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to trigger re-extraction");
+    }
+  };
+
+  const handleDownload = async (artifactId: string) => {
+    try {
+      const res = await api.getDownloadUrl(artifactId);
       window.open(res.download_url, "_blank");
-    } catch (err: any) {
-      alert("Failed to generate download URL: " + err?.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to generate download URL");
     }
   };
-
-  // Click Locator to Scroll and Highlight
-  const handleLocatorClick = (locator: TextLocator, idx: number) => {
-    setSelectedLocatorIndex(idx);
-    const targetRef = paragraphRefs.current[locator.paragraph_index];
-    if (targetRef) {
-      targetRef.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-500">
-        <div className="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-brand-600 rounded-full" />
-        <p className="mt-3 text-sm">Loading recruitment drive intake...</p>
-      </div>
-    );
-  }
-
-  if (error || !drive) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="p-6 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-xl text-red-700 dark:text-red-400">
-          <h2 className="text-lg font-bold">Error Loading Drive</h2>
-          <p className="mt-1 text-sm">{error || "Drive not found"}</p>
-          <Link
-            href="/coordinator/drives"
-            className="inline-block mt-4 text-xs font-semibold uppercase text-brand-600 dark:text-brand-400"
-          >
-            ← Return to drives list
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      {/* Top Breadcrumb & Drive Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-1">
-            <Link href="/coordinator/drives" className="hover:text-slate-700 dark:hover:text-slate-200">
-              Recruitment Drives
-            </Link>
-            <span>/</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">{drive.company_name}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {drive.title}
-            </h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
-              {drive.status}
-            </span>
-            <span className="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-              Rev #{drive.current_revision_number}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {extraction && (
-            <Link
-              href={`/coordinator/drives/${driveId}/review`}
-              className="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded-lg transition"
-            >
-              Review facts and rules →
-            </Link>
-          )}
-          <Link
-            href="/coordinator/drives"
-            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition"
-          >
-            ← Back to Drives
-          </Link>
-        </div>
-      </div>
-
-      {/* Main Grid: Left Intake Panel (5 cols) & Right Viewer (7 cols) */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Intake Controls & File Metadata */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Active Artifact Summary Card if already attached */}
-          {activeArtifact && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 rounded-lg">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[200px]">
-                      {activeArtifact.original_filename || "Document Artifact"}
-                    </h3>
-                    <p className="text-xs text-slate-500 capitalize">{activeArtifact.source_type.replace("_", " ")}</p>
-                  </div>
-                </div>
-
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider ${
-                    activeArtifact.status === "extracted"
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
-                      : activeArtifact.status === "failed"
-                      ? "bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-300"
-                      : "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
-                  }`}
+    <CoordinatorShell>
+      <div className="flex flex-col w-full space-y-6">
+        {drive && (
+          <DriveWorkspaceHeader
+            driveId={drive.id}
+            companyName={drive.company_name}
+            roleTitle={drive.title}
+            lifecycleStatus={drive.status}
+            currentStepTitle="Intake Workspace"
+            actions={
+              activeArtifact && activeArtifact.status === "extracted" ? (
+                <Link
+                  href={`/coordinator/drives/${drive.id}/review`}
+                  className="inline-flex items-center gap-2 bg-coral-pulse hover:bg-[#e8542c] text-paper-white font-body text-xs font-semibold px-5 py-2.5 rounded-full shadow-xs transition"
                 >
-                  {activeArtifact.status}
-                </span>
-              </div>
+                  <span>Proceed to Rule Review</span>
+                  <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </Link>
+              ) : undefined
+            }
+          />
+        )}
 
-              {/* Parsing Error Box if Failed */}
-              {activeArtifact.status === "failed" && (
-                <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg text-xs text-red-700 dark:text-red-400 space-y-1">
-                  <div className="font-semibold uppercase tracking-wider">
-                    Error Code: {String(activeArtifact.metadata_json?.error_code || "PARSE_FAILURE")}
-                  </div>
-                  <p>{String(activeArtifact.metadata_json?.error_message || "Document could not be processed")}</p>
-                  <p className="text-[11px] text-red-600 dark:text-red-400/80 pt-1">
-                    Please review document format and upload a clean replacement below.
+        {/* 2-Column Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column (5 cols): Ingestion Forms */}
+          <div className="lg:col-span-5 flex flex-col space-y-6">
+            {/* Upload & Paste Tab Container */}
+            <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+                <div>
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Intake Recruitment Information
+                  </h2>
+                  <p className="font-body text-xs text-graphite">
+                    Support PDF, DOCX, or direct email body text (INV-03).
                   </p>
                 </div>
-              )}
 
-              {/* Metadata details */}
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between py-1 border-b border-slate-50 dark:border-slate-800/60">
-                  <span className="text-slate-500">SHA-256 Digest:</span>
-                  <span className="font-mono text-slate-700 dark:text-slate-300" title={activeArtifact.hash_sha256}>
-                    {activeArtifact.hash_sha256.substring(0, 16)}...
-                  </span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-slate-50 dark:border-slate-800/60">
-                  <span className="text-slate-500">Payload Size:</span>
-                  <span className="text-slate-700 dark:text-slate-300 font-mono">
-                    {(activeArtifact.byte_size / 1024).toFixed(1)} KB
-                  </span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-slate-500">Attached:</span>
-                  <span className="text-slate-700 dark:text-slate-300">
-                    {new Date(activeArtifact.created_at).toLocaleString()}
-                  </span>
+                <div className="flex items-center bg-cloud-gray p-1 rounded-full text-xs font-body font-medium">
+                  <button
+                    onClick={() => setActiveTab("upload")}
+                    className={`px-3 py-1 rounded-full transition ${
+                      activeTab === "upload"
+                        ? "bg-canopy-green text-paper-white shadow-2xs font-semibold"
+                        : "text-graphite hover:text-ink-black"
+                    }`}
+                  >
+                    File Upload
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("paste")}
+                    className={`px-3 py-1 rounded-full transition ${
+                      activeTab === "paste"
+                        ? "bg-canopy-green text-paper-white shadow-2xs font-semibold"
+                        : "text-graphite hover:text-ink-black"
+                    }`}
+                  >
+                    Paste Text
+                  </button>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-2 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  className="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-medium rounded-lg text-center transition"
-                >
-                  Download Original
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Intake Submission Card (Upload or Paste) */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">
-              {activeArtifact ? "Replace / Supersede Document" : "Intake Job Description"}
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Upload recruiter documents (PDF, DOCX) or paste recruiter communications directly.
-            </p>
-
-            {/* Tab Switcher */}
-            <div className="mt-4 flex border-b border-slate-200 dark:border-slate-800 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setActiveTab("upload")}
-                className={`pb-2.5 px-3 border-b-2 transition ${
-                  activeTab === "upload"
-                    ? "border-brand-600 text-brand-600 dark:text-brand-400"
-                    : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
-              >
-                Upload File (PDF / DOCX)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("paste")}
-                className={`pb-2.5 px-3 border-b-2 transition ${
-                  activeTab === "paste"
-                    ? "border-brand-600 text-brand-600 dark:text-brand-400"
-                    : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
-              >
-                Paste Text / Email
-              </button>
-            </div>
-
-            {/* Tab 1: Upload Dropzone Form */}
-            {activeTab === "upload" && (
-              <form onSubmit={handleUploadSubmit} className="mt-4 space-y-4">
-                {uploadError && (
-                  <div className="p-3 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs rounded-lg border border-red-200 dark:border-red-900">
-                    {uploadError}
-                  </div>
-                )}
-
-                {uploadProgress && (
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs rounded-lg border border-blue-200 dark:border-blue-900 flex items-center gap-2">
-                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
-                    <span>{uploadProgress}</span>
-                  </div>
-                )}
-
-                <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-6 text-center hover:border-brand-500 transition cursor-pointer relative bg-slate-50/50 dark:bg-slate-800/30">
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.doc,.txt"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div className="space-y-1 text-slate-600 dark:text-slate-300">
-                    <svg className="w-8 h-8 mx-auto text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    {fileToUpload ? (
-                      <div>
-                        <p className="text-sm font-semibold text-brand-600 dark:text-brand-400">{fileToUpload.name}</p>
-                        <p className="text-xs text-slate-500">{(fileToUpload.size / 1024).toFixed(1)} KB</p>
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="text-xs font-semibold">Drop PDF or Word document here, or click to browse</p>
-                        <p className="text-[11px] text-slate-400">PDF, DOCX, TXT up to 15MB</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={!fileToUpload || !!uploadProgress}
-                  className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold uppercase tracking-wider rounded-lg shadow-sm transition disabled:opacity-50"
-                >
-                  {uploadProgress ? "Processing Intake..." : "Start Intake & Extraction"}
-                </button>
-              </form>
-            )}
-
-            {/* Tab 2: Pasted Text Form */}
-            {activeTab === "paste" && (
-              <form onSubmit={handlePasteSubmit} className="mt-4 space-y-4">
-                {pasteError && (
-                  <div className="p-3 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs rounded-lg border border-red-200 dark:border-red-900">
-                    {pasteError}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                    Document Title / Recipient Subject
-                  </label>
-                  <input
-                    type="text"
-                    value={pasteTitle}
-                    onChange={(e) => setPasteTitle(e.target.value)}
-                    placeholder="e.g. Campus Recruitment JD - Google 2026"
-                    className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                    Raw Text or Email Body
-                  </label>
-                  <textarea
-                    rows={8}
-                    value={pasteText}
-                    onChange={(e) => setPasteText(e.target.value)}
-                    placeholder="Paste full job description, eligibility terms, CTC breakdown, or recruiter correspondence here..."
-                    className="w-full px-3 py-2 text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={!pasteText.trim() || pasting}
-                  className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold uppercase tracking-wider rounded-lg shadow-sm transition disabled:opacity-50"
-                >
-                  {pasting ? "Extracting Text..." : "Extract Text & Generate Locators"}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-
-        {/* Right Column: Extracted Source Viewer & Interactive Locators Panel */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col min-h-[600px]">
-            {/* Viewer Header */}
-            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Source Document Viewer
-                </h2>
-                {extraction && (
-                  <span className="text-xs px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">
-                    Parser v{extraction.parser_version}
-                  </span>
-                )}
-              </div>
-
-              {extraction && (
-                <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-                  {extraction.page_count !== null && (
-                    <span>
-                      Pages: <strong className="text-slate-800 dark:text-slate-200">{extraction.page_count}</strong>
-                    </span>
-                  )}
-                  <span>
-                    Paragraphs: <strong className="text-slate-800 dark:text-slate-200">{extraction.paragraph_count}</strong>
-                  </span>
-                  <span>
-                    Chars: <strong className="text-slate-800 dark:text-slate-200">{extraction.char_count}</strong>
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Empty State when no extraction is available */}
-            {!extraction ? (
-              <div className="flex-1 flex flex-col items-center justify-center p-12 text-center text-slate-400">
-                <svg className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">No Extracted Source Available</p>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                  Upload a PDF/Word document or paste text on the left to extract plain text and generate source locators.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-12 flex-1 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
-                {/* Extracted Text Pane (7 cols) */}
-                <div className="md:col-span-7 p-6 overflow-y-auto max-h-[700px] space-y-4 font-sans text-sm leading-relaxed text-slate-800 dark:text-slate-200">
-                  {extraction.is_empty_or_scanned && (
-                    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 rounded-lg text-xs text-amber-800 dark:text-amber-300">
-                      ⚠️ Scanned or Image-only Document detected. Extracted text may be incomplete.
+              {activeTab === "upload" ? (
+                <form onSubmit={handleUploadFile} className="space-y-4">
+                  {uploadError && (
+                    <div className="p-3 rounded-xl bg-error-container text-on-error-container font-body text-xs">
+                      {uploadError}
                     </div>
                   )}
 
-                  {extraction.locators.map((loc, idx) => {
-                    const isSelected = selectedLocatorIndex === idx;
-                    return (
-                      <p
-                        key={idx}
-                        ref={(el) => {
-                          paragraphRefs.current[loc.paragraph_index] = el;
-                        }}
-                        className={`p-2.5 rounded-lg transition text-xs leading-normal border ${
-                          isSelected
-                            ? "bg-brand-50/80 border-brand-400 dark:bg-brand-950/50 dark:border-brand-600 shadow-sm"
-                            : "border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                        }`}
-                      >
-                        <span className="block text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 mb-1">
-                          {loc.page_number ? `P.${loc.page_number} ` : ""}¶{loc.paragraph_index} [offset {loc.char_offset_start}:{loc.char_offset_end}]
-                        </span>
-                        {loc.preview}
-                      </p>
-                    );
-                  })}
-                </div>
+                  {/* Drop-zone */}
+                  <label className="border-2 border-dashed border-frost-gray hover:border-canopy-green rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition bg-surface-container-low/50 hover:bg-surface-container-low block">
+                    <span className="material-symbols-outlined text-[36px] text-coral-pulse mb-2">
+                      cloud_upload
+                    </span>
+                    <span className="font-body text-sm font-semibold text-canopy-green block">
+                      Choose PDF / DOCX file
+                    </span>
+                    <span className="font-body text-xs text-slate mt-1 block">
+                      Max file size 20MB • Sniffed signature checks enforced
+                    </span>
+                    <input
+                      type="file"
+                      accept=".pdf,.docx,.txt"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setFileToUpload(e.target.files[0]);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
 
-                {/* Locators Panel (5 cols) */}
-                <div className="md:col-span-5 bg-slate-50/40 dark:bg-slate-900/40 p-4 overflow-y-auto max-h-[700px] space-y-2">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 pb-2 border-b border-slate-200 dark:border-slate-800">
-                    Source Locators ({extraction.locators.length})
+                  {fileToUpload && (
+                    <div className="p-3 rounded-xl bg-mint-wash border border-leaf-bright/30 flex items-center justify-between text-xs font-body">
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="material-symbols-outlined text-canopy-green text-[18px]">
+                          description
+                        </span>
+                        <span className="font-medium text-canopy-green truncate">
+                          {fileToUpload.name} ({(fileToUpload.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFileToUpload(null)}
+                        className="text-slate hover:text-error"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">close</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {uploadProgress && (
+                    <div className="p-3 rounded-xl bg-sky-wash text-deep-teal font-body text-xs flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] animate-spin">
+                        progress_activity
+                      </span>
+                      <span>{uploadProgress}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={!fileToUpload || !!uploadProgress}
+                    className="w-full py-2.5 rounded-full bg-canopy-green hover:bg-[#062616] text-paper-white font-body text-xs font-semibold shadow-xs disabled:opacity-50 transition cursor-pointer"
+                  >
+                    Ingest & Validate Source
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handlePasteText} className="space-y-4">
+                  {pasteError && (
+                    <div className="p-3 rounded-xl bg-error-container text-on-error-container font-body text-xs">
+                      {pasteError}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-semibold text-graphite mb-1">Source Title</label>
+                    <input
+                      type="text"
+                      value={pasteTitle}
+                      onChange={(e) => setPasteTitle(e.target.value)}
+                      placeholder="e.g. Email from Campus Recruiter"
+                      className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                    />
                   </div>
 
-                  {extraction.locators.map((loc, idx) => {
-                    const isSelected = selectedLocatorIndex === idx;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleLocatorClick(loc, idx)}
-                        className={`w-full text-left p-2.5 rounded-lg border text-xs transition ${
-                          isSelected
-                            ? "bg-brand-600 text-white border-brand-600 shadow-sm"
-                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-brand-400"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className={`font-mono text-[11px] font-semibold ${isSelected ? "text-white" : "text-brand-600 dark:text-brand-400"}`}>
-                            {loc.page_number ? `Page ${loc.page_number}` : `Paragraph ${loc.paragraph_index}`}
+                  <div>
+                    <label className="block text-xs font-semibold text-graphite mb-1">
+                      Raw Job Description / Email Content
+                    </label>
+                    <textarea
+                      rows={8}
+                      required
+                      value={pasteText}
+                      onChange={(e) => setPasteText(e.target.value)}
+                      placeholder="Paste complete JD text including requirements, compensation, and selection rounds..."
+                      className="w-full bg-paper-white border border-frost-gray rounded-xl p-3 text-xs font-mono focus:ring-2 focus:ring-canopy-green"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={pasting || !pasteText.trim()}
+                    className="w-full py-2.5 rounded-full bg-canopy-green hover:bg-[#062616] text-paper-white font-body text-xs font-semibold shadow-xs disabled:opacity-50 transition cursor-pointer"
+                  >
+                    {pasting ? "Extracting Text..." : "Ingest Pasted Content"}
+                  </button>
+                </form>
+              )}
+            </div>
+
+            {/* Ingested Documents List */}
+            <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Ingested Source Artifacts
+                  </h2>
+                  <span className="bg-mint-wash text-canopy-green font-body text-xs px-2.5 py-0.5 rounded-full font-bold">
+                    {drive?.source_artifacts?.length || 0}
+                  </span>
+                </div>
+                <button
+                  onClick={fetchDriveAndSource}
+                  className="text-xs font-body text-canopy-green hover:underline flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">refresh</span>
+                  <span>Sync</span>
+                </button>
+              </div>
+
+              {!drive?.source_artifacts || drive.source_artifacts.length === 0 ? (
+                <div className="py-6 text-center text-xs font-body text-slate">
+                  No source documents uploaded yet.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {drive.source_artifacts.map((art) => (
+                    <div
+                      key={art.id}
+                      className={`p-3 rounded-xl border transition ${
+                        activeArtifact?.id === art.id
+                          ? "bg-mint-wash/30 border-leaf-bright"
+                          : "bg-surface-container-low border-frost-gray hover:border-canopy-green"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="material-symbols-outlined text-coral-pulse text-[20px]">
+                            description
                           </span>
-                          <span className={`text-[10px] font-mono ${isSelected ? "text-brand-100" : "text-slate-400"}`}>
-                            ¶{loc.paragraph_index}
-                          </span>
+                          <div className="min-w-0">
+                            <span className="font-body text-xs font-semibold text-canopy-green block truncate">
+                              {art.original_filename || art.source_type}
+                            </span>
+                            <span className="font-mono text-[10px] text-slate block">
+                              sha256:{art.hash_sha256?.slice(0, 10)}...
+                            </span>
+                          </div>
                         </div>
-                        <p className={`line-clamp-2 text-[11px] ${isSelected ? "text-brand-50" : "text-slate-500 dark:text-slate-400"}`}>
-                          {loc.preview}
-                        </p>
-                      </button>
-                    );
-                  })}
+
+                        <span className="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-body text-[10px] font-bold uppercase shrink-0">
+                          {art.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 pt-2 border-t border-frost-gray flex items-center justify-between text-xs font-body">
+                        <span className="text-[11px] text-slate">
+                          {(art.byte_size / 1024).toFixed(1)} KB
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleDownload(art.id)}
+                            className="text-canopy-green hover:underline text-[11px] font-medium"
+                          >
+                            Download
+                          </button>
+                          <span className="text-ash">•</span>
+                          <button
+                            onClick={() => handleReExtract(art.id)}
+                            className="text-coral-pulse hover:underline text-[11px] font-medium"
+                          >
+                            Re-Extract
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column (7 cols): Extracted Text Preview with Provenance Locators */}
+          <div className="lg:col-span-7 bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+              <div>
+                <h2 className="font-headline text-base font-bold text-canopy-green">
+                  Source Provenance & Text Extraction
+                </h2>
+                <span className="font-body text-xs text-slate">
+                  Clickable page/paragraph locators guarantee traceability (INV-03).
+                </span>
+              </div>
+
+              {extraction && (
+                <span className="bg-sky-wash text-deep-teal font-body text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                  Parser v{extraction.parser_version}
+                </span>
+              )}
+            </div>
+
+            {loading ? (
+              <div className="py-24 text-center font-body text-sm text-slate animate-pulse">
+                Parsing document structure...
+              </div>
+            ) : !extraction ? (
+              <div className="py-24 text-center font-body text-slate">
+                <span className="material-symbols-outlined text-[48px] text-ash mb-2 block">
+                  find_in_page
+                </span>
+                <p className="text-sm">No extracted text available yet.</p>
+                <p className="text-xs text-slate mt-1">Upload a PDF or paste text to generate verifiable locators.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Locators Navigation Bar */}
+                {extraction.locators && extraction.locators.length > 0 && (
+                  <div className="p-3 bg-surface-container-low rounded-xl border border-frost-gray">
+                    <span className="font-body text-[11px] font-semibold text-graphite uppercase tracking-wider block mb-2">
+                      Traceable Fact Locators ({extraction.locators.length})
+                    </span>
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                      {extraction.locators.map((loc: TextLocator, idx: number) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setSelectedLocatorIndex(idx);
+                            const el = paragraphRefs.current[loc.paragraph_index];
+                            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }}
+                          className={`shrink-0 px-3 py-1 rounded-full text-xs font-body transition ${
+                            selectedLocatorIndex === idx
+                              ? "bg-coral-pulse text-paper-white font-semibold shadow-2xs"
+                              : "bg-paper-white text-graphite hover:bg-lavender-mist border border-frost-gray"
+                          }`}
+                        >
+                          P.{loc.page_number} §{loc.paragraph_index}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Parsed Text Viewer */}
+                <div className="bg-surface-container-lowest p-6 rounded-2xl border border-frost-gray max-h-[550px] overflow-y-auto space-y-3 font-body text-xs text-ink-black leading-relaxed">
+                  {extraction.extracted_text ? (
+                    extraction.extracted_text
+                      .split(/\n\s*\n/)
+                      .filter(Boolean)
+                      .map((p: string, pIdx: number) => {
+                        const isHighlighted =
+                          selectedLocatorIndex !== null &&
+                          extraction.locators[selectedLocatorIndex]?.paragraph_index === pIdx;
+
+                        return (
+                          <p
+                            key={pIdx}
+                            ref={(el) => {
+                              paragraphRefs.current[pIdx] = el;
+                            }}
+                            className={`p-2.5 rounded-lg transition-colors ${
+                              isHighlighted
+                                ? "bg-peach-wash border-l-4 border-coral-pulse font-medium text-canopy-green"
+                                : "hover:bg-lavender-mist/40"
+                            }`}
+                          >
+                            <span className="font-mono text-[10px] text-slate mr-2 select-none">
+                              [§{pIdx}]
+                            </span>
+                            {p}
+                          </p>
+                        );
+                      })
+                  ) : (
+                    <pre className="whitespace-pre-wrap font-mono text-xs">{extraction.extracted_text}</pre>
+                  )}
+                </div>
+
+                <div className="pt-2 flex items-center justify-between text-[11px] text-slate font-body">
+                  <span>Character count: {extraction.extracted_text?.length || 0}</span>
+                  <span className="flex items-center gap-1 text-canopy-green font-semibold">
+                    <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                    Verified Source Bytes Immutable
+                  </span>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </CoordinatorShell>
   );
 }

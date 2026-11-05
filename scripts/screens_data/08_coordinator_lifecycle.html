@@ -1,0 +1,602 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"error-container":"#ffdad6","on-error-container":"#93000a","on-primary-fixed":"#3c0800","coral-pulse":"#ff643b","on-primary-fixed-variant":"#891e00","tertiary-container":"#ac7dff","inverse-primary":"#ffb4a1","tertiary-fixed-dim":"#d4bbff","primary-fixed-dim":"#ffb4a1","surface-dim":"#e1d5f2","error":"#ba1a1a","on-surface":"#1f182d","deep-teal":"#003642","sky-signal":"#00b4dc","primary":"#b12d05","graphite":"#3d3d3d","outline":"#8e7069","surface-container-highest":"#e9defa","on-primary-container":"#5e1200","surface-tint":"#b12d05","ash":"#a6a6a6","on-tertiary-container":"#3f0088","lilac-wash":"#fdf0ff","indigo-bloom":"#460095","surface-container-lowest":"#ffffff","orchid-tint":"#f3b3fe","surface-container-low":"#f9f1ff","inverse-on-surface":"#f6edff","on-tertiary-fixed-variant":"#5924a8","leaf-bright":"#1dbf73","background":"#fef7ff","cream":"#faf7e8","sand":"#f4ece9","on-primary":"#ffffff","sky-wash":"#ccf0f8","on-tertiary":"#ffffff","secondary-fixed":"#bdeecc","paper-white":"#ffffff","frost-gray":"#e0e0e0","slate":"#7a7a7a","outline-variant":"#e2bfb6","on-background":"#1f182d","surface-container":"#f4eaff","aubergine":"#47264c","on-secondary-fixed":"#002110","tertiary-fixed":"#ebdcff","ink-black":"#000000","secondary-fixed-dim":"#a2d1b1","sage-wash":"#e4f7ee","on-secondary-container":"#426e52","mint-wash":"#d2f2e3","surface-bright":"#fef7ff","surface":"#fef7ff","primary-container":"#ff643b","tertiary":"#7241c1","on-tertiary-fixed":"#270058","inverse-surface":"#342d42","on-secondary-fixed-variant":"#234f36","primary-fixed":"#ffdbd2","lavender-mist":"#eee2ff","cloud-gray":"#f2f2f2","on-error":"#ffffff","canopy-green":"#0a3922","on-secondary":"#ffffff","surface-container-high":"#efe3ff","peach-wash":"#ffede8","charcoal":"#333333","on-surface-variant":"#5a413a","secondary":"#3c674d","surface-variant":"#e9defa","secondary-container":"#bdeecc"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"gutter-mobile":"1rem","margin-tablet":"2.5rem",margin:"5rem","space-xl":"2rem","space-lg":"1.5rem","space-md":"1rem","margin-mobile":"1.25rem",gutter:"1.5rem","space-sm":"0.5rem","space-xs":"0.25rem"},fontFamily:{"body-lg":["DM Sans"],subheading:["DM Sans"],"headline-lg":["Manrope"],"display-lg-mobile":["Manrope"],"display-lg":["Manrope"],"display-xl":["Manrope"],"body-sm":["DM Sans"],"display-md":["Manrope"],"headline-md":["Manrope"],"body-md":["DM Sans"],"headline-sm":["Manrope"],"label-md":["DM Sans"],"headline-lg-mobile":["Manrope"],"label-sm":["DM Sans"],caption:["DM Sans"]},fontSize:{"body-lg":["18px",{lineHeight:"25px",fontWeight:"400"}],subheading:["20px",{lineHeight:"27px",fontWeight:"500"}],"headline-lg":["48px",{lineHeight:"55px",letterSpacing:"-0.019em",fontWeight:"600"}],"display-lg-mobile":["48px",{lineHeight:"52px",letterSpacing:"-0.02em",fontWeight:"600"}],"display-lg":["80px",{lineHeight:"84px",letterSpacing:"-0.028em",fontWeight:"600"}],"display-xl":["116px",{lineHeight:"104px",letterSpacing:"-0.028em",fontWeight:"600"}],"body-sm":["14px",{lineHeight:"19px",fontWeight:"400"}],"display-md":["69px",{lineHeight:"74px",letterSpacing:"-0.028em",fontWeight:"500"}],"headline-md":["32px",{lineHeight:"38px",letterSpacing:"-0.019em",fontWeight:"700"}],"body-md":["16px",{lineHeight:"22px",fontWeight:"400"}],"headline-sm":["24px",{lineHeight:"31px",fontWeight:"600"}],"label-md":["14px",{lineHeight:"18px",fontWeight:"600"}],"headline-lg-mobile":["32px",{lineHeight:"38px",letterSpacing:"-0.019em",fontWeight:"600"}],"label-sm":["12px",{lineHeight:"15px",fontWeight:"600"}],caption:["12px",{lineHeight:"15px",fontWeight:"400"}]}}}};</script></head><body class="bg-lavender-mist font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[240px] bg-paper-white border-r border-frost-gray z-50 flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm border-b border-frost-gray"><img alt="PlacementOS Monogram" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UyQgTw66HZwkG94OZYPdpd1riKlcAIzaVav_-rknbsvvI4_AwV8j6J-gVzKK9jWL9JYOXjYqx90j8dmik0MhFPGsNFgbbtmkVFXc6tli73qKt5x_DwaJmy8k90i4DSUMW99YhbffWyZrg5W2i1Ht-Qk_9iOCtm9J638wha80jjroKjgsYPV6cFb-nO1b2UD_u6vPzAs1VEuPZPG5r-5zbaN9a2ok3QqiaiMKlc3FwBSQ"><div class="flex flex-col"><span class="font-headline-sm text-body-md font-bold text-canopy-green leading-tight">PlacementOS</span><span class="font-label-sm text-caption text-graphite">Recruitment Ops</span></div></div><nav class="flex-1 px-space-sm py-space-md space-y-1 overflow-y-auto" data-active-classes="bg-canopy-green text-paper-white shadow-sm border-l-4 border-leaf-bright font-medium"><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-dashboard" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="">Dashboard</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-drives" href="#"><span class="material-symbols-outlined text-[20px]">business_center</span><span class="">Drives</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-students" href="#"><span class="material-symbols-outlined text-[20px]">school</span><span class="">Students</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-approvals" href="#"><span class="material-symbols-outlined text-[20px]">verified</span><span class="">Approvals</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-exceptions" href="#"><span class="material-symbols-outlined text-[20px]">emergency</span><span class="">Exceptions</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-integrations" href="#"><span class="material-symbols-outlined text-[20px]">hub</span><span class="">Integrations</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-operations" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="">Operations</span></a></nav><div class="p-space-sm border-t border-frost-gray"><div class="bg-mint-wash rounded-xl p-space-sm flex items-center justify-between"><span class="font-label-sm text-caption text-canopy-green font-semibold uppercase tracking-wider">System Status</span><span class="h-2 w-2 rounded-full bg-leaf-bright"></span></div></div></aside><div class="pl-[240px]"><header class="fixed top-0 left-[240px] right-0 h-16 bg-paper-white border-b border-frost-gray z-40 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><span class="font-headline-sm text-body-md text-canopy-green font-semibold tracking-tight">Apex Institute of Technology</span><span class="bg-sky-wash text-deep-teal font-label-sm text-caption px-space-sm py-1 rounded-full">Academic Year 2026–27</span></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm bg-surface-container-low px-space-sm py-1 rounded-full border border-frost-gray"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPq-OTm0hGrViGJzRGrpzRWugj_SQE0z0ILw4ZngLxHqvjkGLmGtTH42psgQCOn-RCBxMZxq_21RwxN_RIW6RO68bWN7vrXX9tEIzb0bnqEoRixbjPvM9KQziWWP3HyGvaH-IS1uquJM2byj_EGjuxJ0ZYoiGPHOA29fLsZGLR4xh-0LAH6sXgdcEvX2il9X0MfjUKn_12Zyf8ZO0oMGS6qdMuEuoG_hL99ixfxZGw"><span class="font-label-md text-body-sm text-graphite">Dr. K. Sharma (Placement Chair)</span></div></div></header><main class="w-full pt-16 bg-lavender-mist"><div class="flex flex-col w-full">
+<div class="w-full max-w-[1280px] mx-auto px-space-md lg:px-space-xl py-space-lg space-y-space-lg">
+<!-- BREADCRUMB & METADATA BAR -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs text-graphite font-body-sm">
+<a class="hover:text-canopy-green transition-colors" href="#">Drives</a>
+<span class="material-symbols-outlined text-[16px] text-ash">chevron_right</span>
+<span class="text-graphite font-medium">Google India – SWE</span>
+<span class="material-symbols-outlined text-[16px] text-ash">chevron_right</span>
+<span class="bg-canopy-green text-paper-white px-2.5 py-0.5 rounded-full font-label-sm font-semibold tracking-wide">Drive Lifecycle Execution</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-1.5 bg-mint-wash px-3 py-1 rounded-full text-canopy-green font-label-sm font-bold">
+<span class="inline-block w-2 h-2 rounded-full bg-leaf-bright animate-pulse"></span>
+
+</div>
+
+</div>
+</div>
+<!-- DRIVE ROOM HERO HEADER -->
+<section class="bg-canopy-green text-paper-white rounded-3xl p-space-lg lg:p-space-xl relative overflow-hidden shadow-sm">
+<div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+<div class="space-y-space-xs max-w-2xl">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="bg-leaf-bright text-canopy-green font-label-sm uppercase tracking-wider px-3 py-0.5 rounded-full font-bold">Round 2 &amp; Final HR Execution</span>
+<span class="text-mint-wash font-body-sm font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">domain</span> Campus Recruitment 2026–27
+            </span>
+</div>
+<h1 class="font-headline-lg text-paper-white tracking-tight">
+            Google India – Software Engineer
+          </h1>
+<p class="font-body-md text-mint-wash max-w-xl">
+            Live evaluation pipelines, synchronized biometric check-in intervals, and automated offer memo cryptographic notarization.
+          </p>
+</div>
+<!-- Metric Tile Mosaic -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-sm lg:gap-space-md">
+<div class="bg-paper-white/10 backdrop-blur-sm rounded-2xl p-space-md flex flex-col justify-between">
+<span class="font-label-sm text-mint-wash tracking-wide uppercase">Shortlisted Pool</span>
+<div class="font-headline-md text-paper-white mt-1">84 <span class="font-body-sm text-mint-wash font-normal">Cands</span></div>
+<span class="font-caption text-leaf-bright mt-1 font-medium">100% Slot Allocated</span>
+</div>
+<div class="bg-paper-white/10 backdrop-blur-sm rounded-2xl p-space-md flex flex-col justify-between">
+<span class="font-label-sm text-mint-wash tracking-wide uppercase">Present in Hall</span>
+<div class="font-headline-md text-paper-white mt-1">81 <span class="font-body-sm text-mint-wash font-normal">/ 84</span></div>
+<span class="font-caption text-mint-wash mt-1">96.4% Verified</span>
+</div>
+<div class="bg-paper-white/10 backdrop-blur-sm rounded-2xl p-space-md flex flex-col justify-between col-span-2 sm:col-span-1">
+<span class="font-label-sm text-mint-wash tracking-wide uppercase">Offers Ready</span>
+<div class="font-headline-md text-coral-pulse mt-1">02 <span class="font-body-sm text-mint-wash font-normal">Ext</span></div>
+<span class="font-caption text-mint-wash mt-1">1 In Draft Queue</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 4-TAB EXECUTION WORKBENCH CONTROLS -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1">
+<button class="tab-btn px-5 py-2.5 rounded-full font-label-md transition-all duration-200 hover:bg-surface-container flex items-center gap-2 whitespace-nowrap bg-canopy-green text-paper-white font-bold shadow-sm" onclick="switchTab('tab-scheduling', this)">
+<span class="material-symbols-outlined text-[18px]">calendar_clock</span>
+<span class="">1. Interview Scheduling</span>
+</button>
+<button class="tab-btn px-5 py-2.5 rounded-full font-label-md transition-all duration-200 hover:bg-surface-container flex items-center gap-2 whitespace-nowrap bg-paper-white text-graphite" onclick="switchTab('tab-attendance', this)">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+<span class="">2. Real-time Attendance</span>
+<span class="w-2 h-2 rounded-full bg-leaf-bright inline-block"></span>
+</button>
+<button class="tab-btn px-5 py-2.5 rounded-full font-label-md transition-all duration-200 flex items-center gap-2 whitespace-nowrap bg-paper-white text-graphite" onclick="switchTab('tab-results', this)">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+<span class="">3. Candidate Results &amp; Offer Memos</span>
+<span class="bg-coral-pulse text-paper-white text-[11px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Active</span>
+</button>
+<button class="tab-btn px-5 py-2.5 rounded-full font-label-md transition-all duration-200 hover:bg-surface-container flex items-center gap-2 whitespace-nowrap bg-paper-white text-graphite" onclick="switchTab('tab-audit', this)">
+<span class="material-symbols-outlined text-[18px]">lock_clock</span>
+<span class="">4. Pre-Closure Audit</span>
+</button>
+</div>
+<!-- TAB 1: INTERVIEW SCHEDULING (Hidden by default) -->
+<div class="tab-content space-y-space-md" id="tab-scheduling">
+<!-- Half-Open Interval Conflict Check Alert -->
+<div class="bg-mint-wash text-canopy-green rounded-2xl p-space-md flex items-start gap-space-md">
+<span class="material-symbols-outlined text-[24px] text-secondary mt-0.5">verified_user</span>
+<div class="flex-1">
+<div class="font-label-md font-bold text-canopy-green">Zero Time Conflicts Detected</div>
+<p class="font-body-sm text-graphite mt-0.5">
+            All 84 interview slots bound to non-overlapping half-open intervals <code class="bg-paper-white px-2 py-0.5 rounded text-canopy-green font-mono text-caption font-bold">[start_time, end_time)</code> across 2 virtual conference rooms.
+          </p>
+</div>
+<span class="bg-paper-white text-secondary font-label-sm font-semibold px-3 py-1 rounded-full">Validated by SchedulerEngine v2</span>
+</div>
+<!-- Timeline & Slot Roster -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-md">
+<div class="bg-paper-white rounded-2xl p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm uppercase tracking-wider text-ash font-bold">Room Matrix 01</span>
+<h3 class="font-headline-sm text-canopy-green">Panel A: Systems &amp; Algorithms</h3>
+</div>
+<span class="bg-sky-wash text-deep-teal font-label-sm px-3 py-1 rounded-full font-bold">42 Slots Assigned</span>
+</div>
+<div class="space-y-3 font-body-sm">
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-between">
+<div>
+<span class="font-mono text-canopy-green font-bold">[09:00, 13:00) IST</span>
+<span class="block text-graphite font-caption">Morning Block · Slots 01–21 (30m per candidate + 10m buffer)</span>
+</div>
+<span class="bg-mint-wash text-canopy-green px-2.5 py-1 rounded-full font-label-sm font-semibold">21 Completed</span>
+</div>
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-between">
+<div>
+<span class="font-mono text-canopy-green font-bold">[14:00, 18:00) IST</span>
+<span class="block text-graphite font-caption">Afternoon Block · Slots 22–42 (Live session progressing)</span>
+</div>
+<span class="bg-sky-wash text-deep-teal px-2.5 py-1 rounded-full font-label-sm font-semibold">18 In Progress</span>
+</div>
+</div>
+</div>
+<div class="bg-paper-white rounded-2xl p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm uppercase tracking-wider text-ash font-bold">Room Matrix 02</span>
+<h3 class="font-headline-sm text-canopy-green">Panel B: Large-scale Design</h3>
+</div>
+<span class="bg-sky-wash text-deep-teal font-label-sm px-3 py-1 rounded-full font-bold">42 Slots Assigned</span>
+</div>
+<div class="space-y-3 font-body-sm">
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-between">
+<div>
+<span class="font-mono text-canopy-green font-bold">[09:00, 13:00) IST</span>
+<span class="block text-graphite font-caption">Morning Block · Slots 01–21 (Completed seamlessly)</span>
+</div>
+<span class="bg-mint-wash text-canopy-green px-2.5 py-1 rounded-full font-label-sm font-semibold">21 Completed</span>
+</div>
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-between">
+<div>
+<span class="font-mono text-canopy-green font-bold">[14:00, 18:00) IST</span>
+<span class="block text-graphite font-caption">Afternoon Block · Slots 22–42 (Awaiting Panel Evaluation)</span>
+</div>
+<span class="bg-sand text-on-surface font-label-sm px-2.5 py-1 rounded-full font-semibold">21 In Review</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TAB 2: ATTENDANCE & CHECK-IN (Hidden by default) -->
+<div class="tab-content space-y-space-md hidden" id="tab-attendance">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+<div class="bg-paper-white rounded-2xl p-space-md shadow-sm">
+<span class="font-label-sm text-ash font-bold uppercase">Scheduled</span>
+<div class="font-headline-md text-ink-black mt-1">84</div>
+<span class="font-caption text-graphite">Total Dossier Calls</span>
+</div>
+<div class="bg-mint-wash rounded-2xl p-space-md shadow-sm">
+<span class="font-label-sm text-canopy-green font-bold uppercase">Checked In</span>
+<div class="font-headline-md text-canopy-green mt-1">81</div>
+<span class="font-caption text-canopy-green font-medium">Admit Pass Scanned</span>
+</div>
+<div class="bg-sky-wash rounded-2xl p-space-md shadow-sm">
+<span class="font-label-sm text-deep-teal font-bold uppercase">Excused Medical</span>
+<div class="font-headline-md text-deep-teal mt-1">02</div>
+<span class="font-caption text-deep-teal font-medium">Re-slot Window Issued</span>
+</div>
+<div class="bg-peach-wash rounded-2xl p-space-md shadow-sm">
+<span class="font-label-sm text-primary font-bold uppercase">No-Show</span>
+<div class="font-headline-md text-primary mt-1">01</div>
+<span class="font-caption text-on-surface-variant font-medium">Student De-listed</span>
+</div>
+</div>
+<div class="bg-paper-white rounded-2xl p-space-lg shadow-sm space-y-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div>
+<h3 class="font-headline-sm text-canopy-green">QR Gate Verification Feed</h3>
+<p class="font-body-sm text-graphite">Real-time telemetry stream from Main Tech Lounge Access Terminal</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-leaf-bright"></span>
+<span class="font-label-sm text-graphite font-bold uppercase tracking-wider">Station Online (Terminal #04)</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-between text-body-sm">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-leaf-bright text-[20px]">qr_code_scanner</span>
+<div>
+<span class="font-bold text-ink-black">Aarav Sen (2023CS012)</span>
+<span class="block text-caption text-graphite">Scanned via Mobile Admit Pass ID #99214</span>
+</div>
+</div>
+<span class="font-mono text-caption text-ash">14:12:08 IST</span>
+</div>
+<div class="p-3 bg-surface-container-low rounded-xl flex items-center justify-between text-body-sm">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-leaf-bright text-[20px]">qr_code_scanner</span>
+<div>
+<span class="font-bold text-ink-black">Kavita Swaminathan (2023CS089)</span>
+<span class="block text-caption text-graphite">Scanned via Physical NFC Smart Card</span>
+</div>
+</div>
+<span class="font-mono text-caption text-ash">14:09:44 IST</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TAB 3: CANDIDATE RESULTS & OFFER MEMOS (Active Content) -->
+<div class="tab-content space-y-space-lg hidden" id="tab-results">
+<!-- Workbench Status Bar & Mode Switcher -->
+<div class="bg-paper-white rounded-2xl p-space-md shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-2xl bg-peach-wash flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]">lock_open</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-canopy-green">Candidate Results &amp; Offer Memos</h2>
+<span class="bg-mint-wash text-canopy-green font-label-sm font-bold px-2.5 py-0.5 rounded-full">Round 4: Googlyness &amp; HR</span>
+</div>
+<p class="font-body-sm text-graphite">Review final offers, compensation bounds, and draft cryptographic dossiers.</p>
+</div>
+</div>
+<!-- Mode Toggle Switcher -->
+<div class="flex items-center bg-surface-container-low p-1.5 rounded-full gap-1">
+<button class="px-4 py-1.5 rounded-full font-label-sm font-semibold transition-all bg-paper-white text-canopy-green shadow-sm" id="btn-draft" onclick="setPublishMode('draft')">
+            Draft Mode (Coordinator Review)
+          </button>
+<button class="px-4 py-1.5 rounded-full font-label-sm font-semibold transition-all text-graphite hover:text-ink-black" id="btn-published" onclick="setPublishMode('published')">
+            Published to Student Dossier (Immutable)
+          </button>
+</div>
+</div>
+<!-- Action Card & Bulk Execution Strip -->
+<div class="bg-peach-wash rounded-3xl p-space-lg flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-coral-pulse text-[20px]">security_update_good</span>
+<span class="font-label-sm uppercase tracking-wider text-primary font-bold">Administrative Freeze Action</span>
+</div>
+<h3 class="font-headline-sm text-on-surface">Publish Verified Offer Letters to Dossiers</h3>
+<p class="font-body-sm text-on-surface-variant max-w-xl">
+            Freezes all pending draft candidate evaluations. Offers will instantly bind with a SHA-256 integrity stamp, notifying candidates via authenticated email and student portals.
+          </p>
+</div>
+<div class="flex items-center gap-space-sm flex-shrink-0">
+<button class="px-5 py-3 rounded-full font-label-md text-ink-black bg-paper-white hover:bg-surface-container transition-colors" onclick="previewRosterAudit()">
+            Audit Checklist (4/4)
+          </button>
+<button class="px-6 py-3 rounded-full font-label-md font-bold text-paper-white bg-coral-pulse hover:opacity-95 transition-all shadow-sm flex items-center gap-2" onclick="openPublishModal()">
+<span class="material-symbols-outlined text-[20px]">send_and_archive</span>
+<span class="">Freeze &amp; Publish Approved Results</span>
+</button>
+</div>
+</div>
+<!-- Candidate Results Roster Table -->
+<div class="bg-paper-white rounded-3xl overflow-hidden shadow-sm">
+<div class="p-space-lg flex flex-wrap items-center justify-between gap-space-sm">
+<div>
+<h3 class="font-headline-sm text-canopy-green">Google India Round 4 Results Roster</h3>
+<span class="font-caption text-graphite">Total 4 Final candidates recorded in this synchronization block</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-graphite">Filter:</span>
+<span class="bg-surface-container text-on-surface font-label-sm px-3 py-1 rounded-full font-semibold">All Rounds</span>
+<span class="bg-mint-wash text-canopy-green font-label-sm px-3 py-1 rounded-full font-semibold">2 Extended</span>
+<span class="bg-peach-wash text-primary font-label-sm px-3 py-1 rounded-full font-semibold">1 Not Selected</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm">
+<thead class="bg-surface-container-low text-graphite font-label-sm uppercase tracking-wider text-caption">
+<tr>
+<th class="py-3 px-space-lg">Candidate &amp; USN</th>
+<th class="py-3 px-space-md">Result Status</th>
+<th class="py-3 px-space-md">Compensation Package</th>
+<th class="py-3 px-space-md">Offer Memo Artifact</th>
+<th class="py-3 px-space-md">Dossier State</th>
+<th class="py-3 px-space-lg text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-transparent">
+<!-- CANDIDATE 1 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-lg">
+<div class="font-bold text-ink-black text-body-md">Rahul Verma</div>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-mono text-caption text-ash">2023CS104</span>
+<span class="bg-surface-container text-graphite px-2 py-0.5 rounded text-caption font-medium">B.Tech CSE</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 bg-mint-wash text-canopy-green px-3 py-1 rounded-full font-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-leaf-bright"></span>
+                    OFFER_EXTENDED
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="font-bold text-canopy-green">₹32.0 LPA Gross</div>
+<div class="font-caption text-graphite">₹18.0 LPA Base · ₹4.0L Sign-on</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 text-canopy-green font-label-sm font-medium">
+<span class="material-symbols-outlined text-[18px] text-leaf-bright">verified</span>
+<span class="">Signed Memo (v1.0.sig)</span>
+</div>
+<span class="font-caption text-ash font-mono">SHA256: 9e0a...7c1a</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="bg-mint-wash text-canopy-green px-2.5 py-1 rounded-full font-label-sm font-bold">
+                    PUBLISHED
+                  </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="text-deep-teal hover:text-canopy-green font-label-sm font-semibold p-2">
+                    View Dossier
+                  </button>
+</td>
+</tr>
+<!-- CANDIDATE 2 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-lg">
+<div class="font-bold text-ink-black text-body-md">Priya Nair</div>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-mono text-caption text-ash">2023CS042</span>
+<span class="bg-surface-container text-graphite px-2 py-0.5 rounded text-caption font-medium">B.Tech CSE</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 bg-mint-wash text-canopy-green px-3 py-1 rounded-full font-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-leaf-bright"></span>
+                    OFFER_EXTENDED
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="font-bold text-canopy-green">₹32.0 LPA Gross</div>
+<div class="font-caption text-graphite">₹18.0 LPA Base · ₹4.0L Sign-on</div>
+</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-1.5 text-canopy-green font-label-sm font-medium">
+<span class="material-symbols-outlined text-[18px] text-leaf-bright">verified</span>
+<span class="">Signed Memo (v1.0.sig)</span>
+</div>
+<span class="font-caption text-ash font-mono">SHA256: 4b1c...ff90</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="bg-mint-wash text-canopy-green px-2.5 py-1 rounded-full font-label-sm font-bold">
+                    PUBLISHED
+                  </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="text-deep-teal hover:text-canopy-green font-label-sm font-semibold p-2">
+                    View Dossier
+                  </button>
+</td>
+</tr>
+<!-- CANDIDATE 3 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-space-md px-space-lg">
+<div class="font-bold text-ink-black text-body-md">Amit Patel</div>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-mono text-caption text-ash">2023IT019</span>
+<span class="bg-surface-container text-graphite px-2 py-0.5 rounded text-caption font-medium">B.Tech IT</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 bg-peach-wash text-primary px-3 py-1 rounded-full font-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                    NOT_SELECTED
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-caption text-ash">N/A (Candidate pool quota reached)</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-caption text-graphite">Feedback rubric filed</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="bg-mint-wash text-canopy-green px-2.5 py-1 rounded-full font-label-sm font-bold">
+                    PUBLISHED
+                  </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="text-graphite hover:text-ink-black font-label-sm font-semibold p-2">
+                    Rubric Notes
+                  </button>
+</td>
+</tr>
+<!-- CANDIDATE 4 -->
+<tr class="hover:bg-surface-container-low/60 transition-colors bg-sand/30">
+<td class="py-space-md px-space-lg">
+<div class="font-bold text-ink-black text-body-md">Vikram Rao</div>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-mono text-caption text-ash">2023ECE012</span>
+<span class="bg-surface-container text-graphite px-2 py-0.5 rounded text-caption font-medium">B.Tech ECE</span>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex items-center gap-1.5 bg-sky-wash text-deep-teal px-3 py-1 rounded-full font-label-sm font-bold">
+<span class="w-2 h-2 rounded-full bg-sky-signal"></span>
+                    WAITLISTED (Rank 1)
+                  </span>
+</td>
+<td class="py-space-md px-space-md">
+<div class="font-bold text-graphite">Conditional ₹32.0 LPA</div>
+<div class="font-caption text-ash">Contingent on Pool Acceptance</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="font-caption text-on-surface-variant font-medium">Pending HR Release Stamp</span>
+</td>
+<td class="py-space-md px-space-md">
+<span class="bg-sand text-on-surface px-2.5 py-1 rounded-full font-label-sm font-bold">
+                    NO (Draft)
+                  </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<button class="text-coral-pulse hover:underline font-label-sm font-bold p-2" onclick="approveDraftItem('Vikram Rao')">
+                    Approve Draft
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="bg-surface-container-low p-space-md flex flex-wrap items-center justify-between text-caption text-graphite">
+<span class="">Showing 4 of 4 candidate dossiers for DRV-8912 Round 4</span>
+<span class="font-mono">Ledger Node: ind-blr-cluster-04a · Sync Lag: 0ms</span>
+</div>
+</div>
+</div>
+<!-- TAB 4: PRE-CLOSURE AUDIT & ARCHIVE (Hidden by default) -->
+<div class="tab-content space-y-space-md hidden" id="tab-audit">
+<div class="bg-paper-white rounded-3xl p-space-lg shadow-sm space-y-space-lg">
+<div class="max-w-2xl space-y-1">
+<span class="font-label-sm uppercase tracking-wider text-canopy-green font-bold">Administrative Sign-Off</span>
+<h2 class="font-headline-sm text-canopy-green">Pre-Closure Audit Certification</h2>
+<p class="font-body-sm text-graphite">
+            Drive completion protocol requires 100% audit conformity before this drive can be officially archived and student placement quotas deducted.
+          </p>
+</div>
+<!-- Checklist Component -->
+<div class="space-y-3">
+<div class="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-leaf-bright text-[24px]">task_alt</span>
+<div>
+<span class="font-bold text-ink-black font-body-md">All Letter of Intent (LOI) Memos Digitally Verified</span>
+<p class="text-caption text-graphite">2 extended offers contain cryptographically valid HR keys.</p>
+</div>
+</div>
+<span class="bg-mint-wash text-canopy-green font-label-sm font-bold px-3 py-1 rounded-full">PASSED</span>
+</div>
+<div class="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-leaf-bright text-[24px]">task_alt</span>
+<div>
+<span class="font-bold text-ink-black font-body-md">Candidate Attendance Reconciliation Synchronized</span>
+<p class="text-caption text-graphite">81 present, 2 excused, 1 no-show registered in main database.</p>
+</div>
+</div>
+<span class="bg-mint-wash text-canopy-green font-label-sm font-bold px-3 py-1 rounded-full">PASSED</span>
+</div>
+<div class="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-leaf-bright text-[24px]">task_alt</span>
+<div>
+<span class="font-bold text-ink-black font-body-md">Zero Unresolved Student Appeals or Grievances</span>
+<p class="text-caption text-graphite">No dispute tickets logged for Google India Round 1 through Round 4.</p>
+</div>
+</div>
+<span class="bg-mint-wash text-canopy-green font-label-sm font-bold px-3 py-1 rounded-full">PASSED</span>
+</div>
+<div class="p-4 bg-surface-container-low rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-coral-pulse text-[24px]">hourglass_empty</span>
+<div>
+<span class="font-bold text-ink-black font-body-md">Cryptographic Master Seal &amp; Archive Hash</span>
+<p class="text-caption text-graphite">Awaiting placement officer final review &amp; publication freeze.</p>
+</div>
+</div>
+<span class="bg-sand text-on-surface font-label-sm font-bold px-3 py-1 rounded-full">PENDING ACTION</span>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between">
+<span class="text-caption text-ash">Audit Reference ID: AUD-GOOG-2026-09</span>
+<button class="px-6 py-3 rounded-full font-label-md font-bold text-paper-white bg-canopy-green hover:opacity-90 transition-opacity">
+            Proceed with Drive Final Sealing
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- CONFIRMATION / PUBLISH MODAL (Triggered by Coral CTA) -->
+<div class="fixed inset-0 bg-ink-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4" id="publish-modal">
+<div class="bg-paper-white rounded-3xl max-w-lg w-full p-space-lg space-y-space-md shadow-2xl">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-2xl bg-peach-wash text-coral-pulse flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[28px]">lock</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-canopy-green">Confirm Dossier Publication</h3>
+<p class="font-body-sm text-graphite">This action is permanent and tamper-sealed.</p>
+</div>
+</div>
+<div class="p-space-md bg-surface-container-low rounded-2xl text-body-sm space-y-2 text-graphite">
+<div class="flex justify-between font-medium">
+<span class="">Target Recipient Count:</span>
+<span class="font-bold text-ink-black">4 Candidates</span>
+</div>
+<div class="flex justify-between font-medium">
+<span class="">Active Offers to be Released:</span>
+<span class="font-bold text-canopy-green">2 Extended</span>
+</div>
+<div class="flex justify-between font-medium">
+<span class="">Cryptographic Hash Key:</span>
+<span class="font-mono text-caption text-deep-teal">e3b0c44298fc1c14...</span>
+</div>
+</div>
+<p class="font-caption text-ash">
+        By authorizing this operation, you attest that employer feedback rubrics and salary structures match the original campus placement policy for 2026–27.
+      </p>
+<div class="flex items-center justify-end gap-space-sm pt-2">
+<button class="px-5 py-2.5 rounded-full font-label-md text-graphite hover:text-ink-black transition-colors" onclick="closePublishModal()">
+          Cancel
+        </button>
+<button class="px-6 py-2.5 rounded-full font-label-md font-bold text-paper-white bg-coral-pulse hover:opacity-90 transition-opacity" onclick="confirmPublishAction()">
+          Confirm &amp; Seal Dossiers
+        </button>
+</div>
+</div>
+</div>
+<!-- TOAST NOTIFICATION CONTAINER -->
+<div class="fixed bottom-6 right-6 bg-canopy-green text-paper-white p-4 rounded-2xl shadow-xl z-50 flex items-center gap-3 translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="toast-notify">
+<span class="material-symbols-outlined text-leaf-bright text-[24px]">verified</span>
+<div>
+<span class="font-label-md font-bold block" id="toast-title">Results Sealed &amp; Published</span>
+<span class="font-caption text-mint-wash block" id="toast-subtitle">Candidate dossiers updated across portals.</span>
+</div>
+</div>
+<script>
+    function switchTab(targetId, el) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-canopy-green', 'text-paper-white', 'font-bold', 'shadow-sm');
+        btn.classList.add('bg-paper-white', 'text-graphite');
+      });
+
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      el.classList.remove('bg-paper-white', 'text-graphite');
+      el.classList.add('bg-canopy-green', 'text-paper-white', 'font-bold', 'shadow-sm');
+    }
+
+    function setPublishMode(mode) {
+      const btnDraft = document.getElementById('btn-draft');
+      const btnPublished = document.getElementById('btn-published');
+      
+      if (mode === 'draft') {
+        btnDraft.className = 'px-4 py-1.5 rounded-full font-label-sm font-semibold transition-all bg-paper-white text-canopy-green shadow-sm';
+        btnPublished.className = 'px-4 py-1.5 rounded-full font-label-sm font-semibold transition-all text-graphite hover:text-ink-black';
+      } else {
+        btnPublished.className = 'px-4 py-1.5 rounded-full font-label-sm font-semibold transition-all bg-paper-white text-canopy-green shadow-sm';
+        btnDraft.className = 'px-4 py-1.5 rounded-full font-label-sm font-semibold transition-all text-graphite hover:text-ink-black';
+      }
+    }
+
+    function openPublishModal() {
+      document.getElementById('publish-modal').classList.remove('hidden');
+    }
+
+    function closePublishModal() {
+      document.getElementById('publish-modal').classList.add('hidden');
+    }
+
+    function triggerToast(title, subtitle) {
+      const toast = document.getElementById('toast-notify');
+      document.getElementById('toast-title').innerText = title;
+      document.getElementById('toast-subtitle').innerText = subtitle;
+      toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      }, 4000);
+    }
+
+    function confirmPublishAction() {
+      closePublishModal();
+      triggerToast('Offers Cryptographically Sealed', '4 dossiers published to candidate dashboards via SHA-256 pipeline.');
+    }
+
+    function approveDraftItem(candidateName) {
+      triggerToast('Candidate Approved', candidateName + ' moved to pending seal queue.');
+    }
+
+    function previewRosterAudit() {
+      switchTab('tab-audit', document.querySelectorAll('.tab-btn')[3]);
+    }
+  </script>
+</div></main></div>
+
+</body></html>

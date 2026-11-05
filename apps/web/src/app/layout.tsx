@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ReactNode } from "react";
-import Link from "next/link";
 import { AuthProvider } from "../context/AuthContext";
-import { PersonaSwitcher } from "../components/PersonaSwitcher";
 
 export const metadata: Metadata = {
   title: "PlacementOS | Campus Recruitment Operations Platform",
@@ -18,112 +16,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Manrope:wght@200..800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-full flex flex-col font-body antialiased bg-lavender-mist text-ink-black">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-slate-900 focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-canopy-green focus:px-4 focus:py-2 focus:text-paper-white focus:shadow-lg font-body text-xs"
         >
           Skip to main content
         </a>
         <AuthProvider>
-          <header className="sticky top-0 z-50 glass-panel border-b border-slate-200 dark:border-slate-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-              <div className="flex items-center gap-8">
-                <Link href="/" className="flex items-center gap-3 group">
-                  <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm group-hover:scale-105 transition">
-                    P
-                  </div>
-                  <span className="font-semibold text-xl tracking-tight text-slate-900 dark:text-white">
-                    Placement<span className="text-brand-600 dark:text-brand-400">OS</span>
-                  </span>
-                </Link>
-
-                <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-5 text-sm font-medium">
-                  <Link
-                    href="/"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition"
-                  >
-                    Overview
-                  </Link>
-                  <Link
-                    href="/coordinator/drives"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    Recruitment Drives
-                  </Link>
-                  <Link
-                    href="/coordinator/students"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    Coordinator Roster
-                  </Link>
-                  <Link
-                    href="/coordinator/approvals"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    Approvals
-                  </Link>
-                  <Link
-                    href="/coordinator/exceptions"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    Exceptions
-                  </Link>
-                  <Link
-                    href="/coordinator/operations"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    Operations
-                  </Link>
-                  <Link
-                    href="/coordinator/integrations"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    Integrations
-                  </Link>
-                  <Link
-                    href="/student/portal"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    Student Portal
-                  </Link>
-                  <Link
-                    href="/student/eligibility"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    My Eligibility
-                  </Link>
-                  <Link
-                    href="/student/drives"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    My Drives
-                  </Link>
-                  <Link
-                    href="/student/schedule-results"
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition flex items-center gap-1.5"
-                  >
-                    My Schedule
-                  </Link>
-                </nav>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  Release 0.13 Measured scaling
-                </span>
-                <PersonaSwitcher />
-              </div>
-            </div>
-          </header>
-
-          <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div id="main-content" className="min-h-screen flex flex-col">
             {children}
-          </main>
-
-          <footer className="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-            PlacementOS Operations Baseline &bull; Deterministic Rules &bull; Scoped Multi-Tenant Architecture
-          </footer>
+          </div>
         </AuthProvider>
       </body>
     </html>

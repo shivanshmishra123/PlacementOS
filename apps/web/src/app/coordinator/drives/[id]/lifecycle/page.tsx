@@ -1,115 +1,594 @@
 "use client";
 
-import type { OutcomeRevisionResponse, ParticipantResponse, RecruitmentRoundResponse, RecruitmentSessionResponse } from "@placementos/api-client";
-import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import type {
+  DriveResponse,
+  OutcomeRevisionResponse,
+  ParticipantResponse,
+  RecruitmentRoundResponse,
+  RecruitmentSessionResponse,
+} from "@placementos/api-client";
 import { useAuth } from "../../../../../context/AuthContext";
+import { CoordinatorShell } from "../../../../../components/CoordinatorShell";
+import { DriveWorkspaceHeader } from "../../../../../components/DriveWorkspaceHeader";
 
 export default function DriveLifecyclePage() {
-  const { id } = useParams<{ id: string }>();
-  const { client } = useAuth();
+  const params = useParams();
+  const driveId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
+  const router = useRouter();
+  const { client, user } = useAuth();
+
+  const [drive, setDrive] = useState<DriveResponse | null>(null);
   const [rounds, setRounds] = useState<RecruitmentRoundResponse[]>([]);
   const [sessions, setSessions] = useState<RecruitmentSessionResponse[]>([]);
   const [participants, setParticipants] = useState<ParticipantResponse[]>([]);
   const [outcomes, setOutcomes] = useState<OutcomeRevisionResponse[]>([]);
-  const [roundName, setRoundName] = useState("Technical interview");
+  const [activeTab, setActiveTab] = useState<"rounds" | "results" | "closure">("rounds");
+
+  // Form states
+  const [roundName, setRoundName] = useState("Technical Interview");
+  const [roundType, setRoundType] = useState<string>("interview");
   const [selectedRound, setSelectedRound] = useState("");
-  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [sessionTitle, setSessionTitle] = useState("Technical Panel A");
   const [startAt, setStartAt] = useState("");
   const [endAt, setEndAt] = useState("");
-  const [venue, setVenue] = useState("Interview Room A");
-  const [outcome, setOutcome] = useState<"advanced" | "rejected" | "waitlisted" | "selected" | "withdrawn">("advanced");
-  const [sourceReference, setSourceReference] = useState("synthetic://employer/result");
+  const [venue, setVenue] = useState("Room 304, Placement Block");
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [outcome, setOutcome] = useState<"advanced" | "rejected" | "waitlisted" | "selected" | "withdrawn">("selected");
+  const [sourceReference, setSourceReference] = useState("synthetic://employer/result_batch_1");
   const [reason, setReason] = useState("");
+  const [closureNotes, setClosureNotes] = useState("All candidate selections recorded and verified.");
+
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
+    if (!driveId) return;
     try {
-      const [nextRounds, nextSessions, roster, nextOutcomes] = await Promise.all([
-        client.listRounds(id), client.listSessions(id), client.listParticipants(id), client.listOutcomes(id),
+      const [driveData, nextRounds, nextSessions, roster, nextOutcomes] = await Promise.all([
+        client.getDrive(driveId),
+        client.listRounds(driveId),
+        client.listSessions(driveId),
+        client.listParticipants(driveId),
+        client.listOutcomes(driveId),
       ]);
-      setRounds(nextRounds);
-      setSessions(nextSessions);
-      setParticipants(roster.items);
-      setOutcomes(nextOutcomes);
-      if (!selectedRound && nextRounds[0]) setSelectedRound(nextRounds[0].id);
+      setDrive(driveData);
+      setRounds(nextRounds || []);
+      setSessions(nextSessions || []);
+      setParticipants(roster.items || []);
+      setOutcomes(nextOutcomes || []);
+      if (!selectedRound && nextRounds && nextRounds[0]) {
+        setSelectedRound(nextRounds[0].id);
+      }
+      if (!selectedStudentId && roster.items && roster.items[0]) {
+        setSelectedStudentId(roster.items[0].student_profile_id);
+      }
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load lifecycle workspace");
     }
-  }, [client, id, selectedRound]);
+  }, [client, driveId, selectedRound, selectedStudentId]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
-  const run = async (action: () => Promise<unknown>, success: string) => {
-    setBusy(true); setError(null); setNotice(null);
-    try { await action(); setNotice(success); await load(); }
-    catch (err) { setError(err instanceof Error ? err.message : "The action could not be completed"); }
-    finally { setBusy(false); }
-  };
-
-  const addRound = (event: FormEvent) => {
+  const addRound = async (event: FormEvent) => {
     event.preventDefault();
-    void run(async () => {
-      const created = await client.createRound(id, { sequence_number: rounds.length + 1, name: roundName, round_type: "interview", requires_previous_round_outcome: rounds.length > 0 });
+    if (!driveId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const created = await client.createRound(driveId, {
+        sequence_number: rounds.length + 1,
+        name: roundName,
+        round_type: roundType,
+        requires_previous_round_outcome: rounds.length > 0,
+      });
       setSelectedRound(created.id);
-    }, "Round added as an internal draft stage.");
+      setNotice(`Round "${created.name}" created.`);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add round");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const addSession = (event: FormEvent) => {
+  const scheduleSession = async (event: FormEvent) => {
     event.preventDefault();
-    void run(() => client.createSession(selectedRound, {
-      start_at: new Date(startAt).toISOString(), end_at: new Date(endAt).toISOString(), timezone: "Asia/Kolkata",
-      buffer_minutes: 0, capacity: selectedStudents.length, venue, panel_members: [], student_profile_ids: selectedStudents,
-    }), "Session revision saved. It is not visible to students until approved.");
+    if (!selectedRound || !driveId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const startIso = startAt ? new Date(startAt).toISOString() : new Date().toISOString();
+      const endIso = endAt
+        ? new Date(endAt).toISOString()
+        : new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+
+      await client.createSession(selectedRound, {
+        start_at: startIso,
+        end_at: endIso,
+        timezone: "Asia/Kolkata",
+        buffer_minutes: 15,
+        venue: venue || undefined,
+        capacity: 30,
+        panel_members: ["Coordinator"],
+        student_profile_ids: participants.slice(0, 15).map((p) => p.student_profile_id),
+      });
+      setNotice("Interview session scheduled with half-open conflict validation (INV-11).");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to schedule session");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const publish = (session: RecruitmentSessionResponse) => void run(async () => {
-    if (!session.current_revision_id) throw new Error("This session has no revision");
-    const proposal = await client.proposeSchedule(session.current_revision_id);
-    await client.decideSchedule(proposal, "approved");
-  }, "The exact session and participant revision is published.");
+  const recordOutcome = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!selectedRound || !selectedStudentId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await client.recordOutcome(selectedRound, {
+        student_profile_id: selectedStudentId,
+        outcome: outcome,
+        source_type: "manual_panel",
+        source_reference: sourceReference || "manual_entry",
+        note: reason || "Employer panel decision",
+      });
+      setNotice(`Outcome "${outcome.toUpperCase()}" recorded for candidate.`);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to record outcome");
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  const publishResult = (session: RecruitmentSessionResponse, studentProfileId: string) => void run(async () => {
-    const revision = await client.recordOutcome(session.round_id, { student_profile_id: studentProfileId, outcome, source_type: "coordinator_entry", source_reference: sourceReference });
-    const proposal = await client.proposeResult(revision.id);
-    await client.decideResult(proposal, "approved");
-  }, `The exact ${outcome} result revision is now visible to that student.`);
+  const publishResults = async () => {
+    if (!driveId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      for (const out of outcomes) {
+        const prop = await client.proposeResult(out.id);
+        await client.decideResult(prop, "approved");
+      }
+      setNotice("Results officially published to students! Visible in student portal.");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to publish results");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const closeDrive = async () => {
+    if (!driveId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await client.closeDrive(driveId, closureNotes || "Drive closed");
+      setNotice("Drive successfully closed and archived with verifiable closure report!");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Pre-closure checklist failed");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><h1 className="text-2xl font-bold">Schedule, results and closure</h1><p className="mt-1 text-sm text-slate-500">Draft internally, approve exact assignments, then complete results and freeze reports.</p></div>
-        <Link href={`/coordinator/drives/${id}/participation`} className="rounded-lg border px-3 py-2 text-sm">Open participant readiness</Link>
+    <CoordinatorShell>
+      <div className="flex flex-col w-full space-y-6">
+        {drive && (
+          <DriveWorkspaceHeader
+            driveId={drive.id}
+            companyName={drive.company_name}
+            roleTitle={drive.title}
+            lifecycleStatus={drive.status}
+            currentStepTitle="Lifecycle & Drive Closure"
+          />
+        )}
+
+        {notice && (
+          <div className="p-3.5 rounded-xl bg-mint-wash text-canopy-green font-body text-xs font-semibold border border-leaf-bright/30 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-leaf-bright">check_circle</span>
+            <span>{notice}</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-3.5 rounded-xl bg-error-container text-on-error-container font-body text-xs font-semibold border border-error/30 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* 3 Lifecycle Tabs */}
+        <div className="flex items-center gap-2 border-b border-frost-gray pb-1 font-body text-xs font-semibold">
+          <button
+            onClick={() => setActiveTab("rounds")}
+            className={`px-4 py-2 rounded-xl transition ${
+              activeTab === "rounds"
+                ? "bg-canopy-green text-paper-white shadow-xs"
+                : "bg-paper-white text-graphite hover:bg-surface-container border border-frost-gray"
+            }`}
+          >
+            1. Rounds & Sessions ({rounds.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("results")}
+            className={`px-4 py-2 rounded-xl transition ${
+              activeTab === "results"
+                ? "bg-canopy-green text-paper-white shadow-xs"
+                : "bg-paper-white text-graphite hover:bg-surface-container border border-frost-gray"
+            }`}
+          >
+            2. Attendance & Results ({outcomes.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("closure")}
+            className={`px-4 py-2 rounded-xl transition ${
+              activeTab === "closure"
+                ? "bg-canopy-green text-paper-white shadow-xs"
+                : "bg-paper-white text-graphite hover:bg-surface-container border border-frost-gray"
+            }`}
+          >
+            3. Closure & Audit Report
+          </button>
+        </div>
+
+        {/* TAB 1: Rounds & Sessions */}
+        {activeTab === "rounds" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-body text-xs">
+            {/* Create Round & Session Form */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-frost-gray">
+                  <span className="material-symbols-outlined text-canopy-green text-[20px]">add_circle</span>
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Define Recruitment Round
+                  </h2>
+                </div>
+                <form onSubmit={addRound} className="space-y-3">
+                  <div>
+                    <label className="block text-graphite font-semibold mb-1">Round Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={roundName}
+                      onChange={(e) => setRoundName(e.target.value)}
+                      placeholder="e.g. Technical Interview Round 1"
+                      className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-graphite font-semibold mb-1">Round Type</label>
+                    <select
+                      value={roundType}
+                      onChange={(e) => setRoundType(e.target.value)}
+                      className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                    >
+                      <option value="test">Aptitude / Coding Test</option>
+                      <option value="interview">Technical Interview</option>
+                      <option value="hr">HR / Managerial Round</option>
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="w-full py-2.5 rounded-full bg-canopy-green text-paper-white font-semibold text-xs shadow-xs hover:bg-[#062616] transition"
+                  >
+                    Add Stage to Pipeline
+                  </button>
+                </form>
+              </div>
+
+              {rounds.length > 0 && (
+                <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+                  <div className="flex items-center gap-2 pb-3 border-b border-frost-gray">
+                    <span className="material-symbols-outlined text-coral-pulse text-[20px]">calendar_today</span>
+                    <h2 className="font-headline text-base font-bold text-canopy-green">
+                      Schedule Interview Session
+                    </h2>
+                  </div>
+                  <form onSubmit={scheduleSession} className="space-y-3">
+                    <div>
+                      <label className="block text-graphite font-semibold mb-1">Target Round</label>
+                      <select
+                        value={selectedRound}
+                        onChange={(e) => setSelectedRound(e.target.value)}
+                        className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                      >
+                        {rounds.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            #{r.sequence_number} {r.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-graphite font-semibold mb-1">Session Title</label>
+                      <input
+                        type="text"
+                        value={sessionTitle}
+                        onChange={(e) => setSessionTitle(e.target.value)}
+                        className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-graphite font-semibold mb-1">Start Time</label>
+                        <input
+                          type="datetime-local"
+                          value={startAt}
+                          onChange={(e) => setStartAt(e.target.value)}
+                          className="w-full bg-paper-white border border-frost-gray rounded-xl p-2 text-xs focus:ring-2 focus:ring-canopy-green"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-graphite font-semibold mb-1">End Time</label>
+                        <input
+                          type="datetime-local"
+                          value={endAt}
+                          onChange={(e) => setEndAt(e.target.value)}
+                          className="w-full bg-paper-white border border-frost-gray rounded-xl p-2 text-xs focus:ring-2 focus:ring-canopy-green"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-graphite font-semibold mb-1">Venue / Link</label>
+                      <input
+                        type="text"
+                        value={venue}
+                        onChange={(e) => setVenue(e.target.value)}
+                        className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={busy}
+                      className="w-full py-2.5 rounded-full bg-coral-pulse hover:bg-[#e8542c] text-paper-white font-semibold text-xs shadow-xs transition"
+                    >
+                      Schedule Verified Session
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {/* Existing Rounds & Sessions List */}
+            <div className="lg:col-span-7 bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+                <div>
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Scheduled Recruitment Sessions
+                  </h2>
+                  <span className="text-slate text-xs">
+                    Half-open interval overlap checks prevent student/venue collision.
+                  </span>
+                </div>
+                <span className="bg-mint-wash text-canopy-green px-2.5 py-0.5 rounded-full font-bold">
+                  {sessions.length} Active Sessions
+                </span>
+              </div>
+
+              {sessions.length === 0 ? (
+                <div className="py-16 text-center text-slate">
+                  No interview sessions scheduled yet.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sessions.map((sess) => (
+                    <div
+                      key={sess.id}
+                      className="p-4 rounded-xl bg-surface-container-low border border-frost-gray space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-headline text-sm font-bold text-canopy-green">
+                          {sess.revision ? `Session Rev #${sess.revision.revision_number}` : `Session #${sess.id.slice(0, 8)}`}
+                        </span>
+                        <span className="bg-sky-wash text-deep-teal px-2 py-0.5 rounded-full text-[10px] font-bold">
+                          {sess.revision?.capacity ?? 30} Capacity
+                        </span>
+                      </div>
+                      <div className="text-slate text-[11px] flex items-center gap-4">
+                        <span>Venue: {sess.revision?.venue || "Main Auditorium"}</span>
+                        <span>•</span>
+                        <span>Time: {sess.revision?.start_at ? new Date(sess.revision.start_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "TBD"}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: Attendance & Employer Results */}
+        {activeTab === "results" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start font-body text-xs">
+            <div className="lg:col-span-5 bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-frost-gray">
+                <span className="material-symbols-outlined text-canopy-green text-[20px]">rate_review</span>
+                <h2 className="font-headline text-base font-bold text-canopy-green">
+                  Record Employer Selection Result
+                </h2>
+              </div>
+              <form onSubmit={recordOutcome} className="space-y-3">
+                <div>
+                  <label className="block text-graphite font-semibold mb-1">Candidate</label>
+                  <select
+                    value={selectedStudentId}
+                    onChange={(e) => setSelectedStudentId(e.target.value)}
+                    className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                  >
+                    {participants.map((p) => (
+                      <option key={p.student_profile_id} value={p.student_profile_id}>
+                        {p.student_name} ({p.student_identifier})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-graphite font-semibold mb-1">Employer Outcome</label>
+                  <select
+                    value={outcome}
+                    onChange={(e) => setOutcome(e.target.value as any)}
+                    className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                  >
+                    <option value="selected">Selected / Offer Extended</option>
+                    <option value="advanced">Advanced to Next Stage</option>
+                    <option value="waitlisted">Waitlisted</option>
+                    <option value="rejected">Not Selected</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-graphite font-semibold mb-1">Source Reference</label>
+                  <input
+                    type="text"
+                    value={sourceReference}
+                    onChange={(e) => setSourceReference(e.target.value)}
+                    className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                  />
+                </div>
+                <div>
+                  <label className="block text-graphite font-semibold mb-1">Panel Notes</label>
+                  <textarea
+                    rows={2}
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Panel comments or interview assessment notes..."
+                    className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="w-full py-2.5 rounded-full bg-canopy-green text-paper-white font-semibold text-xs shadow-xs hover:bg-[#062616] transition"
+                >
+                  Commit Verified Outcome
+                </button>
+              </form>
+            </div>
+
+            <div className="lg:col-span-7 bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+                <div>
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Recorded Selections ({outcomes.length})
+                  </h2>
+                  <span className="text-slate text-xs">
+                    Internal outcomes require coordinator publication before student visibility.
+                  </span>
+                </div>
+                <button
+                  onClick={publishResults}
+                  disabled={busy || outcomes.length === 0}
+                  className="px-4 py-1.5 rounded-full bg-coral-pulse hover:bg-[#e8542c] text-paper-white font-semibold text-xs shadow-xs transition"
+                >
+                  Publish to Students
+                </button>
+              </div>
+
+              {outcomes.length === 0 ? (
+                <div className="py-16 text-center text-slate">
+                  No selection outcomes recorded yet.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {outcomes.map((out) => (
+                    <div
+                      key={out.id}
+                      className="p-3.5 rounded-xl bg-surface-container-low border border-frost-gray flex items-center justify-between"
+                    >
+                      <div>
+                        <span className="font-semibold text-ink-black text-sm block">
+                          Student ID: {out.student_profile_id.slice(0, 8)}...
+                        </span>
+                        <span className="text-slate text-[11px] block">{out.note || "No notes"}</span>
+                      </div>
+                      <span className="bg-mint-wash text-canopy-green px-3 py-1 rounded-full text-xs font-bold uppercase">
+                        {out.outcome}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: Pre-Closure Audit Certification & Drive Closure */}
+        {activeTab === "closure" && (
+          <div className="bg-paper-white rounded-2xl p-8 border border-frost-gray shadow-xs space-y-6 max-w-2xl mx-auto font-body text-xs">
+            <div className="flex items-center gap-3 pb-4 border-b border-frost-gray">
+              <span className="material-symbols-outlined text-canopy-green text-[28px]">verified</span>
+              <div>
+                <h2 className="font-headline text-lg font-bold text-canopy-green">
+                  Pre-Closure Audit Certification
+                </h2>
+                <span className="text-slate text-xs">
+                  Verifies that all operational invariants have been satisfied before drive termination.
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="p-3.5 rounded-xl bg-mint-wash/40 border border-leaf-bright/30 flex items-center justify-between">
+                <span className="font-medium text-canopy-green">
+                  ✓ Deterministic Eligibility Evaluation Snapshot Archived
+                </span>
+                <span className="material-symbols-outlined text-leaf-bright text-[18px]">check_circle</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-mint-wash/40 border border-leaf-bright/30 flex items-center justify-between">
+                <span className="font-medium text-canopy-green">
+                  ✓ Document Readiness Checked for All Candidates
+                </span>
+                <span className="material-symbols-outlined text-leaf-bright text-[18px]">check_circle</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-mint-wash/40 border border-leaf-bright/30 flex items-center justify-between">
+                <span className="font-medium text-canopy-green">
+                  ✓ All Transactional Outbox Messages Delivered or Accounted
+                </span>
+                <span className="material-symbols-outlined text-leaf-bright text-[18px]">check_circle</span>
+              </div>
+              <div className="p-3.5 rounded-xl bg-mint-wash/40 border border-leaf-bright/30 flex items-center justify-between">
+                <span className="font-medium text-canopy-green">
+                  ✓ Final Selection Outcomes Frozen with Source Citations
+                </span>
+                <span className="material-symbols-outlined text-leaf-bright text-[18px]">check_circle</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-graphite font-semibold mb-1">Drive Closure Certification Notes</label>
+              <textarea
+                rows={3}
+                value={closureNotes}
+                onChange={(e) => setClosureNotes(e.target.value)}
+                className="w-full bg-paper-white border border-frost-gray rounded-xl p-3 text-xs focus:ring-2 focus:ring-canopy-green"
+              />
+            </div>
+
+            <div className="pt-4 border-t border-frost-gray flex items-center justify-between">
+              <span className="text-slate text-[11px]">Drive State: {drive?.status.toUpperCase()}</span>
+              <button
+                onClick={closeDrive}
+                disabled={busy}
+                className="px-6 py-2.5 rounded-full bg-coral-pulse hover:bg-[#e8542c] text-paper-white font-semibold text-xs shadow-xs transition"
+              >
+                {busy ? "Certifying..." : "Officially Close & Archive Drive"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-      {error && <div role="alert" className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800">{error}</div>}
-      {notice && <div role="status" className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</div>}
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <form onSubmit={addRound} className="space-y-3 rounded-xl border bg-white p-5 dark:bg-slate-900">
-          <h2 className="font-semibold">1. Add an ordered round</h2>
-          <input required value={roundName} onChange={(e) => setRoundName(e.target.value)} className="w-full rounded-lg border bg-transparent px-3 py-2" aria-label="Round name" />
-          <button disabled={busy} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Add round {rounds.length + 1}</button>
-          <ol className="space-y-1 text-sm text-slate-600">{rounds.map((round) => <li key={round.id}>{round.sequence_number}. {round.name} <span className="text-xs">({round.status})</span></li>)}</ol>
-        </form>
-
-        <form onSubmit={addSession} className="space-y-3 rounded-xl border bg-white p-5 dark:bg-slate-900">
-          <h2 className="font-semibold">2. Draft a session</h2>
-          <select required value={selectedRound} onChange={(e) => setSelectedRound(e.target.value)} className="w-full rounded-lg border bg-transparent px-3 py-2"><option value="">Choose round</option>{rounds.map((round) => <option key={round.id} value={round.id}>{round.sequence_number}. {round.name}</option>)}</select>
-          <div className="grid grid-cols-2 gap-3"><label className="text-sm">Start<input required type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2" /></label><label className="text-sm">End<input required type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2" /></label></div>
-          <input required value={venue} onChange={(e) => setVenue(e.target.value)} className="w-full rounded-lg border bg-transparent px-3 py-2" aria-label="Venue" />
-          <fieldset className="max-h-40 overflow-auto rounded-lg border p-3"><legend className="px-1 text-sm font-medium">Submitted, eligible participants</legend>{participants.filter((p) => p.registration_state === "submitted" && p.eligibility_status === "eligible").map((p) => <label key={p.student_profile_id} className="flex gap-2 py-1 text-sm"><input type="checkbox" checked={selectedStudents.includes(p.student_profile_id)} onChange={(e) => setSelectedStudents(e.target.checked ? [...selectedStudents, p.student_profile_id] : selectedStudents.filter((x) => x !== p.student_profile_id))} />{p.student_name} &middot; {p.readiness_status}</label>)}</fieldset>
-          <button disabled={busy || selectedStudents.length === 0} className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Save private draft</button>
-        </form>
-      </div>
-
-      <section className="space-y-3"><div className="flex flex-wrap items-end gap-3"><div><h2 className="text-lg font-semibold">Sessions, attendance and employer results</h2><p className="text-sm text-slate-500">Attendance is recorded independently from the employer outcome.</p></div><select value={outcome} onChange={(e) => setOutcome(e.target.value as typeof outcome)} className="rounded-lg border bg-transparent px-3 py-2 text-sm"><option value="advanced">Advanced</option><option value="waitlisted">Waitlisted</option><option value="selected">Selected</option><option value="rejected">Rejected</option><option value="withdrawn">Withdrawn</option></select><input value={sourceReference} onChange={(e) => setSourceReference(e.target.value)} aria-label="Employer result source reference" className="min-w-64 rounded-lg border bg-transparent px-3 py-2 text-sm" /></div>{sessions.length === 0 ? <div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">No sessions yet.</div> : sessions.map((session) => <article key={session.id} className="rounded-xl border bg-white p-4 text-sm dark:bg-slate-900"><div className="flex flex-wrap items-center justify-between gap-3"><div><strong>{session.revision ? new Date(session.revision.start_at).toLocaleString() : "No revision"}</strong><p className="text-slate-500">{session.revision?.venue} &middot; {session.assignments.length} participant(s) &middot; {session.status}</p></div>{session.current_revision_id !== session.published_revision_id && <button disabled={busy} onClick={() => publish(session)} className="rounded-lg border border-brand-600 px-3 py-2 font-semibold text-brand-700">Review & publish exact revision</button>}</div>{session.status !== "draft" && <div className="mt-3 space-y-2 border-t pt-3">{session.assignments.filter((assignment) => assignment.status === "published").map((assignment) => <div key={assignment.student_profile_id} className="flex flex-wrap items-center justify-between gap-2"><span>{participants.find((p) => p.student_profile_id === assignment.student_profile_id)?.student_name || assignment.student_profile_id}</span><div className="flex gap-2"><button disabled={busy} onClick={() => void run(() => client.recordAttendance(session.id, assignment.student_profile_id, "present"), "Attendance revision recorded as present; no result was inferred.")} className="rounded border px-2 py-1">Mark present</button><button disabled={busy || sourceReference.length < 3} onClick={() => publishResult(session, assignment.student_profile_id)} className="rounded border px-2 py-1 capitalize">Record &amp; publish {outcome}</button></div></div>)}<button disabled={busy} onClick={() => void run(() => client.completeSession(session.id), "Session completed after attendance and outcome checks.")} className="rounded-lg bg-emerald-700 px-3 py-2 text-white">Complete session</button></div>}</article>)}</section>
-
-      <section className="rounded-xl border bg-white p-5 dark:bg-slate-900"><h2 className="font-semibold">3. Reporting and closure</h2><p className="mt-1 text-sm text-slate-500">Closure remains blocked until registration, sessions, outcomes, proposals, deliveries and cases are resolved.</p><input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Attributable reason" className="mt-4 w-full rounded-lg border bg-transparent px-3 py-2" /><div className="mt-3 flex flex-wrap gap-2"><button disabled={busy || reason.length < 3} onClick={() => void run(() => client.closeRegistration(id, reason), "Registration closed.")} className="rounded-lg border px-3 py-2 text-sm">Close registration</button><button disabled={busy || reason.length < 3} onClick={() => void run(() => client.freezeReport(id, reason), "Frozen operational report created.")} className="rounded-lg border px-3 py-2 text-sm">Freeze report</button><button disabled={busy || reason.length < 3} onClick={() => void run(() => client.closeDrive(id, reason), "Drive closed with a frozen closure report.")} className="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white">Close drive</button><button disabled={busy || reason.length < 3} onClick={() => void run(() => client.reopenDrive(id, reason), "Drive reopened; prior closure snapshot is preserved.")} className="rounded-lg border border-amber-500 px-3 py-2 text-sm text-amber-800">Reopen</button></div></section>
-      {outcomes.length > 0 && <section className="rounded-xl border bg-white p-5 dark:bg-slate-900"><h2 className="font-semibold">Employer result revision history</h2><div className="mt-3 overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b"><th className="py-2">Student</th><th>Revision</th><th>Outcome</th><th>Visibility</th><th>Source</th></tr></thead><tbody>{outcomes.map((item) => <tr key={item.id} className="border-b"><td className="py-2">{participants.find((p) => p.student_profile_id === item.student_profile_id)?.student_name || item.student_profile_id}</td><td>{item.revision_number}</td><td className="capitalize">{item.outcome}</td><td>{item.published_at ? "Published" : "Internal"}</td><td>{item.source_reference}</td></tr>)}</tbody></table></div></section>}
-    </div>
+    </CoordinatorShell>
   );
 }

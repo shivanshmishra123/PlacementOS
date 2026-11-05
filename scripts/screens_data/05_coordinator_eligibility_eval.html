@@ -1,0 +1,592 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"error-container":"#ffdad6","on-error-container":"#93000a","on-primary-fixed":"#3c0800","coral-pulse":"#ff643b","on-primary-fixed-variant":"#891e00","tertiary-container":"#ac7dff","inverse-primary":"#ffb4a1","tertiary-fixed-dim":"#d4bbff","primary-fixed-dim":"#ffb4a1","surface-dim":"#e1d5f2","error":"#ba1a1a","on-surface":"#1f182d","deep-teal":"#003642","sky-signal":"#00b4dc","primary":"#b12d05","graphite":"#3d3d3d","outline":"#8e7069","surface-container-highest":"#e9defa","on-primary-container":"#5e1200","surface-tint":"#b12d05","ash":"#a6a6a6","on-tertiary-container":"#3f0088","lilac-wash":"#fdf0ff","indigo-bloom":"#460095","surface-container-lowest":"#ffffff","orchid-tint":"#f3b3fe","surface-container-low":"#f9f1ff","inverse-on-surface":"#f6edff","on-tertiary-fixed-variant":"#5924a8","leaf-bright":"#1dbf73","background":"#fef7ff","cream":"#faf7e8","sand":"#f4ece9","on-primary":"#ffffff","sky-wash":"#ccf0f8","on-tertiary":"#ffffff","secondary-fixed":"#bdeecc","paper-white":"#ffffff","frost-gray":"#e0e0e0","slate":"#7a7a7a","outline-variant":"#e2bfb6","on-background":"#1f182d","surface-container":"#f4eaff","aubergine":"#47264c","on-secondary-fixed":"#002110","tertiary-fixed":"#ebdcff","ink-black":"#000000","secondary-fixed-dim":"#a2d1b1","sage-wash":"#e4f7ee","on-secondary-container":"#426e52","mint-wash":"#d2f2e3","surface-bright":"#fef7ff","surface":"#fef7ff","primary-container":"#ff643b","tertiary":"#7241c1","on-tertiary-fixed":"#270058","inverse-surface":"#342d42","on-secondary-fixed-variant":"#234f36","primary-fixed":"#ffdbd2","lavender-mist":"#eee2ff","cloud-gray":"#f2f2f2","on-error":"#ffffff","canopy-green":"#0a3922","on-secondary":"#ffffff","surface-container-high":"#efe3ff","peach-wash":"#ffede8","charcoal":"#333333","on-surface-variant":"#5a413a","secondary":"#3c674d","surface-variant":"#e9defa","secondary-container":"#bdeecc"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"gutter-mobile":"1rem","margin-tablet":"2.5rem",margin:"5rem","space-xl":"2rem","space-lg":"1.5rem","space-md":"1rem","margin-mobile":"1.25rem",gutter:"1.5rem","space-sm":"0.5rem","space-xs":"0.25rem"},fontFamily:{"body-lg":["DM Sans"],subheading:["DM Sans"],"headline-lg":["Manrope"],"display-lg-mobile":["Manrope"],"display-lg":["Manrope"],"display-xl":["Manrope"],"body-sm":["DM Sans"],"display-md":["Manrope"],"headline-md":["Manrope"],"body-md":["DM Sans"],"headline-sm":["Manrope"],"label-md":["DM Sans"],"headline-lg-mobile":["Manrope"],"label-sm":["DM Sans"],caption:["DM Sans"]},fontSize:{"body-lg":["18px",{lineHeight:"25px",fontWeight:"400"}],subheading:["20px",{lineHeight:"27px",fontWeight:"500"}],"headline-lg":["48px",{lineHeight:"55px",letterSpacing:"-0.019em",fontWeight:"600"}],"display-lg-mobile":["48px",{lineHeight:"52px",letterSpacing:"-0.02em",fontWeight:"600"}],"display-lg":["80px",{lineHeight:"84px",letterSpacing:"-0.028em",fontWeight:"600"}],"display-xl":["116px",{lineHeight:"104px",letterSpacing:"-0.028em",fontWeight:"600"}],"body-sm":["14px",{lineHeight:"19px",fontWeight:"400"}],"display-md":["69px",{lineHeight:"74px",letterSpacing:"-0.028em",fontWeight:"500"}],"headline-md":["32px",{lineHeight:"38px",letterSpacing:"-0.019em",fontWeight:"700"}],"body-md":["16px",{lineHeight:"22px",fontWeight:"400"}],"headline-sm":["24px",{lineHeight:"31px",fontWeight:"600"}],"label-md":["14px",{lineHeight:"18px",fontWeight:"600"}],"headline-lg-mobile":["32px",{lineHeight:"38px",letterSpacing:"-0.019em",fontWeight:"600"}],"label-sm":["12px",{lineHeight:"15px",fontWeight:"600"}],caption:["12px",{lineHeight:"15px",fontWeight:"400"}]}}}};</script></head><body class="bg-lavender-mist font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[240px] bg-paper-white border-r border-frost-gray z-50 flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm border-b border-frost-gray"><img alt="PlacementOS Monogram" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UyQgTw66HZwkG94OZYPdpd1riKlcAIzaVav_-rknbsvvI4_AwV8j6J-gVzKK9jWL9JYOXjYqx90j8dmik0MhFPGsNFgbbtmkVFXc6tli73qKt5x_DwaJmy8k90i4DSUMW99YhbffWyZrg5W2i1Ht-Qk_9iOCtm9J638wha80jjroKjgsYPV6cFb-nO1b2UD_u6vPzAs1VEuPZPG5r-5zbaN9a2ok3QqiaiMKlc3FwBSQ"><div class="flex flex-col"><span class="font-headline-sm text-body-md font-bold text-canopy-green leading-tight">PlacementOS</span><span class="font-label-sm text-caption text-graphite">Recruitment Ops</span></div></div><nav class="flex-1 px-space-sm py-space-md space-y-1 overflow-y-auto" data-active-classes="bg-canopy-green text-paper-white shadow-sm border-l-4 border-leaf-bright font-medium"><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-dashboard" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="">Dashboard</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-drives" href="#"><span class="material-symbols-outlined text-[20px]">business_center</span><span class="">Drives</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-students" href="#"><span class="material-symbols-outlined text-[20px]">school</span><span class="">Students</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-approvals" href="#"><span class="material-symbols-outlined text-[20px]">verified</span><span class="">Approvals</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-exceptions" href="#"><span class="material-symbols-outlined text-[20px]">emergency</span><span class="">Exceptions</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-integrations" href="#"><span class="material-symbols-outlined text-[20px]">hub</span><span class="">Integrations</span></a><a class="flex items-center gap-space-sm h-[44px] px-space-md rounded-xl text-ink-black font-body-md hover:bg-surface-container hover:text-on-surface transition-all" data-path="coordinator-operations" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="">Operations</span></a></nav><div class="p-space-sm border-t border-frost-gray"><div class="bg-mint-wash rounded-xl p-space-sm flex items-center justify-between"><span class="font-label-sm text-caption text-canopy-green font-semibold uppercase tracking-wider">System Status</span><span class="h-2 w-2 rounded-full bg-leaf-bright"></span></div></div></aside><div class="pl-[240px]"><header class="fixed top-0 left-[240px] right-0 h-16 bg-paper-white border-b border-frost-gray z-40 px-space-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><span class="font-headline-sm text-body-md text-canopy-green font-semibold tracking-tight">Apex Institute of Technology</span><span class="bg-sky-wash text-deep-teal font-label-sm text-caption px-space-sm py-1 rounded-full">Academic Year 2026–27</span><span class="bg-mint-wash text-canopy-green font-label-sm text-caption px-space-sm py-1 rounded-full font-bold">SYNTHETIC DEMO</span></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm bg-surface-container-low px-space-sm py-1 rounded-full border border-frost-gray"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPq-OTm0hGrViGJzRGrpzRWugj_SQE0z0ILw4ZngLxHqvjkGLmGtTH42psgQCOn-RCBxMZxq_21RwxN_RIW6RO68bWN7vrXX9tEIzb0bnqEoRixbjPvM9KQziWWP3HyGvaH-IS1uquJM2byj_EGjuxJ0ZYoiGPHOA29fLsZGLR4xh-0LAH6sXgdcEvX2il9X0MfjUKn_12Zyf8ZO0oMGS6qdMuEuoG_hL99ixfxZGw"><span class="font-label-md text-body-sm text-graphite">Dr. K. Sharma (Placement Chair)</span></div></div></header><main class="w-full pt-16 bg-lavender-mist"><div class="max-w-[1040px] mx-auto px-space-md py-space-lg"><div class="flex flex-col w-full">
+<!-- Top Breadcrumb & Title Section -->
+<div class="flex flex-col gap-space-xs mb-space-lg">
+<div class="flex items-center gap-space-xs text-graphite font-body-sm">
+<span class="hover:text-canopy-green cursor-pointer transition-colors">Drives</span>
+<span class="material-symbols-outlined text-[16px] text-slate">chevron_right</span>
+<span class="hover:text-canopy-green cursor-pointer transition-colors">Google - SWE</span>
+<span class="material-symbols-outlined text-[16px] text-slate">chevron_right</span>
+<span class="text-canopy-green font-semibold">Eligibility Evaluation</span>
+</div>
+<div class="flex items-center justify-between mt-space-xs flex-wrap gap-space-md">
+<div>
+<h1 class="font-headline-md text-headline-md text-canopy-green font-bold tracking-tight">Deterministic Cohort Evaluation</h1>
+<p class="font-body-md text-body-md text-graphite mt-1">Audit-grade rule resolution over immutable student academic records</p>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-5 py-2.5 rounded-full border border-ink-black text-ink-black font-body-md text-body-sm font-medium hover:bg-paper-white transition-colors flex items-center gap-space-xs" id="export-cohort-btn">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span class="">Export Evaluated Cohort</span>
+</button>
+<button class="px-6 py-2.5 rounded-full bg-coral-pulse text-paper-white font-body-md text-body-md font-semibold hover:opacity-95 transition-opacity flex items-center gap-space-xs" id="run-eval-btn">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span class="">Run Deterministic Evaluation</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Control Ribbon -->
+<div class="bg-paper-white rounded-2xl p-space-lg mb-space-xl flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center flex-wrap gap-space-md">
+<!-- Active Policy Capsule -->
+<div class="flex items-center gap-space-xs bg-sage-wash px-3.5 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-canopy-green text-[18px]">shield</span>
+<span class="font-label-md text-label-md text-canopy-green font-semibold">Approved Policy v1.0</span>
+<span class="font-caption text-caption text-graphite font-mono ml-1">(Hash: sha256:91bc74...)</span>
+</div>
+<!-- Cohort Scope Selector -->
+<div class="flex items-center gap-space-xs bg-lavender-mist px-3.5 py-1.5 rounded-xl cursor-pointer">
+<span class="material-symbols-outlined text-canopy-green text-[18px]">group</span>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Batch of 2027 — B.Tech All Branches (480 Verified Students)</span>
+<span class="material-symbols-outlined text-graphite text-[18px]">arrow_drop_down</span>
+</div>
+</div>
+<!-- Historical Run Stamp -->
+<div class="flex items-center gap-space-xs text-graphite">
+<span class="material-symbols-outlined text-leaf-bright text-[18px]" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-body-sm text-body-sm text-graphite">Run #4 — <span class="font-medium text-ink-black">2026-11-04 15:30:12 IST</span> <span class="bg-mint-wash text-canopy-green font-label-sm text-caption px-2 py-0.5 rounded-full font-bold ml-1">Current</span></span>
+</div>
+</div>
+<!-- Summary Metrics Strip (3 Pastel Feature Cards) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg mb-space-xl">
+<!-- Card 1: ELIGIBLE -->
+<div class="bg-mint-wash rounded-[24px] p-6 flex flex-col justify-between h-[210px] relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-canopy-green tracking-wider uppercase">ELIGIBLE</span>
+<span class="material-symbols-outlined text-canopy-green text-[28px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<div class="font-headline-lg text-[64px] leading-none font-bold text-canopy-green tracking-tight">312</div>
+<p class="font-body-sm text-body-sm text-secondary mt-2">65.0% of cohort meets all academic predicates</p>
+</div>
+</div>
+<!-- Card 2: INELIGIBLE -->
+<div class="bg-peach-wash rounded-[24px] p-6 flex flex-col justify-between h-[210px] relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-coral-pulse tracking-wider uppercase">INELIGIBLE</span>
+<span class="material-symbols-outlined text-coral-pulse text-[28px]" style="font-variation-settings: 'FILL' 1;">cancel</span>
+</div>
+<div>
+<div class="font-headline-lg text-[64px] leading-none font-bold text-coral-pulse tracking-tight">142</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">29.6% failed one or more verified predicates</p>
+</div>
+</div>
+<!-- Card 3: NEEDS REVIEW -->
+
+</div>
+<!-- Filter & Search Ribbon -->
+<div class="bg-paper-white rounded-2xl p-space-md mb-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col lg:flex-row items-center justify-between gap-space-md">
+<!-- Search Input -->
+<div class="relative w-full lg:w-[420px]">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-ash text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-surface-container-low font-body-sm text-body-sm text-on-surface placeholder-ash border-none focus:outline-none focus:ring-1 focus:ring-canopy-green" id="student-search-input" placeholder="Search by student roll number, student name, or branch..." type="text">
+</div>
+<!-- Filter Tabs -->
+<div class="flex items-center p-1 bg-surface-container-low rounded-xl overflow-x-auto w-full lg:w-auto">
+<button class="filter-tab px-4 py-1.5 rounded-lg font-label-md text-label-md font-semibold text-canopy-green bg-paper-white transition-all" data-filter="all">All (480)</button>
+<button class="filter-tab px-4 py-1.5 rounded-lg font-label-md text-label-md font-semibold text-graphite hover:text-canopy-green transition-all" data-filter="eligible">Eligible (312)</button>
+<button class="filter-tab px-4 py-1.5 rounded-lg font-label-md text-label-md font-semibold text-graphite hover:text-coral-pulse transition-all" data-filter="ineligible">Ineligible (142)</button>
+<button class="filter-tab px-4 py-1.5 rounded-lg font-label-md text-label-md font-semibold text-graphite hover:text-charcoal transition-all" data-filter="needs_review">Needs Review (26)</button>
+</div>
+</div>
+<!-- Branch Multi-select Pills -->
+<div class="flex items-center gap-space-xs flex-wrap pt-space-xs">
+<span class="font-label-sm text-label-sm text-slate uppercase tracking-wider mr-2">Target Branches:</span>
+<button class="branch-pill active px-3 py-1 rounded-full text-caption font-label-sm font-semibold bg-canopy-green text-paper-white transition-colors">CSE</button>
+<button class="branch-pill active px-3 py-1 rounded-full text-caption font-label-sm font-semibold bg-canopy-green text-paper-white transition-colors">IT</button>
+<button class="branch-pill active px-3 py-1 rounded-full text-caption font-label-sm font-semibold bg-canopy-green text-paper-white transition-colors">ECE</button>
+<button class="branch-pill active px-3 py-1 rounded-full text-caption font-label-sm font-semibold bg-canopy-green text-paper-white transition-colors">EE</button>
+<button class="branch-pill px-3 py-1 rounded-full text-caption font-label-sm font-semibold bg-lavender-mist text-graphite hover:bg-frost-gray transition-colors">ME</button>
+<button class="branch-pill px-3 py-1 rounded-full text-caption font-label-sm font-semibold bg-lavender-mist text-graphite hover:bg-frost-gray transition-colors">CE</button>
+<span class="text-caption text-ash font-body-sm ml-auto">Showing 5 of 480 verified cohort rows</span>
+</div>
+</div>
+<!-- Cohort Evaluation Master Table -->
+<div class="bg-paper-white rounded-2xl p-6 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-lavender-mist/50">
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold rounded-l-xl">Roll Number</th>
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold">Student Name</th>
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold">Branch</th>
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold">Verified CGPA</th>
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold">Backlogs</th>
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold">Outcome</th>
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold">Predicate Summary</th>
+<th class="py-3.5 px-4 font-label-md text-label-md text-graphite font-semibold text-right rounded-r-xl">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-body-sm font-body-sm text-on-surface">
+<!-- Row 1: Eligible (Rahul Verma) -->
+<tr class="student-row hover:bg-surface-container-low transition-colors" data-status="eligible" data-student="rahul verma 2023cs104 cse">
+<td class="py-4 px-4 font-mono font-semibold text-canopy-green">2023CS104</td>
+<td class="py-4 px-4 font-medium text-ink-black">Rahul Verma</td>
+<td class="py-4 px-4"><span class="bg-lavender-mist px-2.5 py-0.5 rounded-full font-label-sm text-caption text-graphite">CSE</span></td>
+<td class="py-4 px-4 font-semibold text-canopy-green">8.42</td>
+<td class="py-4 px-4">0</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1 bg-mint-wash text-canopy-green px-3 py-1 rounded-full font-label-sm text-caption font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-leaf-bright"></span>
+                ELIGIBLE
+              </span>
+</td>
+<td class="py-4 px-4 text-graphite">All 4 predicates satisfied</td>
+<td class="py-4 px-4 text-right">
+<button class="drawer-trigger px-3 py-1 rounded-full border border-ink-black text-ink-black font-label-sm text-caption font-medium hover:bg-surface-container transition-colors inline-flex items-center gap-1" onclick="togglePredicateDrawer('drawer-2023CS104')">
+<span class="">Expand Predicates</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200" id="icon-drawer-2023CS104">expand_more</span>
+</button>
+</td>
+</tr>
+<!-- Expandable Predicate Breakdown Row for Rahul Verma -->
+<tr class="hidden" id="drawer-2023CS104">
+<td class="p-3 bg-lavender-mist/30" colspan="8">
+<div class="bg-lavender-mist rounded-xl p-5 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-canopy-green text-[20px]">rule</span>
+<span class="font-headline-sm text-body-md font-bold text-canopy-green">Atomic Predicate Evaluation Trace (Run #4)</span>
+</div>
+<span class="font-caption text-caption text-graphite font-mono">Timestamp: 2026-11-04T15:30:12.441Z</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-sm">
+<!-- Predicate 1 -->
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 1</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">Permitted Branch</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">IN [CSE, IT, ECE, EE]</code></div>
+<div class="">Actual: <strong class="text-ink-black">CSE</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 flex items-center justify-between text-[11px] text-secondary">
+<span class="">Evidence Source: Academic Registry</span>
+<span class="font-bold text-leaf-bright">VERIFIED</span>
+</div>
+</div>
+<!-- Predicate 2 -->
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 2</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">Graduation Cohort</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">== 2027</code></div>
+<div class="">Actual: <strong class="text-ink-black">2027</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 flex items-center justify-between text-[11px] text-secondary">
+<span class="">Evidence Source: Enrollment SIS</span>
+<span class="font-bold text-leaf-bright">VERIFIED</span>
+</div>
+</div>
+<!-- Predicate 3 -->
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 3</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">Minimum CGPA</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">&gt;= 7.50</code></div>
+<div class="">Actual: <strong class="text-ink-black">8.42</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 flex items-center justify-between text-[11px] text-secondary">
+<span class="">Evidence Source: Controller of Exams</span>
+<span class="font-bold text-leaf-bright">VERIFIED</span>
+</div>
+</div>
+<!-- Predicate 4 -->
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 4</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">Active Backlogs</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">&lt;= 0</code></div>
+<div class="">Actual: <strong class="text-ink-black">0</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 flex items-center justify-between text-[11px] text-secondary">
+<span class="">Evidence Source: Exam Ledger v4.2</span>
+<span class="font-bold text-leaf-bright">VERIFIED</span>
+</div>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<!-- Row 2: Ineligible (Vikram Singh) -->
+<tr class="student-row hover:bg-surface-container-low transition-colors" data-status="ineligible" data-student="vikram singh 2023me045 me">
+<td class="py-4 px-4 font-mono font-semibold text-coral-pulse">2023ME045</td>
+<td class="py-4 px-4 font-medium text-ink-black">Vikram Singh</td>
+<td class="py-4 px-4"><span class="bg-lavender-mist px-2.5 py-0.5 rounded-full font-label-sm text-caption text-graphite">ME</span></td>
+<td class="py-4 px-4 font-semibold text-coral-pulse">7.10</td>
+<td class="py-4 px-4 text-coral-pulse font-semibold">1</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1 bg-peach-wash text-coral-pulse px-3 py-1 rounded-full font-label-sm text-caption font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-coral-pulse"></span>
+                INELIGIBLE
+              </span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant text-caption">
+              Failed Branch (<code class="text-coral-pulse font-mono">ERR_BRANCH_NOT_PERMITTED</code>), Failed CGPA (<code class="text-coral-pulse font-mono">ERR_CGPA_BELOW_MIN</code>)
+            </td>
+<td class="py-4 px-4 text-right">
+<button class="drawer-trigger px-3 py-1 rounded-full border border-ink-black text-ink-black font-label-sm text-caption font-medium hover:bg-surface-container transition-colors inline-flex items-center gap-1" onclick="togglePredicateDrawer('drawer-2023ME045')">
+<span class="">Expand Predicates</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200" id="icon-drawer-2023ME045">expand_more</span>
+</button>
+</td>
+</tr>
+<!-- Expandable Predicate Breakdown Row for Vikram Singh -->
+<tr class="hidden" id="drawer-2023ME045">
+<td class="p-3 bg-lavender-mist/30" colspan="8">
+<div class="bg-peach-wash/60 rounded-xl p-5 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-coral-pulse text-[20px]">error</span>
+<span class="font-headline-sm text-body-md font-bold text-coral-pulse">Failure Diagnostic Trace</span>
+</div>
+<span class="font-caption text-caption text-graphite font-mono">Evaluation Policy: Google - SWE (Strict)</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-sm">
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 1</span>
+<span class="bg-peach-wash text-coral-pulse px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">FAIL</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-coral-pulse">Branch Inclusion</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">IN [CSE, IT, ECE, EE]</code></div>
+<div class="">Actual: <strong class="text-coral-pulse">ME</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 text-[11px] text-coral-pulse font-medium">Violates academic department filter</div>
+</div>
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 2</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">Graduation Cohort</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">== 2027</code></div>
+<div class="">Actual: <strong class="text-ink-black">2027</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 text-[11px] text-leaf-bright font-medium">Predicate Satisfied</div>
+</div>
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 3</span>
+<span class="bg-peach-wash text-coral-pulse px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">FAIL</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-coral-pulse">Minimum CGPA</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">&gt;= 7.50</code></div>
+<div class="">Actual: <strong class="text-coral-pulse">7.10</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 text-[11px] text-coral-pulse font-medium">Deficit of 0.40 grade points</div>
+</div>
+<div class="bg-paper-white p-3.5 rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 4</span>
+<span class="bg-peach-wash text-coral-pulse px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">FAIL</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-coral-pulse">Active Backlogs</div>
+<div class="font-body-sm text-caption text-graphite mt-2 space-y-1">
+<div class="">Expected: <code class="bg-lavender-mist px-1 py-0.5 rounded font-mono text-[11px]">&lt;= 0</code></div>
+<div class="">Actual: <strong class="text-coral-pulse">1 (ME204 Dynamics)</strong></div>
+</div>
+</div>
+<div class="mt-3 pt-2 text-[11px] text-coral-pulse font-medium">Unresolved standing backlog</div>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<!-- Row 3: Needs Review (Priya Nair) -->
+<tr class="student-row hover:bg-surface-container-low transition-colors" data-status="needs_review" data-student="priya nair 2023ec089 ece">
+<td class="py-4 px-4 font-mono font-semibold text-charcoal">2023EC089</td>
+<td class="py-4 px-4 font-medium text-ink-black">Priya Nair</td>
+<td class="py-4 px-4"><span class="bg-lavender-mist px-2.5 py-0.5 rounded-full font-label-sm text-caption text-graphite">ECE</span></td>
+<td class="py-4 px-4 font-semibold text-canopy-green">7.90</td>
+<td class="py-4 px-4 font-mono text-ash">null</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1 bg-cream text-charcoal px-3 py-1 rounded-full font-label-sm text-caption font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-charcoal"></span>
+                NEEDS_REVIEW
+              </span>
+</td>
+<td class="py-4 px-4 text-graphite text-caption">
+              Backlogs evidence unverified (<code class="text-graphite font-mono">EVID_MISSING</code>). Conservative Aggregation Rule applied.
+            </td>
+<td class="py-4 px-4 text-right">
+<button class="drawer-trigger px-3 py-1 rounded-full border border-ink-black text-ink-black font-label-sm text-caption font-medium hover:bg-surface-container transition-colors inline-flex items-center gap-1" onclick="togglePredicateDrawer('drawer-2023EC089')">
+<span class="">Expand Predicates</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200" id="icon-drawer-2023EC089">expand_more</span>
+</button>
+</td>
+</tr>
+<!-- Expandable Predicate Breakdown Row for Priya Nair -->
+<tr class="hidden" id="drawer-2023EC089">
+<td class="p-3 bg-lavender-mist/30" colspan="8">
+<div class="bg-cream rounded-xl p-5 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-charcoal text-[20px]">help_center</span>
+<span class="font-headline-sm text-body-md font-bold text-charcoal">Missing Attestation &amp; Conservative Fallback</span>
+</div>
+<button class="bg-canopy-green text-paper-white text-caption font-label-sm px-3 py-1 rounded-full hover:opacity-90 transition-opacity">Request SIS Sync</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-sm">
+<div class="bg-paper-white p-3.5 rounded-xl">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 1</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">Branch (ECE)</div>
+<div class="text-[11px] text-secondary mt-2">Verified via Academic Roll</div>
+</div>
+<div class="bg-paper-white p-3.5 rounded-xl">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 2</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">Graduation (2027)</div>
+<div class="text-[11px] text-secondary mt-2">Verified via SIS Batch</div>
+</div>
+<div class="bg-paper-white p-3.5 rounded-xl">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-slate font-bold uppercase">Predicate 3</span>
+<span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-canopy-green">CGPA (7.90 &gt;= 7.50)</div>
+<div class="text-[11px] text-secondary mt-2">Verified via Exam Ledger</div>
+</div>
+<div class="bg-paper-white p-3.5 rounded-xl">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-sm text-caption text-charcoal font-bold uppercase">Predicate 4</span>
+<span class="bg-cream text-charcoal px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">UNVERIFIED</span>
+</div>
+<div class="font-label-md text-label-md font-semibold text-charcoal">Backlogs Data Missing</div>
+<div class="text-[11px] text-graphite mt-2">Requires manual verification sign-off</div>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<!-- Row 4: Eligible (Ananya Sharma) -->
+<tr class="student-row hover:bg-surface-container-low transition-colors" data-status="eligible" data-student="ananya sharma 2023it012 it">
+<td class="py-4 px-4 font-mono font-semibold text-canopy-green">2023IT012</td>
+<td class="py-4 px-4 font-medium text-ink-black">Ananya Sharma</td>
+<td class="py-4 px-4"><span class="bg-lavender-mist px-2.5 py-0.5 rounded-full font-label-sm text-caption text-graphite">IT</span></td>
+<td class="py-4 px-4 font-semibold text-canopy-green">9.14</td>
+<td class="py-4 px-4">0</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1 bg-mint-wash text-canopy-green px-3 py-1 rounded-full font-label-sm text-caption font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-leaf-bright"></span>
+                ELIGIBLE
+              </span>
+</td>
+<td class="py-4 px-4 text-graphite">All 4 predicates satisfied</td>
+<td class="py-4 px-4 text-right">
+<button class="drawer-trigger px-3 py-1 rounded-full border border-ink-black text-ink-black font-label-sm text-caption font-medium hover:bg-surface-container transition-colors inline-flex items-center gap-1" onclick="togglePredicateDrawer('drawer-2023IT012')">
+<span class="">Expand Predicates</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200" id="icon-drawer-2023IT012">expand_more</span>
+</button>
+</td>
+</tr>
+<!-- Drawer for Ananya Sharma -->
+<tr class="hidden" id="drawer-2023IT012">
+<td class="p-3 bg-lavender-mist/30" colspan="8">
+<div class="bg-lavender-mist rounded-xl p-5 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-canopy-green text-[20px]">verified</span>
+<span class="font-headline-sm text-body-md font-bold text-canopy-green">Atomic Predicate Evaluation Trace (Run #4)</span>
+</div>
+<span class="font-caption text-caption text-graphite font-mono">Timestamp: 2026-11-04T15:30:12.788Z</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-sm">
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span><div class="font-label-md text-label-md font-semibold text-canopy-green mt-1">Branch (IT)</div><p class="text-[11px] text-secondary mt-1">Actual: IT</p></div>
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span><div class="font-label-md text-label-md font-semibold text-canopy-green mt-1">Graduation (2027)</div><p class="text-[11px] text-secondary mt-1">Actual: 2027</p></div>
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span><div class="font-label-md text-label-md font-semibold text-canopy-green mt-1">CGPA (9.14)</div><p class="text-[11px] text-secondary mt-1">Expected &gt;= 7.50</p></div>
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span><div class="font-label-md text-label-md font-semibold text-canopy-green mt-1">Backlogs (0)</div><p class="text-[11px] text-secondary mt-1">Expected &lt;= 0</p></div>
+</div>
+</div>
+</td>
+</tr>
+<!-- Row 5: Ineligible (Kabir Das) -->
+<tr class="student-row hover:bg-surface-container-low transition-colors" data-status="ineligible" data-student="kabir das 2023cs088 cse">
+<td class="py-4 px-4 font-mono font-semibold text-coral-pulse">2023CS088</td>
+<td class="py-4 px-4 font-medium text-ink-black">Kabir Das</td>
+<td class="py-4 px-4"><span class="bg-lavender-mist px-2.5 py-0.5 rounded-full font-label-sm text-caption text-graphite">CSE</span></td>
+<td class="py-4 px-4 font-semibold text-coral-pulse">6.85</td>
+<td class="py-4 px-4">0</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1 bg-peach-wash text-coral-pulse px-3 py-1 rounded-full font-label-sm text-caption font-bold">
+<span class="h-1.5 w-1.5 rounded-full bg-coral-pulse"></span>
+                INELIGIBLE
+              </span>
+</td>
+<td class="py-4 px-4 text-on-surface-variant text-caption">
+              Failed CGPA (<code class="text-coral-pulse font-mono">ERR_CGPA_BELOW_MIN</code>: 6.85 &lt; 7.50)
+            </td>
+<td class="py-4 px-4 text-right">
+<button class="drawer-trigger px-3 py-1 rounded-full border border-ink-black text-ink-black font-label-sm text-caption font-medium hover:bg-surface-container transition-colors inline-flex items-center gap-1" onclick="togglePredicateDrawer('drawer-2023CS088')">
+<span class="">Expand Predicates</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-200" id="icon-drawer-2023CS088">expand_more</span>
+</button>
+</td>
+</tr>
+<!-- Drawer for Kabir Das -->
+<tr class="hidden" id="drawer-2023CS088">
+<td class="p-3 bg-lavender-mist/30" colspan="8">
+<div class="bg-peach-wash/60 rounded-xl p-5 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-coral-pulse text-[20px]">cancel</span>
+<span class="font-headline-sm text-body-md font-bold text-coral-pulse">Predicate Evaluation Result: Failed CGPA Criterion</span>
+</div>
+<span class="font-caption text-caption text-graphite font-mono">Verified Ledger Record</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-sm">
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span><div class="font-label-md text-label-md font-semibold text-canopy-green mt-1">Branch (CSE)</div></div>
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span><div class="font-label-md text-label-md font-semibold text-canopy-green mt-1">Graduation (2027)</div></div>
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-peach-wash text-coral-pulse px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">FAIL</span><div class="font-label-md text-label-md font-semibold text-coral-pulse mt-1">CGPA: 6.85 &lt; 7.50</div></div>
+<div class="bg-paper-white p-3.5 rounded-xl"><span class="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-full font-label-sm text-caption font-bold">PASS</span><div class="font-label-md text-label-md font-semibold text-canopy-green mt-1">Backlogs (0)</div></div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination / Footer Summary -->
+<div class="flex items-center justify-between pt-space-lg mt-space-md border-t-0 flex-wrap gap-space-sm text-graphite font-body-sm">
+<div class="flex items-center gap-space-xs text-body-sm">
+<span class="">Deterministic Rule Engine: <strong class="text-canopy-green font-medium">PlacementOS Native Kernel v2.4</strong></span>
+<span class="h-1.5 w-1.5 rounded-full bg-leaf-bright ml-2"></span>
+<span class="text-caption text-secondary">Zero Non-Deterministic State</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-low text-graphite hover:text-canopy-green font-label-md text-body-sm transition-colors" disabled="">Previous</button>
+<span class="px-3 py-1 font-semibold text-canopy-green bg-mint-wash rounded-lg text-body-sm">1</span>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-low text-graphite hover:text-canopy-green font-label-md text-body-sm transition-colors">2</button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-low text-graphite hover:text-canopy-green font-label-md text-body-sm transition-colors">3</button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-low text-graphite hover:text-canopy-green font-label-md text-body-sm transition-colors">Next</button>
+</div>
+</div>
+</div>
+<!-- Audit Guarantee Banner -->
+
+</div>
+<script>
+  function togglePredicateDrawer(drawerId) {
+    const drawer = document.getElementById(drawerId);
+    const icon = document.getElementById('icon-' + drawerId);
+    if (!drawer) return;
+
+    if (drawer.classList.contains('hidden')) {
+      drawer.classList.remove('hidden');
+      if (icon) icon.style.transform = 'rotate(180deg)';
+    } else {
+      drawer.classList.add('hidden');
+      if (icon) icon.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  // Client-side quick filter micro-interaction
+  document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.remove('bg-paper-white', 'text-canopy-green');
+        t.classList.add('text-graphite');
+      });
+      this.classList.add('bg-paper-white', 'text-canopy-green');
+      this.classList.remove('text-graphite');
+
+      const filter = this.getAttribute('data-filter');
+      const rows = document.querySelectorAll('.student-row');
+
+      rows.forEach(row => {
+        const status = row.getAttribute('data-status');
+        if (filter === 'all' || status === filter) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Search filter micro-interaction
+  const searchInput = document.getElementById('student-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase().trim();
+      const rows = document.querySelectorAll('.student-row');
+      rows.forEach(row => {
+        const studentInfo = row.getAttribute('data-student') || '';
+        if (studentInfo.includes(query)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  }
+
+  // Branch pill multi-toggle
+  document.querySelectorAll('.branch-pill').forEach(pill => {
+    pill.addEventListener('click', function() {
+      this.classList.toggle('active');
+      if (this.classList.contains('active')) {
+        this.classList.remove('bg-lavender-mist', 'text-graphite');
+        this.classList.add('bg-canopy-green', 'text-paper-white');
+      } else {
+        this.classList.remove('bg-canopy-green', 'text-paper-white');
+        this.classList.add('bg-lavender-mist', 'text-graphite');
+      }
+    });
+  });
+
+  // Re-run evaluation animation trigger
+  const runBtn = document.getElementById('run-eval-btn');
+  if (runBtn) {
+    runBtn.addEventListener('click', function() {
+      const originalText = this.innerHTML;
+      this.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">sync</span><span>Evaluating Cohort...</span>';
+      this.disabled = true;
+      setTimeout(() => {
+        this.innerHTML = '<span class="material-symbols-outlined text-[20px]">check</span><span>Evaluated (480 Records)</span>';
+        setTimeout(() => {
+          this.innerHTML = originalText;
+          this.disabled = false;
+        }, 1500);
+      }, 900);
+    });
+  }
+</script></div></main></div>
+
+</body></html>

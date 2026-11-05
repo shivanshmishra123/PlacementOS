@@ -1,185 +1,240 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { DocumentRevisionResponse, DocumentType, StudentDriveResponse } from "@placementos/api-client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { StudentDriveResponse } from "@placementos/api-client";
 import { useAuth } from "../../../context/AuthContext";
+import { StudentShell } from "../../../components/StudentShell";
 
-const statusStyle: Record<string, string> = {
-  eligible: "bg-emerald-100 text-emerald-800",
-  ready: "bg-emerald-100 text-emerald-800",
-  submitted: "bg-indigo-100 text-indigo-800",
-  pending: "bg-amber-100 text-amber-800",
-  needs_review: "bg-amber-100 text-amber-800",
-  blocked: "bg-rose-100 text-rose-800",
-  ineligible: "bg-rose-100 text-rose-800",
-  eligibility_hold: "bg-rose-100 text-rose-800",
-  withdrawn: "bg-slate-100 text-slate-700",
-};
+const CARD_WASHES = [
+  "bg-mint-wash border-leaf-bright/30",
+  "bg-sky-wash border-sky-signal/30",
+  "bg-peach-wash border-coral-pulse/30",
+  "bg-lilac-wash border-indigo-bloom/30",
+  "bg-cream border-[#e6dcaf]/50",
+  "bg-sage-wash border-secondary/30",
+];
 
 export default function StudentDrivesPage() {
+  const router = useRouter();
   const { client, user } = useAuth();
+
   const [drives, setDrives] = useState<StudentDriveResponse[]>([]);
-  const [documents, setDocuments] = useState<DocumentRevisionResponse[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "eligible" | "registered">("all");
 
   const load = useCallback(async () => {
-    if (user?.role !== "student") return;
+    setLoading(true);
+    setError(null);
     try {
-      const [publishedDrives, history] = await Promise.all([
-        client.listStudentDrives(),
-        client.listMyDocuments(),
-      ]);
-      setDrives(publishedDrives);
-      setDocuments(history);
-      setError(null);
+      const publishedDrives = await client.listStudentDrives();
+      setDrives(publishedDrives || []);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to load published drives");
-    }
-  }, [client, user]);
-
-  useEffect(() => { void load(); }, [load]);
-
-  async function upload(driveId: string, type: DocumentType, file: File) {
-    setBusy(`${driveId}:${type}`);
-    try {
-      await client.uploadStudentDocument(type, file);
-      await load();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Document upload failed");
+      setError(caught instanceof Error ? caught.message : "Unable to load published opportunities");
     } finally {
-      setBusy(null);
+      setLoading(false);
     }
-  }
+  }, [client]);
 
-  async function submit(driveId: string) {
-    setBusy(`${driveId}:submit`);
-    try {
-      await client.submitRegistration(driveId);
-      await load();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Registration failed");
-    } finally {
-      setBusy(null);
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const filteredDrives = drives.filter((d) => {
+    if (filter === "eligible" && d.eligibility_status !== "eligible") return false;
+    if (filter === "registered" && d.registration?.state !== "submitted") return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return (
+        d.company_name?.toLowerCase().includes(q) ||
+        d.role_title?.toLowerCase().includes(q)
+      );
     }
-  }
-
-  async function withdraw(item: StudentDriveResponse) {
-    if (!item.registration) return;
-    const reason = window.prompt("Reason for withdrawal (recorded in the audit trail):");
-    if (!reason || reason.trim().length < 3) return;
-    setBusy(`${item.drive_id}:withdraw`);
-    try {
-      await client.withdrawRegistration(item.registration.id, item.registration.concurrency_revision, reason);
-      await load();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Withdrawal failed");
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function download(revisionId: string) {
-    try {
-      const item = await client.getMyDocumentDownloadUrl(revisionId);
-      window.open(item.download_url, "_blank", "noopener,noreferrer");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to prepare private download");
-    }
-  }
-
-  if (!user || user.role !== "student") {
-    return <main className="rounded-xl border bg-white p-8">Select a student development persona to participate in drives.</main>;
-  }
+    return true;
+  });
 
   return (
-    <main className="space-y-6">
-      <header>
-        <p className="text-sm text-slate-500">Published opportunities and personal evidence</p>
-        <h1 className="text-3xl font-bold">My recruitment drives</h1>
-        <p className="mt-2 text-slate-600">Eligibility, document readiness, and registration are separate statuses. All deadlines are enforced by the server.</p>
-      </header>
-      {error && <div role="alert" className="rounded border border-rose-300 bg-rose-50 p-3 text-rose-800">{error}</div>}
-      {drives.length === 0 && <section className="rounded-xl border bg-white p-8 text-center text-slate-600">No published drive currently includes your evaluated profile.</section>}
-      {drives.map((drive) => {
-        const registrationState = drive.registration?.state;
-        const canSubmit = drive.eligibility_status === "eligible" && drive.document_readiness.requirements
-          .filter((item) => item.required_stage === "registration")
-          .every((item) => item.status === "ready") && !registrationState;
-        return (
-          <article key={drive.drive_id} className="rounded-xl border bg-white p-6 shadow-sm">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-indigo-700">{drive.company_name}</p>
-                <h2 className="text-2xl font-semibold">{drive.role_title}</h2>
-                <p className="text-sm text-slate-600">{drive.location || "Location not supplied"} · {drive.work_mode.replace("_", " ")}</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyle[drive.eligibility_status]}`}>Eligibility: {drive.eligibility_status.replace("_", " ")}</span>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyle[drive.document_readiness.status]}`}>Documents: {drive.document_readiness.status.replace("_", " ")}</span>
-                {registrationState && <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusStyle[registrationState]}`}>Registration: {registrationState.replace("_", " ")}</span>}
-              </div>
+    <StudentShell>
+      <div className="flex flex-col w-full space-y-6">
+        {/* Header Strip */}
+        <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="font-headline text-2xl font-bold text-canopy-green tracking-tight">
+                Campus Recruitment Opportunities
+              </h1>
+              <p className="font-body text-xs text-graphite mt-1">
+                Approved employer drives for your academic cohort (Academic Cycle 2026–27).
+              </p>
             </div>
-            <div className="mt-4 rounded bg-slate-50 p-3 text-sm">
-              <p>Registration opens {new Date(drive.registration_start_at).toLocaleString()}</p>
-              <p>Exclusive deadline {new Date(drive.registration_end_at).toLocaleString()}</p>
-              {drive.registration?.hold_reason && <p className="mt-2 font-medium text-rose-700">Hold: {drive.registration.hold_reason}</p>}
+
+            <span className="bg-mint-wash text-canopy-green font-body text-xs px-3 py-1 rounded-full font-bold border border-leaf-bright/30">
+              {drives.length} Opportunities Published
+            </span>
+          </div>
+
+          {/* Search & Filter Strip */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <div className="relative flex-1 max-w-md">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-ash text-[20px]">
+                search
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by company or job role..."
+                className="w-full bg-cloud-gray rounded-full pl-10 pr-4 py-2.5 text-xs focus:bg-paper-white focus:ring-2 focus:ring-canopy-green font-body border border-transparent focus:border-canopy-green"
+              />
             </div>
-            <section className="mt-5">
-              <h3 className="font-semibold">Document checklist</h3>
-              <div className="mt-2 grid gap-3 md:grid-cols-2">
-                {drive.document_readiness.requirements.map((requirement) => (
-                  <div key={requirement.requirement_id} className="rounded border p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium">{requirement.display_label}</p>
-                      <span className={`rounded px-2 py-1 text-xs font-semibold ${statusStyle[requirement.status]}`}>{requirement.status.replace("_", " ")}</span>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-500">Required before {requirement.required_stage}</p>
-                    {requirement.current_document && <p className="mt-2 text-xs">Revision {requirement.current_document.revision_number}: {requirement.current_document.original_filename}</p>}
-                    <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-600">
-                      {requirement.findings.map((finding) => <li key={finding.code}>{finding.message}</li>)}
-                    </ul>
-                    <label className="mt-3 inline-block cursor-pointer rounded border px-3 py-2 text-xs font-medium hover:bg-slate-50">
-                      {busy === `${drive.drive_id}:${requirement.document_type}` ? "Validating…" : requirement.current_document ? "Replace document" : "Upload document"}
-                      <input
-                        className="sr-only"
-                        type="file"
-                        accept=".pdf,.docx"
-                        disabled={busy !== null}
-                        onChange={(event) => {
-                          const file = event.target.files?.[0];
-                          if (file) void upload(drive.drive_id, requirement.document_type, file);
-                        }}
-                      />
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </section>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {!registrationState && (
-                <button disabled={!canSubmit || busy !== null} onClick={() => void submit(drive.drive_id)} className="rounded bg-indigo-700 px-4 py-2 text-white disabled:cursor-not-allowed disabled:opacity-50">Submit registration</button>
-              )}
-              {registrationState && ["submitted", "eligibility_hold"].includes(registrationState) && (
-                <button disabled={busy !== null} onClick={() => void withdraw(drive)} className="rounded border border-rose-300 px-4 py-2 text-rose-700 disabled:opacity-50">Withdraw</button>
-              )}
-              {!canSubmit && !registrationState && <p className="self-center text-sm text-slate-600">Submission unlocks only when current eligibility is eligible and registration-stage documents are ready.</p>}
+
+            <div className="flex items-center gap-2 overflow-x-auto text-xs font-body">
+              <button
+                onClick={() => setFilter("all")}
+                className={`px-4 py-1.5 rounded-full transition ${
+                  filter === "all" ? "bg-canopy-green text-paper-white font-semibold shadow-2xs" : "bg-paper-white text-graphite border border-frost-gray"
+                }`}
+              >
+                All Drives ({drives.length})
+              </button>
+              <button
+                onClick={() => setFilter("eligible")}
+                className={`px-4 py-1.5 rounded-full transition ${
+                  filter === "eligible" ? "bg-canopy-green text-paper-white font-semibold shadow-2xs" : "bg-paper-white text-graphite border border-frost-gray"
+                }`}
+              >
+                Eligible For Me
+              </button>
+              <button
+                onClick={() => setFilter("registered")}
+                className={`px-4 py-1.5 rounded-full transition ${
+                  filter === "registered" ? "bg-canopy-green text-paper-white font-semibold shadow-2xs" : "bg-paper-white text-graphite border border-frost-gray"
+                }`}
+              >
+                My Registrations
+              </button>
             </div>
-          </article>
-        );
-      })}
-      <section className="rounded-xl border bg-white p-5">
-        <h2 className="text-xl font-semibold">My document revision history</h2>
-        <p className="mt-1 text-sm text-slate-500">Original files are retained privately. Replacements create new revisions rather than rewriting earlier bytes.</p>
-        {documents.length === 0 ? <p className="mt-3 text-sm text-slate-600">No accepted document revisions.</p> : (
-          <ul className="mt-3 divide-y">{documents.map((document) => (
-            <li key={document.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-              <div><strong>{document.document_type.replace("_", " ")} v{document.revision_number}</strong><br/><span className="text-xs text-slate-500">{document.original_filename} · {document.text_status.replace("_", " ")}</span></div>
-              <button onClick={() => void download(document.id)} className="rounded border px-3 py-1.5">Private download</button>
-            </li>
-          ))}</ul>
+          </div>
+        </div>
+
+        {error && (
+          <div className="p-3.5 rounded-xl bg-error-container text-on-error-container font-body text-xs font-semibold border border-error/30">
+            {error}
+          </div>
         )}
-      </section>
-    </main>
+
+        {/* Drives Grid */}
+        {loading ? (
+          <div className="py-20 text-center font-body text-sm text-slate animate-pulse">
+            Loading recruitment opportunities...
+          </div>
+        ) : filteredDrives.length === 0 ? (
+          <div className="bg-paper-white rounded-2xl p-12 text-center border border-frost-gray font-body text-slate">
+            <span className="material-symbols-outlined text-[42px] text-ash mb-2 block">
+              work_off
+            </span>
+            <p className="text-sm">No published drives matching your filter.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredDrives.map((d, idx) => {
+              const washClass = CARD_WASHES[idx % CARD_WASHES.length];
+              const monogram = (d.company_name || "C").charAt(0).toUpperCase();
+
+              const eligibilityPill =
+                d.eligibility_status === "eligible"
+                  ? "bg-mint-wash text-canopy-green border-leaf-bright/30"
+                  : d.eligibility_status === "ineligible"
+                  ? "bg-peach-wash text-coral-pulse border-coral-pulse/30"
+                  : "bg-lilac-wash text-indigo-bloom border-indigo-bloom/30";
+
+              return (
+                <div
+                  key={d.drive_id}
+                  className={`${washClass} rounded-[24px] p-6 border flex flex-col justify-between space-y-4 shadow-xs`}
+                >
+                  <div className="space-y-4">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-paper-white flex items-center justify-center shrink-0 border border-frost-gray shadow-xs">
+                          <span className="font-headline text-xl font-bold text-canopy-green">
+                            {monogram}
+                          </span>
+                        </div>
+                        <div>
+                          <h2 className="font-headline text-lg font-bold text-canopy-green leading-snug">
+                            {d.company_name}
+                          </h2>
+                          <p className="font-body text-xs text-graphite font-medium">
+                            {d.role_title}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className={`px-3 py-1 rounded-full font-body text-[11px] font-bold uppercase border ${eligibilityPill}`}>
+                        {d.eligibility_status.replace("_", " ")}
+                      </span>
+                    </div>
+
+                    {/* Metadata Chips */}
+                    <div className="flex items-center gap-2 flex-wrap text-xs font-body">
+                      <span className="bg-paper-white/90 text-canopy-green px-3 py-0.5 rounded-full border border-frost-gray/50">
+                        {d.location || "Bengaluru / Pan-India"}
+                      </span>
+                      <span className="bg-paper-white/90 text-coral-pulse font-semibold px-3 py-0.5 rounded-full border border-frost-gray/50">
+                        {d.compensation_details?.ctc ? String(d.compensation_details.ctc) : d.work_mode || "Full Time"}
+                      </span>
+                    </div>
+
+                    {/* Deadline Box */}
+                    <div className="bg-paper-white/90 rounded-xl p-3 text-xs font-body border border-frost-gray/50 space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate">Registration Cutoff:</span>
+                        <span className="font-semibold text-ink-black">
+                          {d.registration_end_at ? new Date(d.registration_end_at).toLocaleDateString() : "Open"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate">Document Readiness:</span>
+                        <span className="font-semibold text-canopy-green uppercase text-[11px]">
+                          {d.document_readiness?.status || "pending"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="pt-2 border-t border-black/5 flex items-center justify-between">
+                    <span className="text-[11px] font-body text-graphite">
+                      Status: <span className="font-semibold text-canopy-green">{d.registration?.state || "not registered"}</span>
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href="/student/eligibility"
+                        className="px-3 py-1.5 rounded-full border border-frost-gray bg-paper-white hover:bg-surface-container font-body text-xs font-medium transition"
+                      >
+                        Breakdown
+                      </Link>
+                      <Link
+                        href="/student/registration"
+                        className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full bg-canopy-green hover:bg-[#062616] text-paper-white font-body text-xs font-semibold shadow-xs transition"
+                      >
+                        <span>{d.registration?.state === "submitted" ? "View Registration" : "Register Now"}</span>
+                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </StudentShell>
   );
 }

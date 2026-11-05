@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;font-feature-settings:"ss03";}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "aubergine": "#47264c", "on-primary-container": "#5e1200", "secondary-fixed-dim": "#a2d1b1", "paper-white": "#ffffff", "on-surface-variant": "#5a413a", "outline": "#8e7069", "surface-container-highest": "#e9defa", "primary-fixed": "#ffdbd2", "ash": "#a6a6a6", "sky-wash": "#ccf0f8", "tertiary": "#7241c1", "primary-fixed-dim": "#ffb4a1", "deep-teal": "#003642", "on-tertiary-fixed": "#270058", "coral-pulse": "#ff643b", "cloud-gray": "#f2f2f2", "error-container": "#ffdad6", "slate": "#7a7a7a", "on-primary-fixed-variant": "#891e00", "surface-dim": "#e1d5f2", "orchid-tint": "#f3b3fe", "surface-tint": "#b12d05", "tertiary-container": "#ac7dff", "inverse-primary": "#ffb4a1", "lilac-wash": "#fdf0ff", "sky-signal": "#00b4dc", "on-error-container": "#93000a", "indigo-bloom": "#460095", "on-secondary-container": "#426e52", "on-error": "#ffffff", "charcoal": "#333333", "inverse-surface": "#342d42", "frost-gray": "#e0e0e0", "sand": "#f4ece9", "surface-container-lowest": "#ffffff", "on-background": "#1f182d", "graphite": "#3d3d3d", "ink-black": "#000000", "canopy-green": "#0a3922", "on-primary-fixed": "#3c0800", "surface-variant": "#e9defa", "outline-variant": "#e2bfb6", "surface-container-low": "#f9f1ff", "surface-container": "#f4eaff", "on-tertiary": "#ffffff", "mint-wash": "#d2f2e3", "leaf-bright": "#1dbf73", "surface-bright": "#fef7ff", "primary-container": "#ff643b", "inverse-on-surface": "#f6edff", "tertiary-fixed": "#ebdcff", "secondary": "#3c674d", "secondary-container": "#bdeecc", "on-secondary-fixed-variant": "#234f36", "peach-wash": "#ffede8", "surface-container-high": "#efe3ff", "primary": "#b12d05", "tertiary-fixed-dim": "#d4bbff", "secondary-fixed": "#bdeecc", "on-primary": "#ffffff", "error": "#ba1a1a", "background": "#fef7ff", "on-secondary-fixed": "#002110", "sage-wash": "#e4f7ee", "on-tertiary-container": "#3f0088", "surface": "#fef7ff", "on-secondary": "#ffffff", "on-tertiary-fixed-variant": "#5924a8", "lavender-mist": "#eee2ff", "on-surface": "#1f182d", "cream": "#faf7e8" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.5rem", "gutter-mobile": "1rem", "space-xl": "2rem", "space-md": "1rem", "space-xs": "0.25rem", "gutter": "1.5rem", "margin": "5rem", "margin-tablet": "2.5rem", "margin-mobile": "1.25rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-lg": [ "Manrope" ], "subheading": [ "DM Sans" ], "caption": [ "DM Sans" ], "headline-md": [ "Manrope" ], "display-lg-mobile": [ "Manrope" ], "body-sm": [ "DM Sans" ], "label-sm": [ "DM Sans" ], "body-md": [ "DM Sans" ], "body-lg": [ "DM Sans" ], "display-md": [ "Manrope" ], "display-lg": [ "Manrope" ], "display-xl": [ "Manrope" ], "headline-lg-mobile": [ "Manrope" ], "label-md": [ "DM Sans" ], "headline-sm": [ "Manrope" ] }, "fontSize": { "headline-lg": [ "48px", { "lineHeight": "55px", "letterSpacing": "-0.019em", "fontWeight": "600" } ], "subheading": [ "20px", { "lineHeight": "27px", "fontWeight": "500" } ], "caption": [ "12px", { "lineHeight": "15px", "fontWeight": "400" } ], "headline-md": [ "32px", { "lineHeight": "38px", "letterSpacing": "-0.019em", "fontWeight": "700" } ], "display-lg-mobile": [ "48px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "body-sm": [ "14px", { "lineHeight": "19px", "fontWeight": "400" } ], "label-sm": [ "12px", { "lineHeight": "15px", "fontWeight": "600" } ], "body-md": [ "16px", { "lineHeight": "22px", "fontWeight": "400" } ], "body-lg": [ "18px", { "lineHeight": "25px", "fontWeight": "400" } ], "display-md": [ "69px", { "lineHeight": "74px", "letterSpacing": "-0.028em", "fontWeight": "500" } ], "display-lg": [ "80px", { "lineHeight": "84px", "letterSpacing": "-0.028em", "fontWeight": "600" } ], "display-xl": [ "116px", { "lineHeight": "104px", "letterSpacing": "-0.028em", "fontWeight": "600" } ], "headline-lg-mobile": [ "32px", { "lineHeight": "38px", "letterSpacing": "-0.019em", "fontWeight": "600" } ], "label-md": [ "14px", { "lineHeight": "18px", "fontWeight": "600" } ], "headline-sm": [ "24px", { "lineHeight": "31px", "fontWeight": "600" } ] } } } };</script></head><body class="bg-lavender-mist font-body-md text-on-surface antialiased"><header class="sticky top-0 z-50 w-full bg-paper-white"><div class="h-[72px] max-w-[1280px] mx-auto px-gutter flex items-center justify-between"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><div class="w-10 h-10 rounded-xl bg-canopy-green flex items-center justify-center text-paper-white"><span class="material-symbols-outlined text-[22px]">school</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm leading-tight text-canopy-green tracking-tight font-bold">PlacementOS</span><span class="font-caption text-caption text-graphite">Apex Institute of Technology</span></div></div><nav class="hidden md:flex items-center h-[72px] gap-space-lg ml-space-md" data-active-classes="text-canopy-green font-semibold border-b-[3px] border-leaf-bright"><a aria-current="page" class="h-full flex items-center transition-colors text-canopy-green font-semibold border-b-[3px] border-leaf-bright" data-path="opportunities" href="#">Opportunities</a><a class="h-full flex items-center text-on-surface-variant hover:text-on-surface transition-colors font-body-md text-body-md" data-path="my-schedule-and-results" href="#">My Schedule &amp; Results</a><a class="h-full flex items-center text-on-surface-variant hover:text-on-surface transition-colors font-body-md text-body-md" data-path="my-profile" href="#">My Profile</a><a class="h-full flex items-center text-on-surface-variant hover:text-on-surface transition-colors font-body-md text-body-md" data-path="help" href="#">Help</a></nav></div><div class="flex items-center gap-space-md"><div class="flex items-center bg-mint-wash rounded-full px-space-md py-space-xs gap-space-sm"><div class="w-2 h-2 rounded-full bg-leaf-bright"></div><span class="font-label-sm text-label-sm text-canopy-green">2023CS104</span><span class="text-graphite font-caption text-caption opacity-40">|</span><span class="font-label-md text-label-md text-canopy-green font-semibold">Rahul Verma</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-[72px] bg-lavender-mist min-h-[calc(100vh-72px)]"><div class="flex flex-col w-full">
+<div class="w-full max-w-[1280px] mx-auto px-gutter py-space-xl flex flex-col gap-space-xl">
+<!-- Top Stats Banner & Editorial Context -->
+<div class="w-full bg-canopy-green text-paper-white rounded-2xl p-space-lg md:p-space-xl flex flex-col md:flex-row md:items-center justify-between gap-space-lg relative overflow-hidden">
+<div class="flex flex-col gap-space-xs max-w-2xl relative z-10">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-leaf-bright text-canopy-green font-label-sm text-label-sm font-bold uppercase tracking-wider">Cohort 2027 Portal</span>
+<span class="text-secondary-fixed font-caption text-caption opacity-80">Apex Institute of Technology Placement Cell</span>
+</div>
+<h1 class="font-headline-md text-headline-md tracking-tight text-paper-white">Campus Recruitment Opportunities</h1>
+<p class="font-body-md text-body-md text-secondary-fixed-dim leading-relaxed">
+          Official drives approved by the Placement Cell for the Batch of 2027. Review policy constraints, branch alignments, and documentation requirements prior to locking registration.
+        </p>
+</div>
+<!-- Quick Matriculation Summary -->
+<div class="flex items-stretch gap-space-md shrink-0 relative z-10">
+<div class="bg-paper-white/10 backdrop-blur-md px-space-md py-space-sm rounded-xl flex flex-col justify-center border-0 min-w-[120px]">
+<span class="font-caption text-caption text-secondary-fixed uppercase font-semibold">Eligible Drives</span>
+<span class="font-headline-md text-headline-md font-bold text-paper-white leading-tight">05</span>
+<span class="font-caption text-caption text-leaf-bright flex items-center gap-1 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-leaf-bright inline-block"></span> Verified CSE
+          </span>
+</div>
+<div class="bg-paper-white/10 backdrop-blur-md px-space-md py-space-sm rounded-xl flex flex-col justify-center border-0 min-w-[120px]">
+<span class="font-caption text-caption text-secondary-fixed uppercase font-semibold">Action Needed</span>
+<span class="font-headline-md text-headline-md font-bold text-coral-pulse leading-tight">01</span>
+<span class="font-caption text-caption text-sand mt-0.5">Audit Required</span>
+</div>
+</div>
+<!-- Subtle background clinical circle motif -->
+<div class="absolute -right-16 -bottom-16 w-64 h-64 rounded-full bg-paper-white/5 pointer-events-none"></div>
+</div>
+<!-- Search & Filter Controls -->
+<div class="w-full flex flex-col gap-space-md bg-paper-white p-space-lg rounded-2xl">
+<!-- Search Input with icons -->
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 pl-space-md flex items-center pointer-events-none text-slate">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full pl-11 pr-space-md py-3 text-body-md font-body-md text-charcoal bg-cloud-gray rounded-xl focus:outline-none focus:bg-paper-white focus:ring-2 focus:ring-canopy-green transition-all" id="opportunity-search" placeholder="Search by company name, role title, or location..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-space-md flex items-center gap-2">
+<span class="font-caption text-caption text-ash bg-paper-white px-2 py-1 rounded border-0 hidden sm:inline">Ctrl + K</span>
+</div>
+</div>
+<!-- Filter Tabs Container -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex flex-wrap items-center gap-2" id="filter-tabs">
+<!-- All Opportunities -->
+<button class="tab-btn active-tab flex items-center gap-2 px-4 py-2 rounded-full font-label-md text-label-md transition-all bg-canopy-green text-paper-white font-semibold" data-filter="all">
+<span>All Opportunities</span>
+<span class="bg-paper-white/20 text-paper-white px-2 py-0.5 rounded-full text-caption font-caption">8</span>
+</button>
+<!-- Eligible for Me -->
+<button class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-label-md text-label-md transition-all bg-mint-wash text-canopy-green hover:bg-secondary-container" data-filter="eligible">
+<span>Eligible for Me</span>
+<span class="w-2 h-2 rounded-full bg-leaf-bright"></span>
+<span class="text-canopy-green font-semibold">5</span>
+</button>
+<!-- Needs Review -->
+<button class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-label-md text-label-md transition-all bg-cream text-charcoal hover:bg-sand" data-filter="review">
+<span>Needs Review</span>
+<span class="w-2 h-2 rounded-full bg-coral-pulse"></span>
+<span class="font-semibold text-graphite">1</span>
+</button>
+<!-- Ineligible for Me -->
+<button class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-label-md text-label-md transition-all bg-cloud-gray text-slate hover:bg-frost-gray" data-filter="ineligible">
+<span>Ineligible for Me</span>
+<span class="font-semibold text-graphite">2</span>
+</button>
+</div>
+<!-- Secondary Utility Sorting -->
+<div class="flex items-center gap-space-xs ml-auto">
+<span class="font-caption text-caption text-graphite">Sort by:</span>
+<select class="bg-cloud-gray text-charcoal font-label-sm text-label-sm py-1.5 px-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-canopy-green cursor-pointer">
+<option>Application Deadline (Earliest)</option>
+<option>Compensation CTC (High to Low)</option>
+<option>Company Name (A-Z)</option>
+</select>
+</div>
+</div>
+</div>
+<!-- 3-Column Responsive Drive Opportunity Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg w-full" id="drives-grid">
+<!-- CARD 1: Google India (Mint Wash #d2f2e3 surface) -->
+<article class="drive-card flex flex-col justify-between bg-mint-wash rounded-[24px] p-[24px] transition-transform duration-200 hover:-translate-y-1" data-status="eligible">
+<div class="flex flex-col gap-space-md">
+<!-- Top Row -->
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-lg bg-paper-white flex items-center justify-center font-headline-sm text-headline-sm font-bold text-canopy-green shrink-0 shadow-none">
+                G
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-canopy-green">Google India</span>
+<span class="font-caption text-caption text-graphite">Tech Giant · Tier 1</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-wash text-canopy-green font-label-sm text-label-sm font-bold border border-leaf-bright">
+<span class="w-2 h-2 rounded-full bg-leaf-bright"></span>
+              YOU ARE ELIGIBLE
+            </span>
+</div>
+<!-- Role Name -->
+<div class="mt-1">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-canopy-green leading-snug">
+              Software Engineer - Campus Graduate
+            </h2>
+</div>
+<!-- Key Highlights Grid -->
+<div class="grid grid-cols-1 gap-space-xs bg-paper-white/60 p-space-md rounded-xl">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">payments</span>
+                Compensation:
+              </span>
+<span class="font-bold text-canopy-green">₹18.0 LPA Base <span class="font-normal text-graphite">(₹32.0 LPA CTC)</span></span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">location_on</span>
+                Location:
+              </span>
+<span class="font-semibold text-canopy-green">Bengaluru / Hyderabad (Hybrid)</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">work</span>
+                Type:
+              </span>
+<span class="font-semibold text-canopy-green">Full-Time Employment (FTE)</span>
+</div>
+</div>
+<!-- Countdown Strip -->
+<div class="bg-paper-white p-space-sm rounded-xl flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-coral-pulse text-[20px] shrink-0">schedule</span>
+<div class="flex flex-col min-w-0">
+<span class="font-caption text-caption text-graphite font-medium">Registration Closes</span>
+<span class="font-label-sm text-label-sm font-semibold text-canopy-green truncate">2026-11-15 23:59:00 IST (4 days remaining)</span>
+</div>
+</div>
+<!-- Required Documents -->
+<div class="flex items-start gap-1.5 text-body-sm font-body-sm text-graphite">
+<span class="material-symbols-outlined text-[16px] text-slate mt-0.5">description</span>
+<p class="font-caption text-caption text-charcoal">
+              Resume (Required at Reg) · Marksheet (Required by Nov 17)
+            </p>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="pt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-graphite">Current Status</span>
+<span class="px-2.5 py-0.5 rounded-full bg-cloud-gray text-slate font-label-sm text-label-sm font-medium">
+              NOT REGISTERED
+            </span>
+</div>
+<button class="w-full py-3 px-6 rounded-full bg-coral-pulse text-paper-white font-label-md text-label-md font-semibold text-center hover:opacity-95 transition-opacity flex items-center justify-center gap-2">
+<span>View Details &amp; Register</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 2: Microsoft (Sky Wash #ccf0f8 surface) -->
+<article class="drive-card flex flex-col justify-between bg-sky-wash rounded-[24px] p-[24px] transition-transform duration-200 hover:-translate-y-1" data-status="eligible">
+<div class="flex flex-col gap-space-md">
+<!-- Top Row -->
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-lg bg-paper-white flex items-center justify-center font-headline-sm text-headline-sm font-bold text-deep-teal shrink-0">
+                MS
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-deep-teal">Microsoft</span>
+<span class="font-caption text-caption text-graphite">Global Tech · Core Platforms</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-wash text-canopy-green font-label-sm text-label-sm font-bold border border-leaf-bright">
+<span class="w-2 h-2 rounded-full bg-leaf-bright"></span>
+              YOU ARE ELIGIBLE
+            </span>
+</div>
+<!-- Role Name -->
+<div class="mt-1">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-deep-teal leading-snug">
+              Systems Software Engineer
+            </h2>
+</div>
+<!-- Key Highlights Grid -->
+<div class="grid grid-cols-1 gap-space-xs bg-paper-white/60 p-space-md rounded-xl">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-deep-teal">payments</span>
+                Compensation:
+              </span>
+<span class="font-bold text-deep-teal">₹22.0 LPA Base <span class="font-normal text-graphite">(₹44.5 LPA CTC)</span></span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-deep-teal">location_on</span>
+                Location:
+              </span>
+<span class="font-semibold text-deep-teal">Hyderabad / Bengaluru</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-deep-teal">work</span>
+                Type:
+              </span>
+<span class="font-semibold text-deep-teal">FTE (Cloud &amp; AI Infra)</span>
+</div>
+</div>
+<!-- Countdown Strip -->
+<div class="bg-paper-white p-space-sm rounded-xl flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-coral-pulse text-[20px] shrink-0">schedule</span>
+<div class="flex flex-col min-w-0">
+<span class="font-caption text-caption text-graphite font-medium">Registration Closes</span>
+<span class="font-label-sm text-label-sm font-semibold text-deep-teal truncate">2026-11-20 23:59:00 IST (9 days remaining)</span>
+</div>
+</div>
+<!-- Required Documents -->
+<div class="flex items-start gap-1.5 text-body-sm font-body-sm text-graphite">
+<span class="material-symbols-outlined text-[16px] text-slate mt-0.5">description</span>
+<p class="font-caption text-caption text-charcoal">
+              Resume · B.Tech Marksheets (All Sems)
+            </p>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="pt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-graphite">Current Status</span>
+<span class="px-2.5 py-0.5 rounded-full bg-cloud-gray text-slate font-label-sm text-label-sm font-medium">
+              NOT REGISTERED
+            </span>
+</div>
+<button class="w-full py-3 px-6 rounded-full bg-coral-pulse text-paper-white font-label-md text-label-md font-semibold text-center hover:opacity-95 transition-opacity flex items-center justify-center gap-2">
+<span>View Details &amp; Register</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 3: Texas Instruments (Peach Wash #ffede8 surface) -->
+<article class="drive-card flex flex-col justify-between bg-peach-wash rounded-[24px] p-[24px] transition-transform duration-200 hover:-translate-y-1" data-status="ineligible">
+<div class="flex flex-col gap-space-md">
+<!-- Top Row -->
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-lg bg-paper-white flex items-center justify-center font-headline-sm text-headline-sm font-bold text-on-surface-variant shrink-0">
+                TI
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-canopy-green">Texas Instruments</span>
+<span class="font-caption text-caption text-graphite">Semiconductors · VLSI</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-peach-wash text-coral-pulse font-label-sm text-label-sm font-bold border border-coral-pulse">
+<span class="w-2 h-2 rounded-full bg-coral-pulse"></span>
+              NOT ELIGIBLE
+            </span>
+</div>
+<!-- Role Name -->
+<div class="mt-1">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-canopy-green leading-snug">
+              Hardware Design Engineer
+            </h2>
+</div>
+<!-- Key Highlights Grid -->
+<div class="grid grid-cols-1 gap-space-xs bg-paper-white/60 p-space-md rounded-xl">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">payments</span>
+                Compensation:
+              </span>
+<span class="font-bold text-canopy-green">₹16.5 LPA Base <span class="font-normal text-graphite">(₹26.0 LPA CTC)</span></span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">location_on</span>
+                Location:
+              </span>
+<span class="font-semibold text-canopy-green">Bengaluru</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">work</span>
+                Type:
+              </span>
+<span class="font-semibold text-canopy-green">Core Engineering (Analog/Digital)</span>
+</div>
+</div>
+<!-- Reason Snippet Box -->
+<div class="bg-paper-white p-space-sm rounded-xl flex items-start gap-space-sm border-0">
+<span class="material-symbols-outlined text-coral-pulse text-[20px] shrink-0 mt-0.5">block</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-coral-pulse">Branch Restriction</span>
+<span class="font-caption text-caption text-graphite leading-relaxed mt-0.5">
+                Ineligible Reason: Allowed branches: ECE, EEE. Your enrolled branch record is CSE.
+              </span>
+</div>
+</div>
+<!-- Required Documents -->
+<div class="flex items-start gap-1.5 text-body-sm font-body-sm text-slate">
+<span class="material-symbols-outlined text-[16px] mt-0.5">lock</span>
+<p class="font-caption text-caption text-slate">
+              Application locked by central eligibility engine.
+            </p>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="pt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-graphite">Gate Evaluation</span>
+<span class="px-2.5 py-0.5 rounded-full bg-peach-wash text-coral-pulse font-label-sm text-label-sm font-semibold">
+              CRITERIA FAILED
+            </span>
+</div>
+<button class="w-full py-3 px-6 rounded-full bg-transparent text-ink-black font-label-md text-label-md font-semibold text-center border border-ink-black hover:bg-paper-white transition-colors flex items-center justify-center gap-2">
+<span>View Eligibility Details</span>
+<span class="material-symbols-outlined text-[18px]">info</span>
+</button>
+</div>
+</article>
+<!-- CARD 4: Deloitte (Cream #faf7e8 surface) -->
+<article class="drive-card flex flex-col justify-between bg-cream rounded-[24px] p-[24px] transition-transform duration-200 hover:-translate-y-1" data-status="review">
+<div class="flex flex-col gap-space-md">
+<!-- Top Row -->
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-lg bg-paper-white flex items-center justify-center font-headline-sm text-headline-sm font-bold text-charcoal shrink-0">
+                D
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-canopy-green">Deloitte</span>
+<span class="font-caption text-caption text-graphite">Advisory &amp; Tech Consulting</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cream text-charcoal font-label-sm text-label-sm font-bold border border-ash">
+<span class="w-2 h-2 rounded-full bg-coral-pulse"></span>
+              NEEDS REVIEW
+            </span>
+</div>
+<!-- Role Name -->
+<div class="mt-1">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-canopy-green leading-snug">
+              Technology Analyst
+            </h2>
+</div>
+<!-- Key Highlights Grid -->
+<div class="grid grid-cols-1 gap-space-xs bg-paper-white/60 p-space-md rounded-xl">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">payments</span>
+                Compensation:
+              </span>
+<span class="font-bold text-canopy-green">₹9.0 LPA Base <span class="font-normal text-graphite">(₹14.0 LPA CTC)</span></span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">location_on</span>
+                Location:
+              </span>
+<span class="font-semibold text-canopy-green">Pan India (Client Site)</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">work</span>
+                Type:
+              </span>
+<span class="font-semibold text-canopy-green">Consulting Track</span>
+</div>
+</div>
+<!-- Reason Snippet Box -->
+<div class="bg-paper-white p-space-sm rounded-xl flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-coral-pulse text-[20px] shrink-0 mt-0.5">warning</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-charcoal">Evidence Notice</span>
+<span class="font-caption text-caption text-graphite leading-relaxed mt-0.5">
+                Active Backlogs evidence is unverified in your profile records. Upload Semester 6 clearance certificate to proceed.
+              </span>
+</div>
+</div>
+<!-- Required Documents -->
+<div class="flex items-start gap-1.5 text-body-sm font-body-sm text-graphite">
+<span class="material-symbols-outlined text-[16px] text-slate mt-0.5">file_present</span>
+<p class="font-caption text-caption text-charcoal">
+              Pending Dean Clearance · Verified Grade Card
+            </p>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="pt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-graphite">Document Audit</span>
+<span class="px-2.5 py-0.5 rounded-full bg-cream text-charcoal font-label-sm text-label-sm font-semibold border border-ash/40">
+              PENDING VERIFICATION
+            </span>
+</div>
+<button class="w-full py-3 px-6 rounded-full bg-transparent text-ink-black font-label-md text-label-md font-semibold text-center border border-ink-black hover:bg-paper-white transition-colors flex items-center justify-center gap-2">
+<span>Resolve Evidence Review</span>
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</button>
+</div>
+</article>
+<!-- CARD 5: Amazon AWS (Lilac Wash #fdf0ff surface) -->
+<article class="drive-card flex flex-col justify-between bg-lilac-wash rounded-[24px] p-[24px] transition-transform duration-200 hover:-translate-y-1" data-status="eligible">
+<div class="flex flex-col gap-space-md">
+<!-- Top Row -->
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-lg bg-paper-white flex items-center justify-center font-headline-sm text-headline-sm font-bold text-aubergine shrink-0">
+                A
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-aubergine">Amazon AWS</span>
+<span class="font-caption text-caption text-graphite">Cloud Infrastructure</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-mint-wash text-canopy-green font-label-sm text-label-sm font-bold border border-leaf-bright">
+<span class="w-2 h-2 rounded-full bg-leaf-bright"></span>
+              YOU ARE ELIGIBLE
+            </span>
+</div>
+<!-- Role Name -->
+<div class="mt-1">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-aubergine leading-snug">
+              Cloud Support Associate
+            </h2>
+</div>
+<!-- Key Highlights Grid -->
+<div class="grid grid-cols-1 gap-space-xs bg-paper-white/60 p-space-md rounded-xl">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-aubergine">payments</span>
+                Compensation:
+              </span>
+<span class="font-bold text-aubergine">₹14.0 LPA Base <span class="font-normal text-graphite">(₹21.5 LPA CTC)</span></span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-aubergine">location_on</span>
+                Location:
+              </span>
+<span class="font-semibold text-aubergine">Bengaluru</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-aubergine">work</span>
+                Type:
+              </span>
+<span class="font-semibold text-aubergine">Cloud Solutions Engineering</span>
+</div>
+</div>
+<!-- Countdown Strip -->
+<div class="bg-paper-white p-space-sm rounded-xl flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-coral-pulse text-[20px] shrink-0">schedule</span>
+<div class="flex flex-col min-w-0">
+<span class="font-caption text-caption text-graphite font-medium">Registration Closes</span>
+<span class="font-label-sm text-label-sm font-semibold text-aubergine truncate">2026-11-22 23:59:00 IST (11 days remaining)</span>
+</div>
+</div>
+<!-- Required Documents -->
+<div class="flex items-start gap-1.5 text-body-sm font-body-sm text-graphite">
+<span class="material-symbols-outlined text-[16px] text-slate mt-0.5">description</span>
+<p class="font-caption text-caption text-charcoal">
+              Standard College Resume · AWS Certifications (Optional)
+            </p>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="pt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-graphite">Current Status</span>
+<span class="px-2.5 py-0.5 rounded-full bg-cloud-gray text-slate font-label-sm text-label-sm font-medium">
+              NOT REGISTERED
+            </span>
+</div>
+<button class="w-full py-3 px-6 rounded-full bg-coral-pulse text-paper-white font-label-md text-label-md font-semibold text-center hover:opacity-95 transition-opacity flex items-center justify-center gap-2">
+<span>View Details &amp; Register</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 6: Qualcomm (Sage Wash #e4f7ee surface) -->
+<article class="drive-card flex flex-col justify-between bg-sage-wash rounded-[24px] p-[24px] transition-transform duration-200 hover:-translate-y-1" data-status="ineligible">
+<div class="flex flex-col gap-space-md">
+<!-- Top Row -->
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-lg bg-paper-white flex items-center justify-center font-headline-sm text-headline-sm font-bold text-canopy-green shrink-0">
+                Q
+              </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-canopy-green">Qualcomm</span>
+<span class="font-caption text-caption text-graphite">Wireless Telecom · Silicon</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-peach-wash text-coral-pulse font-label-sm text-label-sm font-bold border border-coral-pulse">
+<span class="w-2 h-2 rounded-full bg-coral-pulse"></span>
+              NOT ELIGIBLE
+            </span>
+</div>
+<!-- Role Name -->
+<div class="mt-1">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-canopy-green leading-snug">
+              Embedded Systems Engineer
+            </h2>
+</div>
+<!-- Key Highlights Grid -->
+<div class="grid grid-cols-1 gap-space-xs bg-paper-white/60 p-space-md rounded-xl">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">payments</span>
+                Compensation:
+              </span>
+<span class="font-bold text-canopy-green">₹19.0 LPA Base <span class="font-normal text-graphite">(₹30.0 LPA CTC)</span></span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">location_on</span>
+                Location:
+              </span>
+<span class="font-semibold text-canopy-green">Hyderabad / Chennai</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-graphite flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-canopy-green">work</span>
+                Type:
+              </span>
+<span class="font-semibold text-canopy-green">VLSI &amp; Embedded Firmware</span>
+</div>
+</div>
+<!-- Reason Snippet Box -->
+<div class="bg-paper-white p-space-sm rounded-xl flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-coral-pulse text-[20px] shrink-0 mt-0.5">block</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold text-coral-pulse">Branch Restriction</span>
+<span class="font-caption text-caption text-graphite leading-relaxed mt-0.5">
+                Ineligible Reason: Allowed branches: ECE, VLSI. Your enrolled branch record is CSE.
+              </span>
+</div>
+</div>
+<!-- Required Documents -->
+<div class="flex items-start gap-1.5 text-body-sm font-body-sm text-slate">
+<span class="material-symbols-outlined text-[16px] mt-0.5">lock</span>
+<p class="font-caption text-caption text-slate">
+              Application locked by central eligibility engine.
+            </p>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="pt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-caption text-caption text-graphite">Gate Evaluation</span>
+<span class="px-2.5 py-0.5 rounded-full bg-peach-wash text-coral-pulse font-label-sm text-label-sm font-semibold">
+              CRITERIA FAILED
+            </span>
+</div>
+<button class="w-full py-3 px-6 rounded-full bg-transparent text-ink-black font-label-md text-label-md font-semibold text-center border border-ink-black hover:bg-paper-white transition-colors flex items-center justify-center gap-2">
+<span>View Eligibility Details</span>
+<span class="material-symbols-outlined text-[18px]">info</span>
+</button>
+</div>
+</article>
+</div>
+<!-- Editorial Clinical Notice / TPO Protocol Room -->
+<div class="w-full bg-paper-white rounded-2xl p-space-lg md:p-space-xl flex flex-col md:flex-row items-center justify-between gap-space-lg mt-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-14 h-14 rounded-2xl bg-mint-wash text-canopy-green flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[28px]">verified</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-headline-sm font-bold text-canopy-green">Automated One-Offer Policy Active</h3>
+<p class="font-body-sm text-body-sm text-graphite max-w-2xl mt-0.5">
+            Apex Institute adheres to the Institutional Placement Charter 2026. Accepting an FTE offer exceeding ₹12 LPA immediately freezes pending applications for parallel tier-2 opportunities to guarantee equitable cohort distribution.
+          </p>
+</div>
+</div>
+<button class="shrink-0 px-6 py-3 rounded-full border border-ink-black font-label-md text-label-md font-semibold text-charcoal hover:bg-cloud-gray transition-colors">
+        Read Placement Manual v4.2
+      </button>
+</div>
+</div>
+<!-- Interactive JavaScript for Filtering & Dynamic Search Filtering -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('opportunity-search');
+      const tabs = document.querySelectorAll('.tab-btn');
+      const cards = document.querySelectorAll('.drive-card');
+
+      let currentFilter = 'all';
+      let searchQuery = '';
+
+      function filterCards() {
+        cards.forEach(card => {
+          const cardStatus = card.getAttribute('data-status');
+          const cardText = card.innerText.toLowerCase();
+
+          const matchesTab = (currentFilter === 'all') || (cardStatus === currentFilter);
+          const matchesSearch = searchQuery === '' || cardText.includes(searchQuery);
+
+          if (matchesTab && matchesSearch) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            t.classList.remove('bg-canopy-green', 'text-paper-white', 'font-semibold');
+          });
+          
+          tab.classList.add('bg-canopy-green', 'text-paper-white', 'font-semibold');
+          currentFilter = tab.getAttribute('data-filter');
+          filterCards();
+        });
+      });
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          searchQuery = e.target.value.toLowerCase().trim();
+          filterCards();
+        });
+      }
+    });
+  </script>
+</div></main><footer class="w-full bg-paper-white"><div class="max-w-[1280px] mx-auto px-gutter py-space-xl flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-canopy-green font-bold">PlacementOS</span><span class="text-graphite font-body-sm text-body-sm">Apex Institute of Technology Placement Cell</span></div><div class="flex items-center gap-space-lg text-graphite font-body-sm text-body-sm"><a class="hover:text-canopy-green transition-colors" data-path="opportunities" href="#">Opportunities</a><a class="hover:text-canopy-green transition-colors" data-path="my-schedule-and-results" href="#">Schedule &amp; Results</a><a class="hover:text-canopy-green transition-colors" data-path="my-profile" href="#">Student Portal</a><a class="hover:text-canopy-green transition-colors" data-path="help" href="#">Support Desk</a></div><div class="font-caption text-caption text-ash">© 2024 Apex Institute of Technology. All rights reserved.</div></div></footer></body></html>

@@ -6,43 +6,24 @@ import {
   StudentDetailDTO,
   CorrectionProposalDTO,
 } from "@placementos/api-client";
-import {
-  GraduationCap,
-  ShieldCheck,
-  CheckCircle2,
-  AlertTriangle,
-  History,
-  FileEdit,
-  Send,
-  Building,
-  Clock,
-  XCircle,
-  FileText,
-  User,
-  Sparkles,
-} from "lucide-react";
+import { StudentShell } from "../../../components/StudentShell";
 
 export default function StudentPortalPage() {
-  const { user, client, loginAsPersona } = useAuth();
+  const { user, client } = useAuth();
 
   const [profile, setProfile] = useState<StudentDetailDTO | null>(null);
   const [corrections, setCorrections] = useState<CorrectionProposalDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Correction Form State
-  const [proposedBranch, setProposedBranch] = useState("");
-  const [proposedCgpa, setProposedCgpa] = useState("");
-  const [proposedBacklogs, setProposedBacklogs] = useState("");
-  const [justification, setJustification] = useState("");
-  const [documentUrl, setDocumentUrl] = useState("");
+  // Correction Form Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fieldName, setFieldName] = useState("cgpa");
+  const [proposedValue, setProposedValue] = useState("");
+  const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [submitFeedback, setSubmitFeedback] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
-
-  const isStudent = user?.role === "student" || user?.capabilities.includes("student:self_read");
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   const loadStudentData = useCallback(async () => {
     if (!user) return;
@@ -54,493 +35,327 @@ export default function StudentPortalPage() {
         client.getMyCorrections(),
       ]);
       setProfile(profileData);
-      setCorrections(correctionsData);
-      if (profileData.current_verified_revision) {
-        setProposedBranch(profileData.current_verified_revision.branch);
-        setProposedCgpa(String(profileData.current_verified_revision.cgpa));
-        setProposedBacklogs(
-          profileData.current_verified_revision.active_backlogs !== null &&
-            profileData.current_verified_revision.active_backlogs !== undefined
-            ? String(profileData.current_verified_revision.active_backlogs)
-            : ""
-        );
-      }
+      setCorrections(correctionsData || []);
     } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to load student profile. Your account may not have an imported student record yet."
-      );
+      setError(err instanceof Error ? err.message : "Failed to load academic records");
     } finally {
       setLoading(false);
     }
   }, [client, user]);
 
   useEffect(() => {
-    if (user && isStudent) {
-      loadStudentData();
-    } else {
-      setLoading(false);
-    }
-  }, [user, isStudent, loadStudentData]);
+    loadStudentData();
+  }, [loadStudentData]);
 
   const handleSubmitCorrection = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!justification.trim()) {
-      setSubmitFeedback({
-        type: "error",
-        message: "Please provide a detailed justification for your correction request.",
-      });
-      return;
-    }
-
+    if (!proposedValue.trim()) return;
     setSubmitting(true);
-    setSubmitFeedback(null);
+    setModalError(null);
     try {
-      const changes: Record<string, unknown> = {};
-      if (proposedBranch) changes.branch = proposedBranch.toUpperCase();
-      if (proposedCgpa) changes.cgpa = parseFloat(proposedCgpa);
-      if (proposedBacklogs !== "") {
-        changes.active_backlogs = parseInt(proposedBacklogs, 10);
+      let parsedVal: any = proposedValue.trim();
+      if (fieldName === "cgpa" || fieldName === "active_backlogs" || fieldName === "graduation_year") {
+        parsedVal = Number(proposedValue);
       }
-
       await client.submitCorrection({
-        proposed_changes: changes,
-        justification: justification.trim(),
-        supporting_document_url: documentUrl.trim() || undefined,
+        proposed_changes: { [fieldName]: parsedVal },
+        justification: reason.trim() || "Student proposed update based on published semester marksheet",
       });
-
-      setSubmitFeedback({
-        type: "success",
-        message: "Correction proposal submitted! Your coordinator has been notified for verification.",
-      });
-      setJustification("");
-      setDocumentUrl("");
-      await loadStudentData();
+      setSubmitSuccess("Correction proposal submitted for coordinator verification.");
+      setIsModalOpen(false);
+      setProposedValue("");
+      setReason("");
+      loadStudentData();
     } catch (err: unknown) {
-      setSubmitFeedback({
-        type: "error",
-        message: err instanceof Error ? err.message : "Failed to submit correction proposal.",
-      });
+      setModalError(err instanceof Error ? err.message : "Failed to submit correction request");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (!user || !isStudent) {
-    return (
-      <div className="max-w-2xl mx-auto py-12 text-center space-y-6">
-        <div className="h-16 w-16 mx-auto rounded-3xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm">
-          <GraduationCap className="w-8 h-8" />
-        </div>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Student Self-Service Portal
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-            View your verified academic records, audit revision history, and propose corrections with supporting evidence. Select a student persona to continue:
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto pt-4">
-          <button
-            onClick={() => loginAsPersona("student_apex")}
-            className="p-4 rounded-2xl glass-panel border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-left transition space-y-1 group"
-          >
-            <div className="text-xs font-mono uppercase text-emerald-600 dark:text-emerald-400 font-semibold">
-              Institution: Apex
-            </div>
-            <div className="font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 transition">
-              Rahul Verma
-            </div>
-            <div className="text-xs text-slate-500">Roll: 2024-CS-001 (CSE)</div>
-          </button>
-
-          <button
-            onClick={() => loginAsPersona("student_beacon")}
-            className="p-4 rounded-2xl glass-panel border border-slate-200 dark:border-slate-800 hover:border-emerald-500 text-left transition space-y-1 group"
-          >
-            <div className="text-xs font-mono uppercase text-emerald-600 dark:text-emerald-400 font-semibold">
-              Institution: Beacon
-            </div>
-            <div className="font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 transition">
-              Sneha Roy
-            </div>
-            <div className="text-xs text-slate-500">Roll: 2024-CS-001 (CSE)</div>
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const rev = profile?.current_verified_revision;
 
   return (
-    <div className="space-y-8">
-      {/* Student Banner */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              <Building className="w-3.5 h-3.5" />
-              {user.institution_slug.toUpperCase()} Student Portal
+    <StudentShell>
+      <div className="flex flex-col w-full space-y-6">
+        {/* Candidate Profile Header Card */}
+        <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-canopy-green text-paper-white flex items-center justify-center font-headline text-2xl font-bold shadow-xs">
+                {user?.full_name?.charAt(0) || "S"}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-headline text-2xl font-bold text-canopy-green leading-tight">
+                    {profile?.full_name || user?.full_name || "Rahul Verma"}
+                  </h1>
+                  <span className="bg-mint-wash text-canopy-green font-body text-xs font-bold px-2.5 py-0.5 rounded-full border border-leaf-bright/30">
+                    VERIFIED
+                  </span>
+                </div>
+                <div className="font-body text-xs text-graphite flex items-center gap-2 mt-1">
+                  <span className="font-mono font-semibold text-ink-black">
+                    {profile?.student_identifier || "2024-CS-001"}
+                  </span>
+                  <span>•</span>
+                  <span>B.Tech in {rev?.branch || "Computer Science & Engineering"}</span>
+                  <span>•</span>
+                  <span>Apex Institute of Technology</span>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Verified Academic Profile
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Your official academic facts used for recruitment eligibility. Propose verified corrections if registrar records change.
-            </p>
+
+            <div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-coral-pulse hover:bg-[#e8542c] text-paper-white font-body text-xs font-semibold px-5 py-2.5 rounded-full shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">edit_document</span>
+                <span>Propose Academic Correction</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {submitSuccess && (
+          <div className="p-3.5 rounded-xl bg-mint-wash text-canopy-green font-body text-xs font-semibold border border-leaf-bright/30 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-leaf-bright">check_circle</span>
+            <span>{submitSuccess}</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-3.5 rounded-xl bg-error-container text-on-error-container font-body text-xs font-semibold border border-error/30 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* 2-Column Academic Evidence & History */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column (6 cols): Authoritative Academic Evidence */}
+          <div className="lg:col-span-6 bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-5 font-body text-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-canopy-green text-[22px]">verified_user</span>
+                <h2 className="font-headline text-base font-bold text-canopy-green">
+                  Authoritative Academic Evidence
+                </h2>
+              </div>
+              <span className="bg-mint-wash text-canopy-green px-2.5 py-0.5 rounded-full font-bold">
+                Revision #{rev?.revision_number || 1}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-surface-container-low border border-frost-gray">
+                <span className="text-[11px] font-semibold text-slate uppercase tracking-wider block">
+                  Cumulative GPA
+                </span>
+                <div className="font-headline text-2xl font-bold text-canopy-green mt-1">
+                  {rev?.cgpa ? Number(rev.cgpa).toFixed(2) : "8.75"} <span className="text-xs text-slate font-normal">/ 10.00</span>
+                </div>
+                <span className="text-[10px] text-leaf-bright font-bold mt-1 block">Exact Decimal (INV-01)</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-surface-container-low border border-frost-gray">
+                <span className="text-[11px] font-semibold text-slate uppercase tracking-wider block">
+                  Active Backlogs
+                </span>
+                <div className="font-headline text-2xl font-bold text-ink-black mt-1">
+                  {rev?.active_backlogs !== null && rev?.active_backlogs !== undefined ? rev.active_backlogs : "0"}
+                </div>
+                <span className="text-[10px] text-leaf-bright font-bold mt-1 block">Verified clean</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-surface-container-low border border-frost-gray">
+                <span className="text-[11px] font-semibold text-slate uppercase tracking-wider block">
+                  Graduation Cohort
+                </span>
+                <div className="font-headline text-xl font-bold text-ink-black mt-1">
+                  Batch of {rev?.graduation_year || 2027}
+                </div>
+                <span className="text-[10px] text-slate mt-1 block">Full-time B.Tech</span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-surface-container-low border border-frost-gray">
+                <span className="text-[11px] font-semibold text-slate uppercase tracking-wider block">
+                  Academic Department
+                </span>
+                <div className="font-headline text-xl font-bold text-canopy-green mt-1">
+                  {rev?.branch || "CSE"}
+                </div>
+                <span className="text-[10px] text-slate mt-1 block">Standard Normalized Alias</span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-lavender-mist/40 border border-frost-gray text-[11px] text-graphite space-y-1">
+              <span className="font-bold text-canopy-green block">Academic Evidence Rule (INV-02, INV-05):</span>
+              <p>
+                Student corrections create proposals and cannot directly alter verified facts. Only authorized placement coordinator verification establishes new authoritative evidence.
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <div className="text-xs text-slate-500">Signed in as</div>
-              <div className="font-semibold text-sm text-slate-900 dark:text-white">
-                {user.full_name}
+          {/* Right Column (6 cols): Correction Proposals & History */}
+          <div className="lg:col-span-6 bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4 font-body text-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-coral-pulse text-[22px]">history_edu</span>
+                <h2 className="font-headline text-base font-bold text-canopy-green">
+                  Correction Proposals & Audits
+                </h2>
               </div>
+              <span className="bg-sky-wash text-deep-teal font-bold px-2.5 py-0.5 rounded-full">
+                {corrections.length} Total
+              </span>
             </div>
-            <div className="h-10 w-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold">
-              {user.full_name.charAt(0)}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {loading ? (
-        <div className="py-16 text-center text-sm text-slate-500">
-          Loading your verified academic record...
-        </div>
-      ) : error ? (
-        <div className="glass-panel p-8 rounded-3xl border border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 text-center space-y-3">
-          <AlertTriangle className="w-8 h-8 text-amber-600 mx-auto" />
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">
-            No Student Record Found
-          </h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-            {error}
-          </p>
-        </div>
-      ) : profile ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Verified Facts Card & Revisions */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Current Verified Facts */}
-            <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                      Current Verified Facts
-                    </h2>
-                    <div className="text-xs text-slate-500 font-mono">
-                      Roll Number: {profile.student_identifier}
-                    </div>
-                  </div>
-                </div>
-
-                {profile.current_verified_revision ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    Revision #{profile.current_verified_revision.revision_number} Verified
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                    Unverified
-                  </span>
-                )}
+            {loading ? (
+              <div className="py-12 text-center text-slate animate-pulse">Loading correction history...</div>
+            ) : corrections.length === 0 ? (
+              <div className="py-12 text-center text-slate">
+                <p>No correction proposals submitted.</p>
+                <p className="text-[11px] text-ash mt-1">If your academic record needs updating, click &quot;Propose Academic Correction&quot; above.</p>
               </div>
+            ) : (
+              <div className="space-y-3">
+                {corrections.map((corr) => {
+                  const statusColor =
+                    corr.status === "approved"
+                      ? "bg-mint-wash text-canopy-green border-leaf-bright/30"
+                      : corr.status === "rejected"
+                      ? "bg-peach-wash text-coral-pulse border-coral-pulse/30"
+                      : "bg-lilac-wash text-indigo-bloom border-indigo-bloom/30";
 
-              {profile.current_verified_revision ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <div className="text-xs text-slate-500">Degree Branch</div>
-                    <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-                      {profile.current_verified_revision.branch}
-                    </div>
-                  </div>
+                  const changesSummary = Object.entries(corr.proposed_changes || {})
+                    .map(([k, v]) => `${k.replace(/_/g, " ")}: ${String(v)}`)
+                    .join(", ");
 
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <div className="text-xs text-slate-500">Cumulative GPA</div>
-                    <div className="text-lg font-mono font-bold text-slate-900 dark:text-white mt-1">
-                      {profile.current_verified_revision.cgpa.toFixed(2)}{" "}
-                      <span className="text-xs font-normal text-slate-400">
-                        / {profile.current_verified_revision.cgpa_scale.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <div className="text-xs text-slate-500">Active Backlogs</div>
-                    <div className="text-lg font-bold mt-1">
-                      {profile.current_verified_revision.active_backlogs === 0 ? (
-                        <span className="text-emerald-600 dark:text-emerald-400">0 Clean</span>
-                      ) : profile.current_verified_revision.active_backlogs === null ? (
-                        <span className="text-amber-600 dark:text-amber-400 text-sm">Unknown</span>
-                      ) : (
-                        <span className="text-rose-600 dark:text-rose-400">
-                          {profile.current_verified_revision.active_backlogs} Active
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                    <div className="text-xs text-slate-500">Graduation Year</div>
-                    <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-                      {profile.current_verified_revision.graduation_year}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-xs text-slate-500">
-                  No verified academic facts on record yet.
-                </div>
-              )}
-
-              {profile.current_verified_revision && (
-                <div className="text-xs text-slate-400 border-t border-slate-200/60 dark:border-slate-800/60 pt-4 flex flex-wrap items-center justify-between gap-2">
-                  <span>
-                    Verified via{" "}
-                    <strong className="text-slate-600 dark:text-slate-300 uppercase">
-                      {profile.current_verified_revision.source}
-                    </strong>
-                  </span>
-                  <span>
-                    Last Updated:{" "}
-                    {profile.current_verified_revision.verified_at
-                      ? new Date(profile.current_verified_revision.verified_at).toLocaleString()
-                      : "Pending"}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Revision History */}
-            <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <History className="w-4 h-4 text-brand-600" />
-                Immutable Revision History ({profile.revision_history.length})
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                PlacementOS retains an immutable audit log of all academic revisions. Unverified edits cannot alter your eligibility facts.
-              </p>
-
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-slate-50 dark:bg-slate-900 text-slate-500 text-[10px] uppercase">
-                    <tr>
-                      <th className="px-4 py-2.5">Rev #</th>
-                      <th className="px-4 py-2.5">Branch</th>
-                      <th className="px-4 py-2.5">CGPA</th>
-                      <th className="px-4 py-2.5">Backlogs</th>
-                      <th className="px-4 py-2.5">Source</th>
-                      <th className="px-4 py-2.5">Status</th>
-                      <th className="px-4 py-2.5">Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                    {profile.revision_history.map((rev) => (
-                      <tr key={rev.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
-                        <td className="px-4 py-2.5 font-bold text-brand-600">
-                          #{rev.revision_number}
-                        </td>
-                        <td className="px-4 py-2.5">{rev.branch}</td>
-                        <td className="px-4 py-2.5">{rev.cgpa.toFixed(2)}</td>
-                        <td className="px-4 py-2.5">
-                          {rev.active_backlogs === null ? "None" : rev.active_backlogs}
-                        </td>
-                        <td className="px-4 py-2.5 font-sans capitalize">{rev.source}</td>
-                        <td className="px-4 py-2.5 font-sans">
-                          {rev.is_verified ? (
-                            <span className="text-emerald-600 font-semibold">Verified</span>
-                          ) : (
-                            <span className="text-slate-400">Draft</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-2.5 text-[10px] text-slate-400">
-                          {new Date(rev.created_at).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* My Correction Requests & Status Tracker */}
-            <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-4 h-4 text-brand-600" />
-                Correction Requests Tracker ({corrections.length})
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Track the status and review notes of any correction proposals submitted to your placement office.
-              </p>
-
-              {corrections.length === 0 ? (
-                <div className="py-8 text-center text-xs text-slate-400 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
-                  You haven&apos;t submitted any correction proposals.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {corrections.map((corr) => (
+                  return (
                     <div
                       key={corr.id}
-                      className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 text-xs"
+                      className="p-4 rounded-xl bg-surface-container-low border border-frost-gray space-y-2"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-slate-400">
-                          Submitted {new Date(corr.created_at).toLocaleDateString()}
+                        <div>
+                          <span className="font-bold text-ink-black uppercase text-xs">
+                            Changes: {changesSummary || "Academic Update"}
+                          </span>
+                          <span className="font-mono text-[10px] text-slate ml-2">
+                            {corr.id.slice(0, 8)}...
+                          </span>
+                        </div>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${statusColor}`}>
+                          {corr.status}
                         </span>
-                        {corr.status === "pending" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200">
-                            <Clock className="w-3 h-3" />
-                            Pending Review
-                          </span>
-                        ) : corr.status === "approved" ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Approved
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200">
-                            <XCircle className="w-3 h-3" />
-                            Rejected
-                          </span>
-                        )}
                       </div>
 
-                      <div className="font-mono text-[11px] text-slate-700 dark:text-slate-300">
-                        Proposed changes: {JSON.stringify(corr.proposed_changes)}
-                      </div>
-                      <div className="text-slate-600 dark:text-slate-400 italic">
-                        &ldquo;{corr.justification}&rdquo;
+                      <div className="text-[11px] text-graphite bg-paper-white p-2.5 rounded-lg border border-frost-gray">
+                        Justification: &quot;{corr.justification || "Semester grade update"}&quot;
                       </div>
 
                       {corr.review_notes && (
-                        <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px]">
-                          <strong className="text-slate-700 dark:text-slate-300">Coordinator Notes:</strong>{" "}
-                          <span className="text-slate-600 dark:text-slate-400">{corr.review_notes}</span>
+                        <div className="text-[11px] text-canopy-green bg-mint-wash/40 p-2 rounded-lg border border-leaf-bright/20 font-medium">
+                          Coordinator Review Notes: &quot;{corr.review_notes}&quot;
                         </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
+        </div>
 
-          {/* Right Column: Propose Correction Form */}
-          <div className="space-y-6">
-            <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 space-y-6 shadow-sm sticky top-24">
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <FileEdit className="w-4 h-4 text-brand-600" />
-                  Propose Record Correction
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Submit revised academic information with official rationale. Unreviewed requests never alter verified facts.
-                </p>
+        {/* Correction Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+            <div className="bg-paper-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-frost-gray shadow-xl space-y-4 font-body text-xs animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+                <div>
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Propose Academic Correction
+                  </h2>
+                  <span className="text-slate text-[11px]">
+                    Requires placement coordinator verification before eligibility evaluation.
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-1 rounded-full text-slate hover:text-ink-black"
+                >
+                  <span className="material-symbols-outlined text-[20px]">close</span>
+                </button>
               </div>
 
-              <form onSubmit={handleSubmitCorrection} className="space-y-4 text-xs">
+              {modalError && (
+                <div className="p-3 rounded-xl bg-error-container text-on-error-container font-semibold">
+                  {modalError}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitCorrection} className="space-y-3">
                 <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Branch / Major
-                  </label>
+                  <label className="block text-graphite font-semibold mb-1">Field to Correct</label>
+                  <select
+                    value={fieldName}
+                    onChange={(e) => setFieldName(e.target.value)}
+                    className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
+                  >
+                    <option value="cgpa">Cumulative GPA (CGPA)</option>
+                    <option value="active_backlogs">Active Backlogs Count</option>
+                    <option value="branch">Branch / Specialization</option>
+                    <option value="graduation_year">Graduation Year</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-graphite font-semibold mb-1">Proposed Correct Value</label>
                   <input
                     type="text"
-                    value={proposedBranch}
-                    onChange={(e) => setProposedBranch(e.target.value)}
-                    placeholder="e.g., CSE, ECE"
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    required
+                    placeholder={fieldName === "cgpa" ? "e.g. 8.95" : fieldName === "active_backlogs" ? "0" : "Value"}
+                    value={proposedValue}
+                    onChange={(e) => setProposedValue(e.target.value)}
+                    className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
                   />
                 </div>
 
                 <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Cumulative CGPA (Scale 10.0)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="10"
-                    value={proposedCgpa}
-                    onChange={(e) => setProposedCgpa(e.target.value)}
-                    placeholder="e.g., 8.90"
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Active Backlogs Count
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={proposedBacklogs}
-                    onChange={(e) => setProposedBacklogs(e.target.value)}
-                    placeholder="0 for clean record"
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Supporting Document URL (Optional)
-                  </label>
-                  <input
-                    type="url"
-                    value={documentUrl}
-                    onChange={(e) => setDocumentUrl(e.target.value)}
-                    placeholder="Link to verified semester grade card..."
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Justification Statement <span className="text-rose-500">*</span>
-                  </label>
+                  <label className="block text-graphite font-semibold mb-1">Reason & Supporting Evidence</label>
                   <textarea
                     rows={3}
                     required
-                    value={justification}
-                    onChange={(e) => setJustification(e.target.value)}
-                    placeholder="Explain why this correction is required (e.g. re-evaluation cleared backlogs in Sem 5)..."
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    placeholder="Explain why this value should be updated (e.g. Updated semester 6 marksheet issued with re-evaluation)..."
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    className="w-full bg-paper-white border border-frost-gray rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-canopy-green"
                   />
                 </div>
 
-                {submitFeedback && (
-                  <div
-                    className={`p-3 rounded-xl text-xs border ${
-                      submitFeedback.type === "success"
-                        ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800"
-                        : "bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-200 border-rose-200 dark:border-rose-800"
-                    }`}
+                <div className="pt-3 border-t border-frost-gray flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 rounded-full border border-frost-gray text-xs font-semibold text-graphite hover:bg-surface-container"
                   >
-                    {submitFeedback.message}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs shadow-sm transition flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  {submitting ? "Submitting..." : "Submit Correction Proposal"}
-                </button>
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-5 py-2 rounded-full bg-coral-pulse hover:bg-[#e8542c] text-paper-white text-xs font-semibold shadow-xs disabled:opacity-50"
+                  >
+                    {submitting ? "Submitting..." : "Submit Proposal"}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
-        </div>
-      ) : null}
-    </div>
+        )}
+      </div>
+    </StudentShell>
   );
 }

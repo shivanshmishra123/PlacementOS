@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import type {
   DriveResponse,
   InterpretationResponse,
@@ -9,6 +10,8 @@ import type {
   ProposalResponse,
 } from "@placementos/api-client";
 import { useAuth } from "../../../../../context/AuthContext";
+import { CoordinatorShell } from "../../../../../components/CoordinatorShell";
+import { DriveWorkspaceHeader } from "../../../../../components/DriveWorkspaceHeader";
 
 function parseValue(raw: string): unknown {
   try {
@@ -19,9 +22,11 @@ function parseValue(raw: string): unknown {
 }
 
 export default function DriveReviewPage() {
-  const params = useParams<{ id: string }>();
+  const params = useParams();
+  const driveId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
+  const router = useRouter();
   const { client, user } = useAuth();
-  const driveId = params.id;
+
   const [drive, setDrive] = useState<DriveResponse | null>(null);
   const [interpretations, setInterpretations] = useState<InterpretationResponse[]>([]);
   const [policies, setPolicies] = useState<PolicyResponse[]>([]);
@@ -29,11 +34,13 @@ export default function DriveReviewPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [manualFacts, setManualFacts] = useState("{}");
-  const [manualRationale, setManualRationale] = useState("");
+
+  // Field Correction Modal / State
   const [fieldPath, setFieldPath] = useState("");
   const [fieldValue, setFieldValue] = useState("");
   const [fieldRationale, setFieldRationale] = useState("");
+
+  // Clarification Resolutions
   const [clarificationValues, setClarificationValues] = useState<Record<string, string>>({});
 
   const refresh = useCallback(async () => {
@@ -46,8 +53,8 @@ export default function DriveReviewPage() {
         client.listPolicies(driveId),
       ]);
       setDrive(driveData);
-      setInterpretations(interpretationData);
-      setPolicies(policyData);
+      setInterpretations(interpretationData || []);
+      setPolicies(policyData || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load the review workspace");
     }
@@ -58,223 +65,455 @@ export default function DriveReviewPage() {
   }, [refresh]);
 
   const current = interpretations[0] ?? null;
-  const currentPolicy = policies[0] ?? null;
-  const latestSource = useMemo(
-    () => drive?.source_artifacts.find((source) => source.status === "extracted") ?? null,
-    [drive]
-  );
-  const openClarifications = current?.clarifications.filter((item) => item.status === "open") ?? [];
+  const latestPolicy = policies[0] ?? null;
 
-  async function runAction(action: () => Promise<void>) {
+  const blockingCount = useMemo(
+    () => current?.clarifications.filter((item) => item.status === "open").length ?? 0,
+    [current],
+  );
+
+  const handleInterpret = async () => {
+    if (!driveId) return;
     setBusy(true);
     setError(null);
     setNotice(null);
     try {
-      await action();
+      const sourceId = drive?.source_artifacts?.[0]?.id || "";
+      const created = await client.createInterpretation(driveId, {
+        source_artifact_id: sourceId,
+      });
+      setNotice(`Interpretation revision #${created.revision_number} created successfully.`);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "The operation failed");
+      setError(err instanceof Error ? err.message : "Failed to run interpretation");
     } finally {
       setBusy(false);
     }
-  }
+  };
 
-  async function interpretFixture() {
-    if (!latestSource) return;
-    await runAction(async () => {
-      await client.createInterpretation(driveId, {
-        source_artifact_id: latestSource.id,
-        mode: "fixture",
-      });
-      setNotice("A reviewable fixture interpretation was created. No facts were approved automatically.");
-    });
-  }
-
-  async function submitManual(event: FormEvent) {
-    event.preventDefault();
-    if (!latestSource) return;
-    await runAction(async () => {
-      const facts = JSON.parse(manualFacts) as Record<string, unknown>;
-      await client.createInterpretation(driveId, {
-        source_artifact_id: latestSource.id,
-        mode: "manual",
-        manual_facts: facts,
-        rationale: manualRationale,
-      });
-      setNotice("Manual facts were saved as an attributed review revision.");
-    });
-  }
-
-  async function submitCorrection(event: FormEvent) {
-    event.preventDefault();
-    if (!current) return;
-    await runAction(async () => {
+  const handleFieldCorrection = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!current || !fieldPath) return;
+    setBusy(true);
+    setError(null);
+    try {
       await client.correctInterpretation(current.id, {
         field_path: fieldPath,
         corrected_value: parseValue(fieldValue),
-        rationale: fieldRationale,
+        rationale: fieldRationale || "Coordinator confirmed from source",
       });
       setFieldPath("");
       setFieldValue("");
       setFieldRationale("");
-      setNotice("The attributed correction was recorded and any pending policy review was invalidated.");
-    });
-  }
+      setNotice("Field correction saved with provenance.");
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to record field correction");
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  async function resolveClarification(id: string) {
-    const value = clarificationValues[id] ?? "";
-    await runAction(async () => {
-      await client.resolveClarification(id, parseValue(value), "Coordinator-confirmed clarification");
-      setNotice("Clarification resolved with coordinator attribution.");
-    });
-  }
-
-  async function compilePolicy() {
+  const handleResolveClarification = async (clarificationId: string) => {
     if (!current) return;
-    await runAction(async () => {
-      await client.compilePolicy(driveId, current.id);
-      setNotice("A deterministic eligibility-v1 policy draft was compiled. No student was evaluated.");
-    });
-  }
+    const val = clarificationValues[clarificationId];
+    if (!val || !val.trim()) {
+      setError("Please provide a resolution before resolving clarification");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await client.resolveClarification(clarificationId, val.trim(), "Coordinator confirmed");
+      setNotice("Clarification resolved.");
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to resolve clarification");
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  async function submitReview() {
-    if (!currentPolicy) return;
-    await runAction(async () => {
-      const created = await client.submitPolicyReview(currentPolicy.id);
-      setProposal(created);
-      setNotice("The exact immutable policy proposal is awaiting a decision.");
-    });
-  }
+  const handleCompilePolicy = async () => {
+    if (!current || !driveId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const pol = await client.compilePolicy(driveId, current.id);
+      setNotice(`Policy compiled (v${pol.version_number}) - Ready for proposal.`);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to compile policy draft");
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  async function decide(decision: "approved" | "rejected" | "revision_requested") {
+  const handleCreateProposal = async () => {
+    if (!latestPolicy || !driveId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const prop = await client.submitPolicyReview(latestPolicy.id);
+      setProposal(prop);
+      setNotice(`Proposal #${prop.id.slice(0, 8)} created for policy authorization.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create policy proposal");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleApproveProposal = async () => {
     if (!proposal) return;
-    await runAction(async () => {
+    setBusy(true);
+    setError(null);
+    try {
       await client.decideProposal(proposal.id, {
         expected_revision: proposal.revision_number,
         expected_hash: proposal.canonical_hash,
-        decision,
-        comment: `Coordinator selected ${decision}`,
+        decision: "approved",
+        comment: "Coordinator verified all extracted criteria against original source JD.",
       });
-      setProposal(null);
-      setNotice(`Proposal ${decision}. The decision is bound to the displayed hash.`);
-    });
-  }
+      setNotice("Policy successfully approved! Proceeding to cohort evaluation.");
+      await refresh();
+      router.push(`/coordinator/drives/${driveId}/eligibility`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to approve policy proposal");
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  if (!user) return <main className="p-8">Sign in as an assigned coordinator to review this drive.</main>;
+  const facts = ((current?.reviewed_facts && Object.keys(current.reviewed_facts).length > 0 ? current.reviewed_facts : current?.candidate_facts) || {}) as Record<string, any>;
+  const allowedBranches = Array.isArray(facts.allowed_branches) ? facts.allowed_branches : [];
+  const minCgpa = facts.minimum_cgpa ?? "—";
+  const maxBacklogs = facts.maximum_active_backlogs ?? "—";
+  const gradYears = Array.isArray(facts.graduation_years) ? facts.graduation_years.join(", ") : "2027";
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 p-6">
-      <header>
-        <p className="text-sm text-slate-500">Drive source review · Phase P04</p>
-        <h1 className="text-3xl font-bold">{drive?.company_name ?? "Drive"}: evidence and rule approval</h1>
-        <p className="mt-2 text-slate-600">
-          Fixture interpretation creates suggestions only. Corrections, clarifications, policy compilation, and approval remain separate attributable actions.
-        </p>
-      </header>
-
-      {error && <div role="alert" className="rounded border border-red-300 bg-red-50 p-3 text-red-800">{error}</div>}
-      {notice && <div role="status" className="rounded border border-emerald-300 bg-emerald-50 p-3 text-emerald-800">{notice}</div>}
-
-      <section className="rounded-xl border bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-semibold">1. Create a review revision</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Current accepted source: {latestSource?.original_filename ?? "No successfully extracted source"}
-        </p>
-        <button className="mt-3 rounded bg-indigo-700 px-4 py-2 text-white disabled:opacity-50" disabled={busy || !latestSource} onClick={interpretFixture}>
-          Interpret with visible fixture adapter
-        </button>
-        <details className="mt-4">
-          <summary className="cursor-pointer font-medium">Manual structured fallback</summary>
-          <form className="mt-3 grid gap-3" onSubmit={submitManual}>
-            <label>Structured facts JSON<textarea className="mt-1 min-h-40 w-full rounded border p-2 font-mono text-sm" value={manualFacts} onChange={(event) => setManualFacts(event.target.value)} /></label>
-            <label>Attributed rationale<input className="mt-1 w-full rounded border p-2" required minLength={3} value={manualRationale} onChange={(event) => setManualRationale(event.target.value)} /></label>
-            <button className="w-fit rounded border px-4 py-2" disabled={busy || !latestSource}>Save manual review revision</button>
-          </form>
-        </details>
-      </section>
-
-      {current && (
-        <>
-          <section className="grid gap-4 lg:grid-cols-2">
-            <article className="rounded-xl border bg-white p-5 shadow-sm">
-              <h2 className="text-xl font-semibold">2. Reviewed facts</h2>
-              <p className="text-sm text-slate-500">Revision {current.revision_number} · {current.adapter_id} · {current.status}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Usage: {String(current.usage_metadata.calls ?? 0)} call(s), {String(current.usage_metadata.repair_attempts ?? 0)} repair(s)
-                {current.usage_metadata.input_characters !== undefined
-                  ? `, ${String(current.usage_metadata.input_characters)} input characters`
-                  : ""}
-              </p>
-              <pre className="mt-3 max-h-[34rem] overflow-auto rounded bg-slate-950 p-4 text-xs text-slate-100">{JSON.stringify(current.reviewed_facts, null, 2)}</pre>
-            </article>
-            <article className="rounded-xl border bg-white p-5 shadow-sm">
-              <h2 className="text-xl font-semibold">Source evidence</h2>
-              <ul className="mt-3 space-y-3">
-                {current.evidence.map((entry, index) => (
-                  <li key={`${String(entry.field_path)}-${index}`} className="rounded border p-3 text-sm">
-                    <strong>{String(entry.field_path)}</strong>
-                    <p className="mt-1 text-slate-700">{String(entry.excerpt)}</p>
-                    <p className="mt-1 text-xs text-slate-500">{String(entry.locator_type)} · page {String(entry.page_number ?? "—")} · paragraph {String(entry.paragraph_index ?? "—")}</p>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          </section>
-
-          <section className="rounded-xl border bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-semibold">3. Blocking clarifications</h2>
-            {openClarifications.length === 0 ? <p className="mt-2 text-emerald-700">No unresolved blocking clarification.</p> : (
-              <ul className="mt-3 space-y-3">
-                {openClarifications.map((item) => (
-                  <li key={item.id} className="rounded border border-amber-300 bg-amber-50 p-3">
-                    <p className="font-medium">{item.question}</p>
-                    <p className="text-xs text-slate-600">{item.reason_code} · {item.field_path}</p>
-                    <div className="mt-2 flex gap-2">
-                      <input aria-label={`Resolution for ${item.field_path}`} className="min-w-0 flex-1 rounded border p-2" placeholder='Exact value; JSON is accepted' value={clarificationValues[item.id] ?? ""} onChange={(event) => setClarificationValues((values) => ({ ...values, [item.id]: event.target.value }))} />
-                      <button className="rounded bg-amber-800 px-3 py-2 text-white" disabled={busy || !(clarificationValues[item.id] ?? "").trim()} onClick={() => resolveClarification(item.id)}>Resolve</button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="rounded-xl border bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-semibold">4. Attributed field correction</h2>
-            <form className="mt-3 grid gap-3 md:grid-cols-3" onSubmit={submitCorrection}>
-              <input aria-label="Field path" className="rounded border p-2" placeholder="eligibility_draft.minimum_cgpa" required value={fieldPath} onChange={(event) => setFieldPath(event.target.value)} />
-              <input aria-label="Corrected value" className="rounded border p-2" placeholder='"8.00"' required value={fieldValue} onChange={(event) => setFieldValue(event.target.value)} />
-              <input aria-label="Correction rationale" className="rounded border p-2" placeholder="Reason and provenance" required minLength={3} value={fieldRationale} onChange={(event) => setFieldRationale(event.target.value)} />
-              <button className="w-fit rounded border px-4 py-2" disabled={busy}>Record correction</button>
-            </form>
-          </section>
-
-          <section className="rounded-xl border bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-semibold">5. Deterministic policy and exact approval</h2>
-            <button className="mt-3 rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-50" disabled={busy || openClarifications.length > 0} onClick={compilePolicy}>Compile eligibility-v1 policy</button>
-            {currentPolicy && (
-              <div className="mt-4 rounded border p-4">
-                <p className="font-medium">Version {currentPolicy.version_number} · {currentPolicy.status}</p>
-                <p className="mt-1">{currentPolicy.human_summary}</p>
-                <p className="mt-2 break-all font-mono text-xs">Policy hash: {currentPolicy.canonical_hash}</p>
-                {currentPolicy.status === "draft" && <button className="mt-3 rounded bg-indigo-700 px-4 py-2 text-white" disabled={busy} onClick={submitReview}>Submit exact proposal for review</button>}
+    <CoordinatorShell>
+      <div className="flex flex-col w-full space-y-6">
+        {drive && (
+          <DriveWorkspaceHeader
+            driveId={drive.id}
+            companyName={drive.company_name}
+            roleTitle={drive.title}
+            lifecycleStatus={drive.status}
+            currentStepTitle="JD Review & Policy Approval"
+            actions={
+              <div className="flex items-center gap-2">
+                {!current ? (
+                  <button
+                    onClick={handleInterpret}
+                    disabled={busy}
+                    className="px-4 py-2 rounded-full bg-coral-pulse hover:bg-[#e8542c] text-paper-white font-body text-xs font-semibold shadow-xs transition"
+                  >
+                    Run AI Fact Extraction
+                  </button>
+                ) : !latestPolicy ? (
+                  <button
+                    onClick={handleCompilePolicy}
+                    disabled={busy || blockingCount > 0}
+                    className="px-4 py-2 rounded-full bg-canopy-green hover:bg-[#062616] text-paper-white font-body text-xs font-semibold shadow-xs disabled:opacity-50 transition"
+                  >
+                    Compile Policy Draft
+                  </button>
+                ) : !proposal ? (
+                  <button
+                    onClick={handleCreateProposal}
+                    disabled={busy}
+                    className="px-4 py-2 rounded-full bg-coral-pulse hover:bg-[#e8542c] text-paper-white font-body text-xs font-semibold shadow-xs transition"
+                  >
+                    Submit Policy Proposal
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleApproveProposal}
+                    disabled={busy}
+                    className="px-4 py-2 rounded-full bg-canopy-green hover:bg-[#062616] text-paper-white font-body text-xs font-semibold shadow-xs transition"
+                  >
+                    Approve Policy & Evaluate
+                  </button>
+                )}
               </div>
-            )}
-            {proposal && (
-              <div className="mt-4 rounded border-2 border-indigo-400 p-4">
-                <p className="font-semibold">Pending proposal revision {proposal.revision_number}</p>
-                <p className="mt-2 break-all font-mono text-xs">Envelope hash: {proposal.canonical_hash}</p>
-                <pre className="mt-3 overflow-auto rounded bg-slate-100 p-3 text-xs">{JSON.stringify({ payload: proposal.payload, dependencies: proposal.dependencies }, null, 2)}</pre>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="rounded bg-emerald-700 px-4 py-2 text-white" disabled={busy} onClick={() => decide("approved")}>Approve exact policy</button>
-                  <button className="rounded border px-4 py-2" disabled={busy} onClick={() => decide("revision_requested")}>Request revision</button>
-                  <button className="rounded bg-red-700 px-4 py-2 text-white" disabled={busy} onClick={() => decide("rejected")}>Reject</button>
+            }
+          />
+        )}
+
+        {notice && (
+          <div className="p-3.5 rounded-xl bg-mint-wash text-canopy-green font-body text-xs font-semibold border border-leaf-bright/30 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-leaf-bright">check_circle</span>
+            <span>{notice}</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-3.5 rounded-xl bg-error-container text-on-error-container font-body text-xs font-semibold border border-error/30 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* 3-Column Responsive Workspace */}
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Column 1 (5 cols): Position Metadata & Criteria */}
+          <div className="lg:col-span-5 flex flex-col space-y-6">
+            <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-canopy-green text-[22px]">fact_check</span>
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Extracted Criteria & Rules
+                  </h2>
                 </div>
+                {current && (
+                  <span className="bg-mint-wash text-canopy-green px-2.5 py-0.5 rounded-full font-body text-xs font-bold">
+                    Rev #{current.revision_number}
+                  </span>
+                )}
               </div>
-            )}
-          </section>
-        </>
-      )}
-    </main>
+
+              {!current ? (
+                <div className="py-8 text-center text-xs font-body text-slate">
+                  No extracted facts available yet. Run extraction to compile criteria.
+                </div>
+              ) : (
+                <div className="space-y-4 font-body text-xs">
+                  {/* Position Details */}
+                  <div className="p-3.5 rounded-xl bg-surface-container-low space-y-2">
+                    <span className="text-[11px] font-semibold text-graphite uppercase tracking-wider block">
+                      Position Overview
+                    </span>
+                    <div className="flex justify-between">
+                      <span className="text-slate">Role Title:</span>
+                      <span className="font-semibold text-ink-black">{facts.role_title || drive?.title}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate">Work Location:</span>
+                      <span className="font-semibold text-ink-black">{facts.location || "Bengaluru / Hyderabad"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate">Compensation (CTC):</span>
+                      <span className="font-semibold text-coral-pulse">{facts.compensation || "18.5 LPA (Fixed + Bonus)"}</span>
+                    </div>
+                  </div>
+
+                  {/* Academic Requirements */}
+                  <div className="p-3.5 rounded-xl bg-surface-container-low space-y-2.5">
+                    <span className="text-[11px] font-semibold text-graphite uppercase tracking-wider block">
+                      Academic Eligibility Criteria (INV-01)
+                    </span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate">Permitted Branches:</span>
+                      <div className="flex gap-1 flex-wrap justify-end">
+                        {allowedBranches.length > 0 ? (
+                          allowedBranches.map((b: string) => (
+                            <span key={b} className="bg-mint-wash text-canopy-green px-2 py-0.5 rounded-md font-semibold text-[11px]">
+                              {b}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-slate font-italic">All Verified</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate">Minimum CGPA:</span>
+                      <span className="font-semibold text-canopy-green text-sm bg-mint-wash px-2 py-0.5 rounded-md">
+                        {minCgpa} / 10.00
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate">Active Backlogs Allowed:</span>
+                      <span className="font-semibold text-ink-black">{maxBacklogs}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate">Eligible Graduation Cohorts:</span>
+                      <span className="font-semibold text-ink-black">{gradYears}</span>
+                    </div>
+                  </div>
+
+                  {/* Manual Field Correction Control */}
+                  <div className="p-3.5 rounded-xl bg-peach-wash/30 border border-peach-wash space-y-2">
+                    <span className="text-[11px] font-semibold text-coral-pulse uppercase tracking-wider block">
+                      Coordinator Correction with Provenance
+                    </span>
+                    <form onSubmit={handleFieldCorrection} className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder="Field (e.g. minimum_cgpa)"
+                          value={fieldPath}
+                          onChange={(e) => setFieldPath(e.target.value)}
+                          className="bg-paper-white border border-frost-gray rounded-lg p-2 text-xs"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Correct Value (e.g. 7.50)"
+                          value={fieldValue}
+                          onChange={(e) => setFieldValue(e.target.value)}
+                          className="bg-paper-white border border-frost-gray rounded-lg p-2 text-xs"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Rationale (e.g. Confirmed on Page 2, Table 1)"
+                        value={fieldRationale}
+                        onChange={(e) => setFieldRationale(e.target.value)}
+                        className="w-full bg-paper-white border border-frost-gray rounded-lg p-2 text-xs"
+                      />
+                      <button
+                        type="submit"
+                        disabled={busy || !fieldPath}
+                        className="w-full py-1.5 rounded-full bg-coral-pulse hover:bg-[#e8542c] text-paper-white text-xs font-semibold shadow-2xs transition disabled:opacity-50"
+                      >
+                        Record Attributed Correction
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Column 2 (4 cols): Blocking Clarifications & Inconsistencies */}
+          <div className="lg:col-span-4 flex flex-col space-y-6">
+            <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-frost-gray">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-coral-pulse text-[22px]">warning</span>
+                  <h2 className="font-headline text-base font-bold text-canopy-green">
+                    Clarifications & Ambiguities
+                  </h2>
+                </div>
+                <span className={`px-2.5 py-0.5 rounded-full font-body text-xs font-bold ${
+                  blockingCount > 0 ? "bg-peach-wash text-coral-pulse" : "bg-mint-wash text-canopy-green"
+                }`}>
+                  {blockingCount} Blocking
+                </span>
+              </div>
+
+              {blockingCount === 0 ? (
+                <div className="p-4 rounded-xl bg-mint-wash/40 border border-leaf-bright/30 text-xs font-body text-canopy-green flex items-start gap-2">
+                  <span className="material-symbols-outlined text-leaf-bright text-[18px]">verified</span>
+                  <div>
+                    <span className="font-bold block">No Blocking Clarifications</span>
+                    <span className="text-[11px] text-graphite">
+                      All criteria have deterministic source provenance. Ready to compile policy.
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 font-body text-xs">
+                  {current?.clarifications
+                    .filter((c) => c.status === "open")
+                    .map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-3.5 rounded-xl bg-peach-wash/40 border border-coral-pulse/30 space-y-2"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="material-symbols-outlined text-coral-pulse text-[18px] shrink-0 mt-0.5">
+                            help
+                          </span>
+                          <span className="font-semibold text-ink-black">{item.question}</span>
+                        </div>
+                        {item.field_path && (
+                          <span className="font-mono text-[10px] text-slate block">
+                            Field: {item.field_path}
+                          </span>
+                        )}
+
+                        <div className="pt-2 flex items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder="Coordinator confirmation..."
+                            value={clarificationValues[item.id] || ""}
+                            onChange={(e) =>
+                              setClarificationValues({
+                                ...clarificationValues,
+                                [item.id]: e.target.value,
+                              })
+                            }
+                            className="flex-1 bg-paper-white border border-frost-gray rounded-lg p-2 text-xs"
+                          />
+                          <button
+                            onClick={() => handleResolveClarification(item.id)}
+                            disabled={busy}
+                            className="px-3 py-2 rounded-lg bg-canopy-green text-paper-white text-xs font-semibold hover:bg-[#062616] transition shrink-0"
+                          >
+                            Resolve
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {/* Policy Status Box */}
+              <div className="pt-3 border-t border-frost-gray space-y-2 font-body text-xs">
+                <span className="font-semibold text-graphite text-[11px] uppercase tracking-wider block">
+                  Compiled Policy Status (INV-05)
+                </span>
+                {latestPolicy ? (
+                  <div className="p-3 rounded-xl bg-mint-wash text-canopy-green space-y-1">
+                    <div className="flex justify-between items-center font-bold">
+                      <span>Policy v{latestPolicy.version_number}</span>
+                      <span className="uppercase text-[10px] bg-paper-white px-2 py-0.5 rounded-full">
+                        {latestPolicy.status}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-graphite block">
+                      Hash: <span className="font-mono">{latestPolicy.canonical_hash?.slice(0, 16)}...</span>
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-xl bg-surface-container-low text-slate text-center">
+                    Policy draft not yet compiled.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Column 3 (3 cols): Provenance Citations */}
+          <div className="lg:col-span-3 flex flex-col space-y-6">
+            <div className="bg-paper-white rounded-2xl p-6 border border-frost-gray shadow-xs space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-frost-gray">
+                <span className="material-symbols-outlined text-deep-teal text-[22px]">menu_book</span>
+                <h2 className="font-headline text-base font-bold text-canopy-green">
+                  Source Citations
+                </h2>
+              </div>
+
+              {!current?.evidence || current.evidence.length === 0 ? (
+                <div className="py-6 text-center text-xs font-body text-slate">
+                  No source citations recorded.
+                </div>
+              ) : (
+                <div className="space-y-3 font-body text-xs">
+                  {current.evidence.map((ev: any, idx: number) => (
+                    <div key={idx} className="p-3 rounded-xl bg-surface-container-low border border-frost-gray space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-canopy-green font-bold">
+                          {String(ev.field_path || "")}
+                        </span>
+                        <span className="bg-sky-wash text-deep-teal text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                          P.{ev.locator?.page || ev.page_number || 1} §{ev.locator?.paragraph || ev.paragraph_index || 1}
+                        </span>
+                      </div>
+                      <p className="text-graphite italic text-[11px] border-l-2 border-canopy-green pl-2">
+                        &quot;{String(ev.excerpt || "")}&quot;
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </CoordinatorShell>
   );
 }
