@@ -9,7 +9,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from placementos.core.config import settings
 from placementos.core.database import get_db
 from placementos.core.dependencies import get_current_auth
 from placementos.core.errors import (
@@ -42,13 +41,13 @@ from placementos.schemas.intelligence import (
 from placementos.services.audit import record_audit
 from placementos.services.authorization import load_authorized_drive
 from placementos.services.jd_intelligence import (
-    DeterministicFixtureJDInterpreter,
     canonical_hash,
     compile_policy,
     get_path,
     set_path,
     validate_evidence,
 )
+from placementos.services.models import get_model_interpreter
 from placementos.services.session import AuthContext
 
 router = APIRouter(tags=["JD Intelligence & Policy Review"])
@@ -244,12 +243,8 @@ async def create_interpretation(
     if not extraction:
         raise ConflictException("Source extraction has not completed successfully")
 
-    if payload.mode == "fixture":
-        if settings.MODEL_INTERPRETER_MODE != "fixture" or settings.ENVIRONMENT == "production":
-            raise ConflictException(
-                "The deterministic interpretation fixture is disabled; use attributed manual entry"
-            )
-        adapter = DeterministicFixtureJDInterpreter()
+    if payload.mode != "manual":
+        adapter = get_model_interpreter()
         draft = adapter.interpret(extraction)
         facts = draft.facts
         evidence = draft.evidence

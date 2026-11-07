@@ -23,6 +23,8 @@ dependencies = [
     "cryptography>=44.0.0",
     "langgraph==1.2.18",
     "langgraph-checkpoint-postgres==3.2.0",
+    "langchain-core>=0.3.0",
+    "langchain-google-genai>=2.0.0",
 ]
 
 [project.optional-dependencies]

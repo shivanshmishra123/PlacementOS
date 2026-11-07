@@ -8,7 +8,6 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from placementos.core.config import settings
 from placementos.core.errors import ConflictException
 from placementos.models.communications import DispatchBatch
 from placementos.models.eligibility import EvaluationRun
@@ -31,10 +30,10 @@ from placementos.services.communications import (
 from placementos.services.eligibility_engine import canonical_hash
 from placementos.services.eligibility_runs import EligibilityRunService
 from placementos.services.jd_intelligence import (
-    DeterministicFixtureJDInterpreter,
     compile_policy,
     validate_evidence,
 )
+from placementos.services.models import get_model_interpreter
 from placementos.services.session import AuthContext
 from placementos.services.source_jobs import SourceJobService
 
@@ -156,9 +155,7 @@ async def ensure_interpretation(
     ).scalar_one_or_none()
     if existing:
         return existing
-    if settings.MODEL_INTERPRETER_MODE != "fixture" or settings.ENVIRONMENT == "production":
-        raise ConflictException("Workflow interpretation requires attributed manual entry")
-    adapter = DeterministicFixtureJDInterpreter()
+    adapter = get_model_interpreter()
     draft = adapter.interpret(extraction)
     validate_evidence(extraction, draft.evidence)
     next_revision = (

@@ -86,7 +86,10 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P11 | Local connector implementation complete; isolated live-account acceptance blocked on explicit credentials/authorization | FR-INT-03 through FR-INT-09 | Controlled Google connectors with local contract evidence; live acceptance pending. |
 | P12 | Completed locally; deterministic fixture/manual planner and synthetic provider evidence only | FR-EXC-04 through FR-EXC-07 | Approved recovery plans for changing information. |
 | P13 | Complete locally; synthetic evidence | Measured expansion | Reliable operation at demonstrated additional demand. |
-| P-UI | Not started; `screens.md` and `DESIGN.md` inputs prepared for Stitch | Production UI replacement | Stitch-generated, production-quality coordinator and student interfaces replacing the demo-only frontend. |
+| P-UI | Completed; 16 active Stitch screens generated and wired to API client | Production UI replacement | Stitch-generated, production-quality coordinator and student interfaces replacing demo-only frontend. |
+| P14 | Completed; AI governance, model selection (gemini-2.5-flash-lite), privacy boundaries | NFR-AI-GOV, INV-10 | Fail-closed governance, model benchmark, zero-student-data boundary, and token budgeting. |
+| P15 | Completed; Model gateway, Pydantic structured output, and zero-token cache | FR-AI-JD, INV-01, INV-03 | Native structured output adapter, paragraph locators, zero-token replay cache, verified live call. |
+| P16 | Ready; Real JD interpretation in coordinator workflow | FR-AI-JD, FR-POL | Live extraction and provenance review in Coordinator Intake/Review workspace. |
 
 Do not assign calendar dates before the developer's capacity and providers are known. Estimate each phase after its dependencies work. A sequence of verified milestones is more useful than unsupported delivery promises.
 
@@ -604,7 +607,60 @@ P-UI is frontend-only and does not block AI provider integration work (P14+). Bo
 
 ---
 
-## 18. Cross-cutting work tracks
+## 19. P14: AI governance, model selection, and privacy boundaries
+
+**Objective:** Define and enforce governance, data privacy, model selection, rate/cost boundaries, acceptance datasets, and fail-closed circuits for LLM integration. **Dependencies:** P-UI / P13 and user-provided provider credentials. **Requirements:** NFR-AI-GOV, INV-01, INV-03, INV-04, INV-07, INV-10, INV-11.
+
+- [x] **P14-T01: Select and benchmark model provider.** Evaluated Google Gemini (`gemini-2.5-flash-lite` selected over larger variants for fast latency [4.2s], low quota usage, high availability on free tier). Configured via `langchain-google-genai` and `google-genai`. Evidence: `docs/p14-ai-governance-verification.md`.
+- [x] **P14-T02: Define strict data classification and privacy boundary (INV-10).** Only sanitized/anonymized JD text is sent to the external model. Student records, PII, grades, resumes, and server secrets are strictly prohibited from prompts. Evidence: `docs/p14-ai-governance-verification.md` §2.
+- [x] **P14-T03: Configure provider retention and operational roles.** Fails closed to manual coordinator entry on provider errors. Roles assigned for AI Service Owner, Privacy Officer, and Cost Administrator. Evidence: `docs/p14-ai-governance-verification.md` §3-4.
+- [x] **P14-T04: Establish client-side token budgets and daily ceilings.** Hard ceilings configured: `MODEL_MAX_INPUT_TOKENS_PER_DRIVE=4000`, `MODEL_MAX_CALLS_PER_DRIVE=3`, `MODEL_DAILY_REQUEST_CAP=50`. Enforced via `TokenBudgetExceededError`. Evidence: `backend/src/placementos/core/config.py` and `backend/tests/unit/test_model_gateway.py`.
+- [x] **P14-T05: Model authority freeze and invariants.** Invariant `INV-01` (eligibility is purely deterministic, never set by model), `INV-04` (human coordinator authorization required), `INV-07` (zero tool access for model; no external side effects), `INV-11` (explicit deadline semantics; date-only deadlines flag blocking clarifications). Evidence: `docs/p14-ai-governance-verification.md` §7.
+- [x] **P14-T06: Phase completion verification and documentation.** Published governance report and validated rate limiting and security settings. Evidence: `docs/p14-ai-governance-verification.md`.
+
+### P14 Completion Record
+
+```text
+Task/phase: P14 (AI governance, model selection, and privacy boundaries)
+Behavior delivered: Evaluated Google Gemini models; selected gemini-2.5-flash-lite for free-tier resilience and low latency; established strict zero-student-data boundary (INV-10); configured client-side rate/token budgeting (4,000 tokens/drive, 3 calls/drive, 50 calls/day); enforced fail-closed manual fallback on provider errors; froze model authority (proposal-only candidate facts, pure deterministic eligibility engine, zero tool access).
+Requirements covered: NFR-AI-GOV, INV-01, INV-03, INV-04, INV-07, INV-10, INV-11.
+Files/change reference: docs/p14-ai-governance-verification.md, backend/src/placementos/core/config.py, .env.
+Verification commands and results: Validated config settings and production validators with pytest backend/tests/unit/test_config.py and test_model_gateway.py.
+Demonstrated scenario: System enforces rate ceilings and blocks unreviewed model fixtures in production mode.
+Remaining limits: Google AI Studio free-tier requires non-confidential development data; production requires Vertex AI with zero data retention.
+Next dependency-ready task: P15 (Model gateway and secrets).
+```
+
+---
+
+## 20. P15: Model gateway, structured output schemas, and zero-token cache
+
+**Objective:** Implement the LangChain model gateway, strict Pydantic schemas, paragraph-indexed locators (`[§p]`), rate limiting tracking, and offline response recording/cache. **Dependencies:** P14. **Requirements:** FR-AI-JD, INV-01, INV-03, INV-11.
+
+- [x] **P15-T01: Define strict Pydantic extraction schemas.** Implemented `JDExtractionResult`, `CompensationDetails`, `EligibilityDraft`, `ExtractedCitation`, and `ClarificationFinding` in `backend/src/placementos/services/models/schemas.py`.
+- [x] **P15-T02: Implement model gateway protocol and usage tracker.** Built `ModelGateway` protocol, `TokenBudgetExceededError`, and `GLOBAL_USAGE_TRACKER` in `backend/src/placementos/services/models/gateway.py` with thread-safe per-drive and daily quota enforcement.
+- [x] **P15-T03: Implement Gemini structured output adapter.** Built `GeminiModelInterpreter` in `backend/src/placementos/services/models/gemini_adapter.py` using `ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite")` with `.with_structured_output(JDExtractionResult)`. Added paragraph locator mapping, `validate_evidence` checks (`INV-03`), and deadline ambiguity detection (`DEADLINE_TIMEZONE_MISSING`, `INV-11`).
+- [x] **P15-T04: Implement zero-token cache adapter.** Built `CachedModelInterpreter` in `backend/src/placementos/services/models/cached_adapter.py` for offline replay from `recordings/` directory with automatic fallback to deterministic fixture. Guarantees 0 external tokens consumed during routine testing.
+- [x] **P15-T05: Wire model gateway into API and domain services.** Wired `get_model_interpreter()` factory into `backend/src/placementos/api/v1/intelligence.py` and `backend/src/placementos/services/workflow_domain.py`.
+- [x] **P15-T06: Execute live verification and record golden fixture.** Executed live API call against Google AI Studio in `scripts/verify_gemini_extraction.py`. Extracted all 8 structured fields, 14 provenance locators, and 1 deadline clarification in 4.2 seconds; recorded response to `recordings/sample_campus_jd.json`.
+- [x] **P15-T07: Phase completion testing and verification.** Unit regression suite passes with 69 tests in 2.82s, including 6 dedicated model gateway tests in `backend/tests/unit/test_model_gateway.py`. Zero token waste during test runs.
+
+### P15 Completion Record
+
+```text
+Task/phase: P15 (Model gateway, structured output schemas, and zero-token cache)
+Behavior delivered: LangChain model gateway with native structured output; strict Pydantic validation schemas; paragraph-indexed provenance citations ([§p]); automatic date-only deadline clarification flagging; thread-safe rate and token budgeting; offline recording cache for zero-token regression testing; live verification against Google Gemini 2.5 Flash Lite.
+Requirements covered: FR-AI-JD, INV-01, INV-03, INV-11.
+Files/change reference: backend/src/placementos/services/models/, backend/src/placementos/api/v1/intelligence.py, backend/src/placementos/services/workflow_domain.py, scripts/verify_gemini_extraction.py, backend/tests/unit/test_model_gateway.py.
+Verification commands and results: uv run --project backend pytest backend/tests/unit/test_model_gateway.py (6 passed in 0.32s); uv run --project backend pytest backend/tests/unit (69 passed in 2.82s); live verification in scripts/verify_gemini_extraction.py (200 OK in 4,266 ms).
+Demonstrated scenario: Live JD text extracted into structured company, role, branches, CGPA, backlogs, compensation, and deadline facts with 14 exact text citations, followed by 0-token replay from cache.
+Remaining limits: Model operates in proposal mode; coordinator must review candidate facts and compile policy.
+Next dependency-ready task: P16 (Real JD interpretation in coordinator workspace).
+```
+
+---
+
+## 21. Cross-cutting work tracks
 
 | Track | Start | Ongoing obligation | Consolidated proof |
 | --- | --- | --- | --- |
@@ -618,7 +674,7 @@ P-UI is frontend-only and does not block AI provider integration work (P14+). Bo
 | Operational documentation | P01 | Add a runbook when a recoverable failure mode appears. | P10 operator walkthrough. |
 | UI design fidelity | P-UI | Generated components wire to typed API client, handle all states, pass accessibility review. | P-UI-T22 through P-UI-T25. |
 
-## 19. Critical scenario matrix
+## 22. Critical scenario matrix
 
 | Scenario | Expected outcome | Primary phase evidence |
 | --- | --- | --- |
@@ -642,7 +698,7 @@ P-UI is frontend-only and does not block AI provider integration work (P14+). Bo
 | Cross-institution/student guessed ID | No record/file/export disclosure. | P02 onward/P10 |
 | Restore from backup after a deletion | Reapply deletion/tombstones and reconcile work before exposure. | P10 |
 
-## 20. Change and handoff discipline
+## 23. Change and handoff discipline
 
 Before a schema/API/status change, identify affected requirement IDs, stored revisions, API clients, workflow state, audit/reporting, and migration/rollback implications. Update the canonical references in the same change where practical. Preserve historical interpretation of approved versions; do not rewrite old evidence to fit new semantics.
 

@@ -68,13 +68,16 @@ class Settings(BaseSettings):
     S3_REGION: str = "us-east-1"
     S3_SECURE: bool = False
     MALWARE_SCANNER_MODE: Literal["development_fixture", "clamav"] = "development_fixture"
-    MODEL_INTERPRETER_MODE: Literal["fixture", "disabled"] = "fixture"
-    MODEL_PROVIDER_NAME: str = ""
-    MODEL_ID: str = ""
-    MODEL_DATA_REGION: str = ""
+    MODEL_INTERPRETER_MODE: Literal["fixture", "disabled", "provider", "cached"] = "fixture"
+    MODEL_PROVIDER_NAME: str = "gemini"
+    MODEL_ID: str = "gemini-2.5-flash-lite"
+    MODEL_DATA_REGION: str = "us-central1"
     MODEL_POLICY_REVIEWED: bool = False
-    MODEL_MAX_CALLS_PER_DRIVE: int = 10
-    MODEL_MAX_INPUT_TOKENS_PER_DRIVE: int = 100_000
+    MODEL_MAX_CALLS_PER_DRIVE: int = 3
+    MODEL_MAX_INPUT_TOKENS_PER_DRIVE: int = 4_000
+    GEMINI_API_KEY: str = ""
+    MODEL_TIMEOUT_SECONDS: int = 30
+    MODEL_DAILY_REQUEST_CAP: int = 50
     EXCEPTION_PLANNER_MODE: Literal["fixture", "disabled"] = "fixture"
     MAX_UPLOAD_BYTES: int = 15 * 1024 * 1024
     MAX_PDF_PAGES: int = 50
@@ -145,8 +148,8 @@ class Settings(BaseSettings):
     @classmethod
     def validate_model_mode(cls, v: str, info) -> str:
         environment = info.data.get("ENVIRONMENT", "development")
-        if environment == "production" and v == "fixture":
-            raise ValueError("Production cannot use the deterministic model fixture")
+        if environment == "production" and v in {"fixture", "cached"}:
+            raise ValueError("Production cannot use the deterministic model fixture or response cache")
         return v
 
     @field_validator("EMAIL_ADAPTER_MODE")
