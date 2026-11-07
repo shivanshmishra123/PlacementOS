@@ -21,7 +21,7 @@ class EvidenceLocator(BaseModel):
 
 class InterpretationCreate(BaseModel):
     source_artifact_id: uuid.UUID
-    mode: Literal["fixture", "manual"] = "fixture"
+    mode: Literal["fixture", "manual", "provider", "cached"] = "provider"
     manual_facts: dict[str, Any] | None = None
     manual_evidence: list[EvidenceLocator] = Field(default_factory=list)
     rationale: str | None = Field(default=None, min_length=3, max_length=1000)

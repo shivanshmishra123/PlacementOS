@@ -306,6 +306,7 @@ async def create_interpretation(
     )
     for old in previous:
         old.status = "superseded"
+        await _stale_policy_work(session, old.id)
 
     item = JDInterpretationRevision(
         institution_id=auth.institution_id,
@@ -317,7 +318,7 @@ async def create_interpretation(
         status="review_ready",
         mode=payload.mode,
         adapter_id=adapter_id,
-        model_id=None,
+        model_id=usage.get("model"),
         prompt_version=prompt_version,
         source_hash=artifact.hash_sha256,
         candidate_facts=facts,
@@ -336,9 +337,9 @@ async def create_interpretation(
                 drive_id=drive_id,
                 interpretation_id=item.id,
                 field_path=spec["field_path"],
-                question=spec["question"],
+                question=spec.get("question") or spec.get("detail") or f"Confirm {spec['field_path']}",
                 reason_code=spec["reason_code"],
-                blocking=spec["blocking"],
+                blocking=spec.get("blocking", True),
                 status="open",
             )
         )

@@ -268,9 +268,14 @@ export default function DriveReviewPage() {
                   </h2>
                 </div>
                 {current && (
-                  <span className="bg-mint-wash text-canopy-green px-2.5 py-0.5 rounded-full font-body text-xs font-bold">
-                    Rev #{current.revision_number}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="bg-sky-wash text-deep-teal px-2 py-0.5 rounded-full font-body text-[11px] font-semibold">
+                      {String(current.usage_metadata?.model || current.adapter_id || "AI Model")}
+                    </span>
+                    <span className="bg-mint-wash text-canopy-green px-2.5 py-0.5 rounded-full font-body text-xs font-bold">
+                      Rev #{current.revision_number}
+                    </span>
+                  </div>
                 )}
               </div>
 

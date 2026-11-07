@@ -89,7 +89,8 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P-UI | Completed; 16 active Stitch screens generated and wired to API client | Production UI replacement | Stitch-generated, production-quality coordinator and student interfaces replacing demo-only frontend. |
 | P14 | Completed; AI governance, model selection (gemini-2.5-flash-lite), privacy boundaries | NFR-AI-GOV, INV-10 | Fail-closed governance, model benchmark, zero-student-data boundary, and token budgeting. |
 | P15 | Completed; Model gateway, Pydantic structured output, and zero-token cache | FR-AI-JD, INV-01, INV-03 | Native structured output adapter, paragraph locators, zero-token replay cache, verified live call. |
-| P16 | Ready; Real JD interpretation in coordinator workflow | FR-AI-JD, FR-POL | Live extraction and provenance review in Coordinator Intake/Review workspace. |
+| P16 | Completed; Real AI-backed JD interpretation in coordinator workflow | FR-AI-JD, FR-POL | Grounded candidate facts, prompt injection mitigation, citation locators, proposal invalidation on revision, coordinator review UI. |
+| P17 | Ready; LangGraph production workflow migration | FR-WF, INV-08 | Durable workflow checkpoints, human interrupt nodes, restart recovery. |
 
 Do not assign calendar dates before the developer's capacity and providers are known. Estimate each phase after its dependencies work. A sequence of verified milestones is more useful than unsupported delivery promises.
 
@@ -660,7 +661,36 @@ Next dependency-ready task: P16 (Real JD interpretation in coordinator workspace
 
 ---
 
-## 21. Cross-cutting work tracks
+## 21. P16: Real AI-backed JD interpretation
+
+**Objective:** Replace regex-only interpretation with grounded, reviewable model suggestions while preserving source evidence, prompt injection resistance, and deterministic policy compilation. **Dependencies:** P15. **Requirements:** FR-AI-JD, FR-POL, INV-01, INV-02, INV-03, INV-05, INV-07, INV-11.
+
+- [x] **P16-T01: Enforce strict candidate schemas and field typing.** Defined `JDExtractionResult`, `CompensationDetails`, `EligibilityDraft`, and `ExtractedCitation` with nullable unknowns, decimal CGPA constraints, and typed enum fields. Evidence: `backend/src/placementos/services/models/schemas.py`.
+- [x] **P16-T02: Bind prompts to immutable SHA-256 version hashes.** Prompt version formatted as `jd-intelligence-gemini-v1:<hash>` and bound to stored interpretation records and metadata. Evidence: `backend/src/placementos/services/models/gemini_adapter.py`.
+- [x] **P16-T03: Isolate untrusted source text and mitigate prompt injection.** Wrapped JD document body inside `<untrusted_document_content>` tags; detected untrusted instruction patterns and recorded non-fatal `UNTRUSTED_INSTRUCTION_IGNORED` findings in metadata (`INV-07`). Evidence: `backend/tests/unit/test_model_gateway.py`.
+- [x] **P16-T04: Verifiable citation matching and fallback.** Located exact character offsets (`char_offset_start`, `char_offset_end`) and paragraph indices (`[§p]`); resilient fallback anchors excerpts to valid source text, guaranteeing compliance with `validate_evidence` (`INV-03`). Evidence: `GeminiModelInterpreter._find_evidence_span`.
+- [x] **P16-T05: Conservative deadline and criteria clarification.** Date-only deadlines without explicit cutoffs automatically trigger blocking `DEADLINE_TIMEZONE_MISSING` clarification tasks (`INV-11`). Evidence: `GeminiModelInterpreter.interpret`.
+- [x] **P16-T06: Preserve manual interpretation fallback.** Manual entry with attributed rationale remains fully supported when models are offline or disabled. Evidence: `InterpretationCreate.mode="manual"` in `backend/src/placementos/api/v1/intelligence.py`.
+- [x] **P16-T07: Coordinator Review UI with AI model provenance.** Delivered 3-column review workspace in `/coordinator/drives/[id]/review` displaying AI model badge, revision count, criteria breakdown, inline clarification resolutions, and clickable provenance citations. Evidence: `apps/web/src/app/coordinator/drives/[id]/review/page.tsx`.
+- [x] **P16-T08: Invalidate dependent proposals on interpretation revision (INV-05).** Superseding an interpretation revision marks dependent draft policies as superseded and pending ActionProposals as `stale`. Evidence: `_stale_policy_work` in `create_interpretation`.
+- [x] **P16-T09: Phase completion testing and verification.** 72 unit tests passing in 1.30s (`pytest backend/tests/unit`); prompt injection resistance, citation fallback, and stale proposal invalidation verified. Zero token waste during test runs.
+
+### P16 Completion Record
+
+```text
+Task/phase: P16 (Real AI-backed JD interpretation in coordinator workspace)
+Behavior delivered: Grounded, reviewable candidate fact suggestions from Google Gemini 2.5 Flash Lite; strict Pydantic candidate schemas with nullable unknowns; prompt versioning with SHA-256 hash binding; prompt injection mitigation with <untrusted_document_content> isolation and UNTRUSTED_INSTRUCTION_IGNORED findings; resilient paragraph-level citation matching (INV-03); automatic date-only deadline clarification generation (INV-11); stale proposal invalidation on revision (INV-05); AI model provenance badge in Coordinator Review workspace.
+Requirements covered: FR-AI-JD, FR-POL, INV-01, INV-02, INV-03, INV-05, INV-07, INV-11.
+Files/change reference: backend/src/placementos/services/models/gemini_adapter.py, backend/src/placementos/api/v1/intelligence.py, backend/src/placementos/services/workflow_domain.py, backend/tests/unit/test_model_gateway.py, apps/web/src/app/coordinator/drives/[id]/review/page.tsx.
+Verification commands and results: uv run --project backend pytest backend/tests/unit (72 passed in 1.30s); pnpm typecheck (0 errors); pnpm lint (0 errors).
+Demonstrated scenario: Candidate recruitment facts extracted with verifiable citations; date-only deadlines flag blocking clarifications; prompt injections are safely ignored; superseded revisions invalidate pending proposals.
+Remaining limits: Coordinator must resolve blocking clarifications and approve compiled policy proposal before eligibility evaluation.
+Next dependency-ready task: P17 (LangGraph production workflow migration).
+```
+
+---
+
+## 22. Cross-cutting work tracks
 
 | Track | Start | Ongoing obligation | Consolidated proof |
 | --- | --- | --- | --- |
@@ -674,7 +704,7 @@ Next dependency-ready task: P16 (Real JD interpretation in coordinator workspace
 | Operational documentation | P01 | Add a runbook when a recoverable failure mode appears. | P10 operator walkthrough. |
 | UI design fidelity | P-UI | Generated components wire to typed API client, handle all states, pass accessibility review. | P-UI-T22 through P-UI-T25. |
 
-## 22. Critical scenario matrix
+## 23. Critical scenario matrix
 
 | Scenario | Expected outcome | Primary phase evidence |
 | --- | --- | --- |
@@ -698,7 +728,7 @@ Next dependency-ready task: P16 (Real JD interpretation in coordinator workspace
 | Cross-institution/student guessed ID | No record/file/export disclosure. | P02 onward/P10 |
 | Restore from backup after a deletion | Reapply deletion/tombstones and reconcile work before exposure. | P10 |
 
-## 23. Change and handoff discipline
+## 24. Change and handoff discipline
 
 Before a schema/API/status change, identify affected requirement IDs, stored revisions, API clients, workflow state, audit/reporting, and migration/rollback implications. Update the canonical references in the same change where practical. Preserve historical interpretation of approved versions; do not rewrite old evidence to fit new semantics.
 

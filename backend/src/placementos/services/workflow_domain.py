@@ -177,9 +177,9 @@ async def ensure_interpretation(
         revision_number=next_revision,
         schema_version=1,
         status="review_ready",
-        mode="fixture",
+        mode=draft.usage.get("provider", "fixture"),
         adapter_id=adapter.adapter_id,
-        model_id=None,
+        model_id=draft.usage.get("model"),
         prompt_version=adapter.prompt_version,
         source_hash=artifact.hash_sha256,
         candidate_facts=draft.facts,
@@ -198,9 +198,9 @@ async def ensure_interpretation(
                 drive_id=run.drive_id,
                 interpretation_id=item.id,
                 field_path=spec["field_path"],
-                question=spec["question"],
+                question=spec.get("question") or spec.get("detail") or f"Confirm {spec['field_path']}",
                 reason_code=spec["reason_code"],
-                blocking=spec["blocking"],
+                blocking=spec.get("blocking", True),
                 status="open",
             )
         )
