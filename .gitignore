@@ -46,3 +46,6 @@ celerybeat.pid
 # Logs
 logs/
 *.log
+
+backend/celerybeat-schedule*
+celerybeat-schedule*

@@ -27,6 +27,7 @@ os.environ.setdefault("PLACEMENTOS_ENVIRONMENT", "development")
 
 def build_synthetic_extraction() -> object:
     """Build a minimal synthetic TextExtraction-like fixture for shadow eval."""
+    import uuid
     from placementos.models.storage import TextExtraction
 
     jd_text = (
@@ -44,13 +45,11 @@ def build_synthetic_extraction() -> object:
     )
 
     return TextExtraction(
-        id=None,
-        source_artifact_id="shadow-eval-fixture-001",
-        drive_id=None,
+        source_artifact_id=uuid.uuid4(),
+        institution_id=uuid.uuid4(),
         extracted_text=jd_text,
         extraction_method="pdf_text_layer",
-        extractor_version="pdfminer-v1",
-        source_hash="shadow_fixture_hash",
+        text_hash_sha256="shadow_fixture_hash",
         parser_version="1.0.0",
         locators=[
             {"locator_type": "paragraph", "paragraph_index": 0, "char_offset_start": 0, "char_offset_end": 40, "page_number": 1},
@@ -164,3 +163,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
