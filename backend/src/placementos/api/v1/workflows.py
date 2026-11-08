@@ -110,6 +110,27 @@ async def list_workflow_runs(
     return [_run_response(item) for item in runs]
 
 
+@router.get("/workflow-runs", response_model=list[WorkflowRunResponse])
+async def list_institution_workflow_runs(
+    status: str | None = Query(default=None),
+    drive_id: uuid.UUID | None = Query(default=None),
+    auth: AuthContext = Depends(get_current_auth),
+    session: AsyncSession = Depends(get_db),
+) -> list[WorkflowRunResponse]:
+    auth.require_coordinator()
+    query = select(WorkflowRun).where(WorkflowRun.institution_id == auth.institution_id)
+    if status:
+        query = query.where(WorkflowRun.status == status)
+    if drive_id:
+        query = query.where(WorkflowRun.drive_id == drive_id)
+    runs = (
+        (await session.execute(query.order_by(WorkflowRun.created_at.desc()).limit(100)))
+        .scalars()
+        .all()
+    )
+    return [_run_response(item) for item in runs]
+
+
 @router.get("/workflow-runs/{workflow_run_id}", response_model=WorkflowRunResponse)
 async def get_workflow_run(
     workflow_run_id: uuid.UUID,

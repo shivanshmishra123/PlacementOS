@@ -158,51 +158,73 @@ async def intake_node(state: WorkflowState) -> WorkflowState:
             }
         else:
             assert artifact is not None and extraction is not None
-            interpretation = await ensure_interpretation(session, run, artifact, extraction)
-            clarification = (
-                await session.execute(
-                    select(ClarificationTask)
-                    .where(
-                        ClarificationTask.interpretation_id == interpretation.id,
-                        ClarificationTask.blocking.is_(True),
-                        ClarificationTask.status == "open",
-                    )
-                    .order_by(ClarificationTask.created_at)
-                    .limit(1)
-                )
-            ).scalar_one_or_none()
-            references = {
-                "source_artifact_id": str(artifact.id),
-                "extraction_id": str(extraction.id),
-                "interpretation_id": str(interpretation.id),
-            }
-            if clarification:
-                await _set_run(
+            try:
+                interpretation = await ensure_interpretation(session, run, artifact, extraction)
+            except Exception as exc:
+                case = await ensure_case(
                     session,
                     run,
-                    status="waiting_clarification",
-                    step="intake",
-                    references=references,
-                    clarification_id=clarification.id,
+                    key_suffix=f"interpretation-failure:{artifact.id}",
+                    category="ai_model_failure",
+                    severity="high",
+                    resources=[{"type": "source_artifact", "id": str(artifact.id)}],
+                    evidence={"error": str(exc)[:500]},
+                    next_action="Retry AI fact extraction or enter facts manually.",
                 )
+                await _set_run(session, run, status="waiting_input", step="intake", case_id=case.id)
                 pause_payload = {
-                    "kind": "clarification",
-                    "clarification_id": str(clarification.id),
-                    "question": clarification.question,
+                    "kind": "exception_case",
+                    "case_id": str(case.id),
+                    "category": case.category,
+                    "next_action": case.proposed_next_action,
                 }
-            else:
-                await _set_run(session, run, status="running", step="policy", references=references)
-                result = _mark_command(
-                    {
-                        "source_artifact_id": references["source_artifact_id"],
-                        "extraction_id": references["extraction_id"],
-                        "interpretation_id": references["interpretation_id"],
-                        "current_step": "policy",
-                        "pending_case_id": None,
-                        "pending_clarification_id": None,
-                    },
-                    state,
-                )
+                interpretation = None
+
+            if interpretation:
+                clarification = (
+                    await session.execute(
+                        select(ClarificationTask)
+                        .where(
+                            ClarificationTask.interpretation_id == interpretation.id,
+                            ClarificationTask.blocking.is_(True),
+                            ClarificationTask.status == "open",
+                        )
+                        .order_by(ClarificationTask.created_at)
+                        .limit(1)
+                    )
+                ).scalar_one_or_none()
+                references = {
+                    "source_artifact_id": str(artifact.id),
+                    "extraction_id": str(extraction.id),
+                    "interpretation_id": str(interpretation.id),
+                }
+                if clarification:
+                    await _set_run(
+                        session,
+                        run,
+                        status="waiting_clarification",
+                        step="intake",
+                        references=references,
+                        clarification_id=clarification.id,
+                    )
+                    pause_payload = {
+                        "kind": "clarification",
+                        "clarification_id": str(clarification.id),
+                        "question": clarification.question,
+                    }
+                else:
+                    await _set_run(session, run, status="running", step="policy", references=references)
+                    result = _mark_command(
+                        {
+                            "source_artifact_id": references["source_artifact_id"],
+                            "extraction_id": references["extraction_id"],
+                            "interpretation_id": references["interpretation_id"],
+                            "current_step": "policy",
+                            "pending_case_id": None,
+                            "pending_clarification_id": None,
+                        },
+                        state,
+                    )
     if pause_payload:
         interrupt(pause_payload)
     return result

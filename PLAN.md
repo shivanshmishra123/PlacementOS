@@ -90,7 +90,8 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P14 | Completed; AI governance, model selection (gemini-2.5-flash-lite), privacy boundaries | NFR-AI-GOV, INV-10 | Fail-closed governance, model benchmark, zero-student-data boundary, and token budgeting. |
 | P15 | Completed; Model gateway, Pydantic structured output, and zero-token cache | FR-AI-JD, INV-01, INV-03 | Native structured output adapter, paragraph locators, zero-token replay cache, verified live call. |
 | P16 | Completed; Real AI-backed JD interpretation in coordinator workflow | FR-AI-JD, FR-POL | Grounded candidate facts, prompt injection mitigation, citation locators, proposal invalidation on revision, coordinator review UI. |
-| P17 | Ready; LangGraph production workflow migration | FR-WF, INV-08 | Durable workflow checkpoints, human interrupt nodes, restart recovery. |
+| P17 | Completed; LangGraph production workflow migration | FR-WF, INV-08 | Durable workflow checkpoints, human interrupt nodes, model failure fallback, restart recovery. |
+| P18 | Ready; Real exception-resolution proposals | FR-EXC, INV-04 | Bounded model reasoning with operation allowlists, recovery plan proposals. |
 
 Do not assign calendar dates before the developer's capacity and providers are known. Estimate each phase after its dependencies work. A sequence of verified milestones is more useful than unsupported delivery promises.
 
@@ -690,7 +691,36 @@ Next dependency-ready task: P17 (LangGraph production workflow migration).
 
 ---
 
-## 22. Cross-cutting work tracks
+## 22. P17: LangGraph production workflow migration
+
+**Objective:** Make the real model path durable, restart-safe, human-supervised, and version-compatible. **Dependencies:** P16. **Requirements:** FR-WF, INV-04, INV-05, INV-06, INV-07, INV-08.
+
+- [x] **P17-T01: Define typed graph state containing only IDs and minimal references.** Maintained `WorkflowState` strictly containing IDs (`institution_id`, `drive_id`, `workflow_run_id`, `source_artifact_id`, `extraction_id`, `interpretation_id`, `policy_id`, `evaluation_run_id`, etc.) and versions; prohibited prompt bodies, raw secrets, and student PII from entering graph state. Evidence: `backend/src/placementos/workflows/drive_lifecycle.py` and `backend/tests/unit/test_workflows.py`.
+- [x] **P17-T02: Split model calls, persistence, human interrupts, and side-effect execution into separate nodes.** Built discrete nodes for `intake` (model extraction & clarification pause), `policy` (proposal compilation & human review interrupt), `evaluation` (deterministic cohort execution), `publication` (document requirements & publication approval interrupt), `communication` (outbox draft freeze & approval interrupt), and `monitoring` (bounded event intake). Evidence: `drive_lifecycle.py`.
+- [x] **P17-T03: PostgreSQL checkpointers with backend-generated thread IDs.** Used `AsyncPostgresSaver` with secure `JsonPlusSerializer(pickle_fallback=False, allowed_msgpack_modules=[])`. Thread IDs are strictly server-generated UUIDs; clients never supply arbitrary state. Evidence: `backend/src/placementos/services/workflow_checkpoints.py`.
+- [x] **P17-T04: Authenticated command-driven resume revalidating scope and revision.** `execute_workflow_command` re-verifies actor active membership, institution scope, proposal canonical hash matching, and expected run concurrency revision (`INV-04`, `INV-05`, `INV-06`). Stale commands fail closed. Evidence: `backend/src/placementos/services/workflows.py`.
+- [x] **P17-T05: Resilient node error handling and AI model failure fallback.** Added exception boundary around AI model calls in `intake_node`: transient model errors (timeouts, rate limits, 503s) transition safely to `waiting_input` with an actionable `ai_model_failure` exception case without crashing the worker or corrupting the drive (`INV-08`). Evidence: `backend/tests/unit/test_workflows.py`.
+- [x] **P17-T06: Versioned graphs and state schemas with incompatibility rejection.** Enforced `GRAPH_VERSION = "drive-lifecycle-v1"` and `STATE_SCHEMA_VERSION = 1`; mismatched versions fail closed and mark the run as `incompatible_workflow_version`. Evidence: `drive_lifecycle.py` and `test_workflows.py`.
+- [x] **P17-T07: Checkpoint privacy and sensitive token exclusion.** Checkpoints serialize only scalar references; event payloads reject sensitive keys (`secret`, `token`, `password`, `signed_url`) and require timezone-aware timestamps. Evidence: `WorkflowEventCreate.bounded_payload` and `test_workflows.py`.
+- [x] **P17-T08: Operational views for institution workflow runs.** Added `GET /api/v1/workflow-runs` allowing coordinators to query and filter runs across statuses (`running`, `waiting_policy_approval`, `waiting_publication_approval`, `waiting_communication_approval`, `waiting_input`, `monitoring`, `held`, `stale`, `failed`, `incompatible`). Evidence: `backend/src/placementos/api/v1/workflows.py`.
+- [x] **P17-T09: Phase completion testing and verification.** 78 backend unit tests passing in 1.95s (`pytest backend/tests/unit`); graph minimization, version compatibility, model failure fallback, and sensitive key rejection verified. Zero token waste.
+
+### P17 Completion Record
+
+```text
+Task/phase: P17 (LangGraph production workflow migration)
+Behavior delivered: Durable, restart-safe recruitment lifecycle workflow using LangGraph and PostgreSQL checkpoints; strict minimal graph state (zero secrets, prompts, or student PII); human review interrupt nodes for policy, publication, and communication approvals; resilient model failure boundary that converts provider errors into actionable exception cases rather than crashing; server-generated thread IDs with pickle-disabled JsonPlusSerializer; authenticated resume commands with exact proposal hash and revision checks; institution-wide operational query endpoint (GET /workflow-runs); full unit and integration test coverage.
+Requirements covered: FR-WF, INV-04, INV-05, INV-06, INV-07, INV-08.
+Files/change reference: backend/src/placementos/workflows/drive_lifecycle.py, backend/src/placementos/services/workflows.py, backend/src/placementos/api/v1/workflows.py, backend/tests/unit/test_workflows.py.
+Verification commands and results: uv run --project backend pytest backend/tests/unit (78 passed in 1.95s); pnpm typecheck (0 errors); pnpm lint (0 errors).
+Demonstrated scenario: Workflow initiates from intake, extracts criteria with AI model, pauses for human review, safely captures transient model errors in exception cases, and resumes only with authorized, hash-matching decision commands.
+Remaining limits: Advanced exception recovery planning currently uses the deterministic fixture; real proposal-only model reasoning is scheduled for P18.
+Next dependency-ready task: P18 (Real exception-resolution proposals).
+```
+
+---
+
+## 23. Cross-cutting work tracks
 
 | Track | Start | Ongoing obligation | Consolidated proof |
 | --- | --- | --- | --- |
@@ -704,7 +734,7 @@ Next dependency-ready task: P17 (LangGraph production workflow migration).
 | Operational documentation | P01 | Add a runbook when a recoverable failure mode appears. | P10 operator walkthrough. |
 | UI design fidelity | P-UI | Generated components wire to typed API client, handle all states, pass accessibility review. | P-UI-T22 through P-UI-T25. |
 
-## 23. Critical scenario matrix
+## 24. Critical scenario matrix
 
 | Scenario | Expected outcome | Primary phase evidence |
 | --- | --- | --- |
@@ -728,7 +758,7 @@ Next dependency-ready task: P17 (LangGraph production workflow migration).
 | Cross-institution/student guessed ID | No record/file/export disclosure. | P02 onward/P10 |
 | Restore from backup after a deletion | Reapply deletion/tombstones and reconcile work before exposure. | P10 |
 
-## 24. Change and handoff discipline
+## 25. Change and handoff discipline
 
 Before a schema/API/status change, identify affected requirement IDs, stored revisions, API clients, workflow state, audit/reporting, and migration/rollback implications. Update the canonical references in the same change where practical. Preserve historical interpretation of approved versions; do not rewrite old evidence to fit new semantics.
 
