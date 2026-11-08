@@ -13,6 +13,11 @@ interface AuthContextType {
   personas: PersonaInfo[];
   loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
+  isStudent: boolean;
+  isCoordinator: boolean;
+  isAdmin: boolean;
+  login: (email: string, password?: string, institutionSlug?: string) => Promise<UserProfileResponse>;
   loginAsPersona: (personaKey: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -54,6 +59,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.warn("Could not fetch personas:", err);
     }
   }, [client]);
+
+  const login = useCallback(
+    async (email: string, password?: string, institutionSlug?: string): Promise<UserProfileResponse> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const resp = await client.login({
+          email,
+          password: password || undefined,
+          institution_slug: institutionSlug || undefined,
+        });
+        setUser(resp.user);
+        return resp.user;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to sign in";
+        setError(msg);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [client]
+  );
 
   const loginAsPersona = useCallback(
     async (personaKey: string) => {
@@ -97,6 +125,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [refreshUser, loadPersonas]);
 
+  const isAuthenticated = !!user;
+  const isStudent = user?.role === "student";
+  const isCoordinator =
+    user?.role === "placement_coordinator" ||
+    user?.role === "coordinator" ||
+    user?.role === "institution_admin" ||
+    user?.role === "super_admin";
+  const isAdmin = user?.role === "institution_admin" || user?.role === "super_admin";
+
   return (
     <AuthContext.Provider
       value={{
@@ -105,6 +142,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         personas,
         loading,
         error,
+        isAuthenticated,
+        isStudent,
+        isCoordinator,
+        isAdmin,
+        login,
         loginAsPersona,
         logout,
         refreshUser,

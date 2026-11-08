@@ -51,6 +51,19 @@ export interface DevLoginResponse {
   session_token: string;
 }
 
+export interface LoginRequest {
+  email: string;
+  password?: string | null;
+  institution_slug?: string | null;
+}
+
+export interface LoginResponse {
+  message: string;
+  user: UserProfileResponse;
+  csrf_token: string;
+  session_token: string;
+}
+
 export interface PersonaInfo {
   key: string;
   name: string;

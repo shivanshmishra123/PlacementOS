@@ -114,3 +114,56 @@ async def test_untrusted_browser_origin_is_rejected(client: AsyncClient):
     )
     assert response.status_code == 403
     assert response.json()["error"]["code"] == "ORIGIN_REJECTED"
+
+
+@pytest.mark.asyncio
+async def test_standard_login_endpoint_coordinator(client: AsyncClient):
+    """Verify standard POST /auth/login resolves coordinator role and capabilities."""
+    client.cookies.clear()
+    resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "priya.sharma@apex.edu", "password": "password123"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["user"]["email"] == "priya.sharma@apex.edu"
+    assert data["user"]["role"] in {"placement_coordinator", "coordinator"}
+    assert data["user"]["institution_slug"] == "apex-tech"
+    assert "drive:create" in data["user"]["capabilities"]
+
+    # Verify session is established
+    me_resp = await client.get("/api/v1/auth/me")
+    assert me_resp.status_code == 200
+    assert me_resp.json()["email"] == "priya.sharma@apex.edu"
+
+
+@pytest.mark.asyncio
+async def test_standard_login_endpoint_student(client: AsyncClient):
+    """Verify standard POST /auth/login resolves student role and restricted capabilities."""
+    client.cookies.clear()
+    resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "student.a@apex.edu"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["user"]["email"] == "student.a@apex.edu"
+    assert data["user"]["role"] == "student"
+    assert data["user"]["institution_slug"] == "apex-tech"
+    assert "student:portal" in data["user"]["capabilities"]
+    assert "drive:create" not in data["user"]["capabilities"]
+
+    # Verify student /me endpoint resolves
+    me_resp = await client.get("/api/v1/auth/me")
+    assert me_resp.status_code == 200
+    assert me_resp.json()["role"] == "student"
+
+
+@pytest.mark.asyncio
+async def test_standard_login_invalid_email(client: AsyncClient):
+    """Verify login rejects invalid email addresses."""
+    resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "notanemail"},
+    )
+    assert resp.status_code == 400

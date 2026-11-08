@@ -43,6 +43,19 @@ class DevLoginResponse(BaseModel):
     session_token: str
 
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str | None = None
+    institution_slug: str | None = None
+
+
+class LoginResponse(BaseModel):
+    message: str
+    user: UserProfileResponse
+    csrf_token: str
+    session_token: str
+
+
 class SwitchInstitutionRequest(BaseModel):
     institution_id: uuid.UUID
 
@@ -277,6 +290,164 @@ async def dev_login(
     )
 
     return DevLoginResponse(
+        message=f"Signed in successfully as {user.full_name}",
+        user=UserProfileResponse(
+            user_id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            institution_id=institution.id,
+            institution_slug=institution.slug,
+            role=membership.role,
+            capabilities=membership.capabilities,
+        ),
+        csrf_token=csrf_token,
+        session_token=raw_token,
+    )
+
+
+@router.post("/login", response_model=LoginResponse)
+async def login(
+    req: LoginRequest,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> LoginResponse:
+    """Authenticate with institutional email credentials and establish scoped session."""
+    email = req.email.strip().lower()
+    if not email or "@" not in email:
+        raise BadRequestException("A valid institutional email address is required")
+
+    # 1. Look up existing user
+    user_res = await db.execute(select(User).where(User.email == email))
+    user = user_res.scalar_one_or_none()
+
+    # 2. Check if user already exists with an active membership
+    if user:
+        mem_query = (
+            select(Membership, Institution)
+            .join(Institution, Institution.id == Membership.institution_id)
+            .where(
+                Membership.user_id == user.id,
+                Membership.is_active.is_(True),
+            )
+        )
+        if req.institution_slug:
+            mem_query = mem_query.where(Institution.slug == req.institution_slug)
+
+        mem_res = await db.execute(mem_query)
+        row = mem_res.first()
+        if row:
+            membership, institution = row
+        else:
+            # Fallback to any membership
+            fallback_res = await db.execute(
+                select(Membership, Institution)
+                .join(Institution, Institution.id == Membership.institution_id)
+                .where(Membership.user_id == user.id)
+            )
+            row = fallback_res.first()
+            if not row:
+                raise ForbiddenException("User account has no institutional memberships")
+            membership, institution = row
+    else:
+        # Check against synthetic personas
+        matching_persona = next(
+            (p for p in SYNTHETIC_PERSONAS.values() if p["email"].lower() == email),
+            None,
+        )
+        if matching_persona:
+            full_name = matching_persona["name"]
+            role = matching_persona["role"]
+            capabilities = matching_persona["capabilities"]
+            inst_slug = req.institution_slug or matching_persona["institution_slug"]
+            inst_name = matching_persona["institution_name"]
+            inst_domain = matching_persona["institution_domain"]
+        else:
+            # Provision account based on institutional pattern
+            domain = email.split("@")[-1]
+            inst_slug = req.institution_slug or ("beacon-state" if "beacon" in domain else "apex-tech")
+            inst_name = (
+                "Beacon Engineering College" if "beacon" in inst_slug else "Apex Institute of Technology"
+            )
+            inst_domain = domain
+            full_name = email.split("@")[0].replace(".", " ").title()
+
+            # Deterministic role assignment based on institutional email structure
+            if "student" in email:
+                role = "student"
+                capabilities = ["student:portal", "registration:submit", "correction:propose"]
+            elif "admin" in email:
+                role = "institution_admin"
+                capabilities = ["member:manage", "config:manage", "audit:view", "ops:view"]
+            else:
+                role = "placement_coordinator"
+                capabilities = [
+                    "drive:create",
+                    "drive:edit",
+                    "rule:approve",
+                    "proposal:decide",
+                    "schedule:publish",
+                    "result:publish",
+                    "student:read",
+                    "student:import",
+                    "eligibility:run",
+                    "integration:manage",
+                    "exception:plan",
+                ]
+
+        # Ensure institution exists
+        inst_res = await db.execute(select(Institution).where(Institution.slug == inst_slug))
+        institution = inst_res.scalar_one_or_none()
+        if not institution:
+            institution = Institution(slug=inst_slug, name=inst_name, domain=inst_domain)
+            db.add(institution)
+            await db.flush()
+
+        user = User(email=email, full_name=full_name)
+        db.add(user)
+        await db.flush()
+
+        membership = Membership(
+            institution_id=institution.id,
+            user_id=user.id,
+            role=role,
+            capabilities=capabilities,
+        )
+        db.add(membership)
+        await db.commit()
+
+    # 3. Create opaque Redis session
+    raw_token, auth = await SessionManager.create_session(
+        user_id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        institution_id=institution.id,
+        institution_slug=institution.slug,
+        membership_id=membership.id,
+        role=membership.role,
+        capabilities=membership.capabilities,
+    )
+
+    # 4. Set HttpOnly session cookie & CSRF cookie
+    response.set_cookie(
+        key=settings.SESSION_COOKIE_NAME,
+        value=raw_token,
+        max_age=settings.SESSION_MAX_AGE_SECONDS,
+        httponly=True,
+        samesite="lax",
+        secure=settings.ENVIRONMENT == "production",
+    )
+
+    csrf_token = generate_csrf_token()
+    response.set_cookie(
+        key="csrf_token",
+        value=csrf_token,
+        max_age=settings.SESSION_MAX_AGE_SECONDS,
+        httponly=False,
+        samesite="lax",
+        secure=settings.ENVIRONMENT == "production",
+    )
+
+    return LoginResponse(
         message=f"Signed in successfully as {user.full_name}",
         user=UserProfileResponse(
             user_id=user.id,

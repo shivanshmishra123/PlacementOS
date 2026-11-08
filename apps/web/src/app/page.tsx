@@ -9,12 +9,24 @@ import {
   DriveSummaryListResponse,
 } from "@placementos/api-client";
 import { CoordinatorShell } from "../components/CoordinatorShell";
+import { useAuth } from "../context/AuthContext";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user, isAuthenticated, loading: authLoading, isStudent } = useAuth();
   const [drives, setDrives] = useState<DriveSummaryResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        router.push("/login");
+      } else if (isStudent) {
+        router.push("/student/portal");
+      }
+    }
+  }, [authLoading, isAuthenticated, isStudent, router]);
 
   const fetchDashboardData = useCallback(async () => {
     try {

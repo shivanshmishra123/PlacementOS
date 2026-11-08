@@ -5,6 +5,8 @@ import type {
   UserProfileResponse,
   DevLoginRequest,
   DevLoginResponse,
+  LoginRequest,
+  LoginResponse,
   PersonaInfo,
   StudentListItemDTO,
   StudentDetailDTO,
@@ -156,6 +158,14 @@ export class PlacementOSClient {
   // ==========================================
   // Authentication & Personas
   // ==========================================
+
+  public async login(req: LoginRequest): Promise<LoginResponse> {
+    return this.request<LoginResponse>("/api/v1/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    });
+  }
 
   public async devLogin(req: DevLoginRequest): Promise<DevLoginResponse> {
     return this.request<DevLoginResponse>("/api/v1/auth/dev-login", {
