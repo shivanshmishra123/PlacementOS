@@ -107,3 +107,4 @@ class TelemetryTracker:
 
 
 GLOBAL_TELEMETRY = TelemetryTracker()
+

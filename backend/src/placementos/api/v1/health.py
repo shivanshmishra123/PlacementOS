@@ -86,3 +86,38 @@ async def get_telemetry(request: Request) -> dict:
     snapshot["correlation_id"] = getattr(request.state, "correlation_id", None)
     return snapshot
 
+
+@router.get(
+    "/pilot-readiness",
+    summary="P21 institutional pilot readiness and signoff gate status",
+)
+async def get_pilot_readiness(request: Request) -> dict:
+    """Return P21-T05 institutional pilot signoff gate status (read-only).
+
+    All six signoff flags must be True and REAL_DATA_ENABLED must be set
+    before the platform is permitted to operate with real institutional data.
+    This endpoint exposes gate status without disclosing tenant data (INV-10).
+    """
+    from placementos.core.config import validate_pilot_signoff
+    from placementos.services.pilot_readiness import run_security_review
+
+    signoff = validate_pilot_signoff()
+    security = run_security_review()
+
+    return {
+        "pilot_signoff": signoff,
+        "security_review": {
+            "total_items": security["total_items"],
+            "passed": security["passed"],
+            "failed": security["failed"],
+            "deferred": security["deferred"],
+            "all_critical_items_pass": security["all_critical_items_pass"],
+        },
+        "shadow_mode_active": not settings.LIVE_SEND_ENABLED
+        and not settings.GOOGLE_CONNECTORS_ENABLED,
+        "model_interpreter_mode": settings.MODEL_INTERPRETER_MODE,
+        "live_send_enabled": settings.LIVE_SEND_ENABLED,
+        "google_connectors_enabled": settings.GOOGLE_CONNECTORS_ENABLED,
+        "real_data_enabled": settings.REAL_DATA_ENABLED,
+        "correlation_id": getattr(request.state, "correlation_id", None),
+    }

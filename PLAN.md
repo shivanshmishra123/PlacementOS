@@ -805,6 +805,33 @@ Next dependency-ready task: Phase 21 (Shadow mode, institutional acceptance, and
 
 ---
 
+## 25. P21: Shadow mode, institutional acceptance and controlled launch
+
+**Objective:** Prove real AI behavior and complete workflows before allowing it to influence a live drive. **Dependencies:** P20. **Requirements:** P21-T01 through P21-T07, INV-01, INV-04, INV-07, INV-10.
+
+- [x] **P21-T01: Shadow mode comparison runner (ShadowModeRunner).** Built read-only `ShadowModeRunner` in `backend/src/placementos/services/shadow_mode.py` comparing model extraction against coordinator ground truth across all 12 comparable fields (precision + recall metrics). Status is always `SHADOW_ONLY`; results cannot be auto-adopted into any live drive.
+- [x] **P21-T02: Field-level correction telemetry (ShadowCorrectionTracker).** Built `ShadowCorrectionTracker` recording field-level corrections with per-field correction-rate aggregation for prompt quality evaluation. Corrections are analysis-only — they never modify deterministic eligibility results (INV-01) or approved historical policies (INV-09).
+- [x] **P21-T03: Security review checklist.** Built `build_security_review_checklist()` and `run_security_review()` in `backend/src/placementos/services/pilot_readiness.py` covering 16 items across Authorization, Privacy, Prompt Injection, AI Governance, Browser Security, and Infrastructure. All critical (non-deferred) items are PASS; 3 infrastructure items are DEFERRED to live deployment.
+- [x] **P21-T04: Failover rehearsal drills (FailoverRehearsalRunner).** Built `FailoverRehearsalRunner` with 7 drills: model kill-switch, daily budget exhaustion, per-drive budget cap, live-send shadow block, provider missing API key fallback, Redis unavailable (SKIP), and database restore (SKIP). All 5 in-process drills pass; 2 infrastructure drills documented as runbook steps.
+- [x] **P21-T05: Institution pilot signoff gate.** Added 6 `PILOT_*_SIGNED_OFF` flags and `REAL_DATA_ENABLED` to `Settings`; built `validate_pilot_signoff()` in `config.py` returning gate status. All 6 flags must be True before `REAL_DATA_ENABLED` is permitted.
+- [x] **P21-T06: Kill-switch enforcement.** Implemented `shadow_mode_active()` and `assert_shadow_restrictions()` in `shadow_mode.py`. Shadow mode is active when `MODEL_INTERPRETER_MODE in {provider, cached}` and `LIVE_SEND_ENABLED=false` and `GOOGLE_CONNECTORS_ENABLED=false`. Consequential actions raise `PermissionError` in shadow mode.
+- [x] **P21-T07: Honest operational status lifecycle (SuggestionLifecycleStatus).** Defined 6-value enum: `suggested`, `reviewed`, `adopted`, `rejected`, `shadow_only`, `expired`. Published via `GET /api/v1/health/pilot-readiness` endpoint (security review + signoff gates + shadow mode status).
+
+### P21 Completion Record
+
+```text
+Task/phase: P21 (Shadow mode, institutional acceptance, and controlled launch)
+Behavior delivered: Read-only shadow mode comparison engine (precision + recall metrics, 12 field paths); field-level correction telemetry for prompt evaluation (never modifies eligibility); 16-item security review checklist (all critical items PASS); 7-drill failover rehearsal runner (5 in-process drills pass, 2 infrastructure drills documented); 6-gate institutional pilot signoff system (all required before REAL_DATA_ENABLED); live-send and consequential-action kill-switch (PermissionError in shadow mode); honest 6-status SuggestionLifecycleStatus lifecycle; GET /api/v1/health/pilot-readiness diagnostics endpoint; scripts/run_shadow_eval.py evaluation script.
+Requirements covered: P21-T01 through P21-T07, INV-01, INV-04, INV-07, INV-09, INV-10.
+Files/change reference: backend/src/placementos/services/shadow_mode.py, backend/src/placementos/services/pilot_readiness.py, backend/src/placementos/core/config.py (validate_pilot_signoff + 7 new PILOT_* settings), backend/src/placementos/api/v1/health.py (GET /pilot-readiness), backend/tests/unit/test_p21.py, scripts/run_shadow_eval.py.
+Verification commands and results: .venv/Scripts/python.exe -m pytest tests/unit (145 passed in 1.42s across all 17 test modules); ruff check src tests (0 errors); pnpm typecheck (0 errors).
+Demonstrated scenario: Shadow mode runner compares model extraction against coordinator ground truth; mismatch records correction in ShadowCorrectionTracker; security review confirms all critical items pass; failover drills confirm kill switches operate correctly; pilot signoff gate blocks REAL_DATA_ENABLED until all 6 gates cleared.
+Remaining limits: Infrastructure rehearsal drills (Redis outage, database restore) require production deployment environment. Live institutional pilot requires external account provisioning (OIDC IdP, transactional email, cloud hosting).
+Next dependency-ready task: Post-Phase 21 — Live cloud provisioning, institutional IdP registration, and production secret injection. No further application coding required.
+```
+
+---
+
 ## 26. Cross-cutting work tracks
 
 | Track | Start | Ongoing obligation | Consolidated proof |

@@ -146,3 +146,4 @@ async def verify_student_academic_records(
     )
     await session.commit()
     return verified_count
+

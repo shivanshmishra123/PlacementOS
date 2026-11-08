@@ -130,6 +130,16 @@ class Settings(BaseSettings):
     BACKUP_ENCRYPTION_KEY_ID: str = ""
     BACKUP_RESTORE_TESTED: bool = False
 
+    # P21-T05: Explicit institution pilot signoff gates (P21).
+    # All must be True before REAL_DATA_ENABLED is permitted.
+    PILOT_DATA_USE_SIGNED_OFF: bool = False
+    PILOT_PERMISSIONS_SIGNED_OFF: bool = False
+    PILOT_ACADEMIC_CONFIG_SIGNED_OFF: bool = False
+    PILOT_SENDER_SIGNED_OFF: bool = False
+    PILOT_RETENTION_SIGNED_OFF: bool = False
+    PILOT_LAUNCH_SCOPE_SIGNED_OFF: bool = False
+    REAL_DATA_ENABLED: bool = False
+
     # CORS & Web
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
     API_V1_PREFIX: str = "/api/v1"
@@ -275,3 +285,29 @@ class Settings(BaseSettings):
 
 # Cached global settings instance
 settings = Settings()
+
+
+def validate_pilot_signoff(s: "Settings | None" = None) -> dict[str, object]:
+    """Return the P21-T05 institutional signoff gate status.
+
+    All six signoff flags must be True before REAL_DATA_ENABLED is permitted.
+    Returns a dict with per-gate status and an overall all_signed_off boolean.
+    This function does NOT raise; it returns findings for the pilot-readiness endpoint.
+    """
+    cfg = s or settings
+    gates = {
+        "data_use": cfg.PILOT_DATA_USE_SIGNED_OFF,
+        "permissions": cfg.PILOT_PERMISSIONS_SIGNED_OFF,
+        "academic_config": cfg.PILOT_ACADEMIC_CONFIG_SIGNED_OFF,
+        "sender": cfg.PILOT_SENDER_SIGNED_OFF,
+        "retention": cfg.PILOT_RETENTION_SIGNED_OFF,
+        "launch_scope": cfg.PILOT_LAUNCH_SCOPE_SIGNED_OFF,
+    }
+    all_signed = all(gates.values())
+    real_data_safe = all_signed and cfg.REAL_DATA_ENABLED
+    return {
+        "all_signed_off": all_signed,
+        "real_data_enabled": cfg.REAL_DATA_ENABLED,
+        "real_data_permitted": real_data_safe,
+        "gates": gates,
+    }

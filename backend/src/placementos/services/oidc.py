@@ -167,3 +167,4 @@ class OIDCAdapter:
 
         await session.commit()
         return user, membership, institution
+
