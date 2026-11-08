@@ -31,7 +31,11 @@ def test_readiness_projection_does_not_expose_secrets():
     assert "S3_SECRET_ACCESS_KEY" not in serialized
 
 
-def test_configuration_cannot_substitute_for_missing_production_adapters():
+def test_configuration_cannot_substitute_for_missing_production_adapters(monkeypatch):
+    import placementos.services.operations
+
+    monkeypatch.setattr(placementos.services.operations, "OIDC_ADAPTER_IMPLEMENTED", False)
+    monkeypatch.setattr(placementos.services.operations, "CLAMAV_ADAPTER_IMPLEMENTED", False)
     config = Settings(
         _env_file=None,
         IDENTITY_MODE="oidc",
@@ -46,3 +50,21 @@ def test_configuration_cannot_substitute_for_missing_production_adapters():
     checks = {item["key"]: item for item in snapshot["checks"]}
     assert checks["oidc_identity"]["classification"] == "implementation_required"
     assert checks["real_malware_scanner"]["classification"] == "implementation_required"
+
+
+def test_implemented_production_adapters_clear_implementation_blockers():
+    """When OIDC and ClamAV adapters are implemented (P19), they clear implementation blockers."""
+    config = Settings(
+        _env_file=None,
+        IDENTITY_MODE="oidc",
+        OIDC_ISSUER_URL="https://identity.apex.edu",
+        OIDC_CLIENT_ID="placementos",
+        OIDC_MEMBERSHIP_OWNER="identity@apex.edu",
+        MALWARE_SCANNER_MODE="clamav",
+    )
+    snapshot = pilot_readiness_snapshot(config)
+    assert "oidc_identity" not in snapshot["blockers"]
+    assert "real_malware_scanner" not in snapshot["blockers"]
+    checks = {item["key"]: item for item in snapshot["checks"]}
+    assert checks["oidc_identity"]["classification"] == "configured"
+    assert checks["real_malware_scanner"]["classification"] == "configured"

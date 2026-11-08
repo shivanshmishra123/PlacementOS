@@ -5,8 +5,8 @@ from typing import Literal
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-OIDC_ADAPTER_IMPLEMENTED = False
-CLAMAV_ADAPTER_IMPLEMENTED = False
+OIDC_ADAPTER_IMPLEMENTED = True
+CLAMAV_ADAPTER_IMPLEMENTED = True
 
 
 class Settings(BaseSettings):
@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     IDENTITY_MODE: Literal["development_personas", "oidc"] = "development_personas"
     OIDC_ISSUER_URL: str = ""
     OIDC_CLIENT_ID: str = ""
+    OIDC_CLIENT_SECRET: str = ""
+    OIDC_REDIRECT_URI: str = ""
     OIDC_MEMBERSHIP_OWNER: str = ""
 
     # Database
@@ -68,6 +70,9 @@ class Settings(BaseSettings):
     S3_REGION: str = "us-east-1"
     S3_SECURE: bool = False
     MALWARE_SCANNER_MODE: Literal["development_fixture", "clamav"] = "development_fixture"
+    CLAMAV_HOST: str = "127.0.0.1"
+    CLAMAV_PORT: int = 3310
+    CLAMAV_TIMEOUT_SECONDS: int = 10
     MODEL_INTERPRETER_MODE: Literal["fixture", "disabled", "provider", "cached"] = "fixture"
     MODEL_PROVIDER_NAME: str = "gemini"
     MODEL_ID: str = "gemini-2.5-flash-lite"

@@ -73,6 +73,10 @@ class MalwareScanner:
             raise MalwareDetectedError()
         if settings.MALWARE_SCANNER_MODE == "development_fixture":
             return "development_fixture"
+        if settings.MALWARE_SCANNER_MODE == "clamav":
+            from placementos.services.scanner import ClamAVScanner
+
+            return ClamAVScanner().scan_bytes(data)
         raise ParseError("SCANNER_UNAVAILABLE", "Configured malware scanner adapter is unavailable")
 
 

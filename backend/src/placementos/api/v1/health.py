@@ -72,3 +72,17 @@ async def get_readiness(request: Request) -> JSONResponse:
         correlation_id=correlation_id,
     )
     return JSONResponse(status_code=status_code, content=payload.model_dump())
+
+
+@router.get(
+    "/telemetry",
+    summary="Platform operational metrics and telemetry",
+)
+async def get_telemetry(request: Request) -> dict:
+    """Return platform operational metrics snapshot without sensitive tenant data (INV-10)."""
+    from placementos.core.telemetry import GLOBAL_TELEMETRY
+
+    snapshot = GLOBAL_TELEMETRY.get_metrics_snapshot()
+    snapshot["correlation_id"] = getattr(request.state, "correlation_id", None)
+    return snapshot
+

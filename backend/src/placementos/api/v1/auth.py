@@ -327,3 +327,130 @@ async def logout(
     response.delete_cookie(settings.SESSION_COOKIE_NAME)
     response.delete_cookie("csrf_token")
     return {"message": "Successfully logged out"}
+
+
+# ---------------------------------------------------------------------------
+# P19: Production OpenID Connect (OIDC) Endpoints
+# ---------------------------------------------------------------------------
+
+
+class OIDCLoginResponse(BaseModel):
+    authorization_url: str
+    state: str
+
+
+class OIDCCallbackRequest(BaseModel):
+    code: str
+    state: str
+    redirect_uri: str | None = None
+
+
+@router.get("/oidc/login", response_model=OIDCLoginResponse)
+async def oidc_login(
+    redirect_uri: str | None = None,
+) -> OIDCLoginResponse:
+    """Initiate standard OIDC authorization-code flow with state & nonce."""
+    import json
+    import secrets
+    import time
+
+    from placementos.core.redis import get_redis_client
+    from placementos.services.oidc import OIDCAdapter
+
+    callback_url = redirect_uri or getattr(settings, "OIDC_REDIRECT_URI", "") or f"{settings.PUBLIC_WEB_URL}/auth/callback"
+    state = secrets.token_urlsafe(32)
+    nonce = secrets.token_urlsafe(32)
+
+    # Cache state with 10-minute TTL
+    redis = await get_redis_client()
+    await redis.setex(
+        f"oidc_state:{state}",
+        600,
+        json.dumps({"nonce": nonce, "redirect_uri": callback_url, "created_at": time.time()}),
+    )
+
+    adapter = OIDCAdapter()
+    auth_url = adapter.get_authorization_url(redirect_uri=callback_url, state=state, nonce=nonce)
+    return OIDCLoginResponse(authorization_url=auth_url, state=state)
+
+
+@router.post("/oidc/callback", response_model=DevLoginResponse)
+async def oidc_callback(
+    req: OIDCCallbackRequest,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> DevLoginResponse:
+    """Validate OIDC authorization code and establish authenticated session."""
+    import json
+
+    from placementos.core.redis import get_redis_client
+    from placementos.services.oidc import OIDCAdapter
+
+    redis = await get_redis_client()
+    state_bytes = await redis.get(f"oidc_state:{req.state}")
+    if not state_bytes:
+        raise BadRequestException("Invalid or expired OIDC state parameter")
+
+    state_info = json.loads(state_bytes)
+    nonce = state_info.get("nonce")
+    callback_url = req.redirect_uri or state_info.get("redirect_uri")
+
+    adapter = OIDCAdapter()
+    tokens = await adapter.exchange_code(code=req.code, redirect_uri=callback_url)
+    id_token = tokens.get("id_token")
+    if not id_token:
+        raise BadRequestException("Missing id_token in token exchange response")
+
+    claims = adapter.verify_id_token(id_token=id_token, expected_nonce=nonce)
+    user, membership, institution = await adapter.map_claims_to_membership(db, claims)
+
+    # Clean up single-use state
+    await redis.delete(f"oidc_state:{req.state}")
+
+    # Issue opaque session
+    raw_token, auth = await SessionManager.create_session(
+        user_id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        institution_id=institution.id,
+        institution_slug=institution.slug,
+        membership_id=membership.id,
+        role=membership.role,
+        capabilities=membership.capabilities,
+    )
+
+    # Set security cookies
+    response.set_cookie(
+        key=settings.SESSION_COOKIE_NAME,
+        value=raw_token,
+        max_age=settings.SESSION_MAX_AGE_SECONDS,
+        httponly=True,
+        samesite="lax",
+        secure=settings.ENVIRONMENT == "production",
+    )
+
+    csrf_token = generate_csrf_token()
+    response.set_cookie(
+        key="csrf_token",
+        value=csrf_token,
+        max_age=settings.SESSION_MAX_AGE_SECONDS,
+        httponly=False,
+        samesite="lax",
+        secure=settings.ENVIRONMENT == "production",
+    )
+
+    return DevLoginResponse(
+        message=f"Signed in via OIDC as {user.full_name}",
+        user=UserProfileResponse(
+            user_id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            institution_id=institution.id,
+            institution_slug=institution.slug,
+            role=membership.role,
+            capabilities=membership.capabilities,
+        ),
+        csrf_token=csrf_token,
+        session_token=raw_token,
+    )
+

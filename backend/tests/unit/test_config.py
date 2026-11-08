@@ -83,36 +83,62 @@ def test_production_rejects_missing_identity_and_operational_owners():
         )
 
 
-def test_production_config_cannot_claim_unimplemented_runtime_adapters():
+VALID_PRODUCTION_CONFIG = {
+    "ENVIRONMENT": "production",
+    "DEBUG": False,
+    "SECRET_KEY": "externally-generated-secret-key-with-64-safe-characters-1234567890",
+    "IDENTITY_MODE": "oidc",
+    "OIDC_ISSUER_URL": "https://identity.apex.edu",
+    "OIDC_CLIENT_ID": "placementos",
+    "OIDC_MEMBERSHIP_OWNER": "identity-team@apex.edu",
+    "DATABASE_URL": "postgresql+psycopg://app:external@db/placementos",
+    "MIGRATION_DATABASE_URL": "postgresql+psycopg://migration:external@db/placementos",
+    "MALWARE_SCANNER_MODE": "clamav",
+    "MODEL_INTERPRETER_MODE": "disabled",
+    "EXCEPTION_PLANNER_MODE": "disabled",
+    "EMAIL_ADAPTER_MODE": "disabled",
+    "PUBLIC_WEB_URL": "https://placement.apex.edu",
+    "ALLOWED_ORIGINS": ["https://placement.apex.edu"],
+    "WORKFLOW_DATABASE_URL": "postgresql://workflow:external@db/placementos",
+    "S3_ENDPOINT_URL": "https://objects.apex.edu",
+    "S3_ACCESS_KEY_ID": "external-access-key",
+    "S3_SECRET_ACCESS_KEY": "external-secret-key",
+    "S3_BUCKET_NAME": "placementos-pilot-private",
+    "RETENTION_POLICY_ID": "RET-2026-01",
+    "RECORD_RETENTION_DAYS": 365,
+    "BACKUP_RETENTION_DAYS": 30,
+    "BACKUP_ENCRYPTION_KEY_ID": "kms/placementos-backups",
+    "DELETION_OWNER": "records@apex.edu",
+    "DEPLOYMENT_REGION": "in-south",
+    "OPERATIONS_OWNER": "placement-ops@apex.edu",
+    "SECURITY_OWNER": "security@apex.edu",
+    "BACKUP_OWNER": "platform@apex.edu",
+    "INCIDENT_CONTACT": "soc@apex.edu",
+}
+
+
+def test_production_config_with_valid_settings_succeeds():
+    """With OIDC and ClamAV implemented, valid production settings succeed validation."""
+    settings = Settings(**VALID_PRODUCTION_CONFIG)
+    assert settings.ENVIRONMENT == "production"
+    assert settings.IDENTITY_MODE == "oidc"
+    assert settings.MALWARE_SCANNER_MODE == "clamav"
+
+
+def test_production_config_fails_if_oidc_adapter_unimplemented(monkeypatch):
+    """If OIDC adapter flag is False, production configuration fails closed."""
+    import placementos.core.config
+    monkeypatch.setattr(placementos.core.config, "OIDC_ADAPTER_IMPLEMENTED", False)
+
     with pytest.raises(ValueError, match="production OIDC adapter is not implemented"):
-        Settings(
-            ENVIRONMENT="production",
-            DEBUG=False,
-            SECRET_KEY="externally-generated-secret-key-with-64-safe-characters-1234567890",
-            IDENTITY_MODE="oidc",
-            OIDC_ISSUER_URL="https://identity.apex.edu",
-            OIDC_CLIENT_ID="placementos",
-            OIDC_MEMBERSHIP_OWNER="identity-team@apex.edu",
-            DATABASE_URL="postgresql+psycopg://app:external@db/placementos",
-            MIGRATION_DATABASE_URL="postgresql+psycopg://migration:external@db/placementos",
-            MALWARE_SCANNER_MODE="clamav",
-            MODEL_INTERPRETER_MODE="disabled",
-            EMAIL_ADAPTER_MODE="disabled",
-            PUBLIC_WEB_URL="https://placement.apex.edu",
-            ALLOWED_ORIGINS=["https://placement.apex.edu"],
-            WORKFLOW_DATABASE_URL="postgresql://workflow:external@db/placementos",
-            S3_ENDPOINT_URL="https://objects.apex.edu",
-            S3_ACCESS_KEY_ID="external-access-key",
-            S3_SECRET_ACCESS_KEY="external-secret-key",
-            S3_BUCKET_NAME="placementos-pilot-private",
-            RETENTION_POLICY_ID="RET-2026-01",
-            RECORD_RETENTION_DAYS=365,
-            BACKUP_RETENTION_DAYS=30,
-            BACKUP_ENCRYPTION_KEY_ID="kms/placementos-backups",
-            DELETION_OWNER="records@apex.edu",
-            DEPLOYMENT_REGION="in-south",
-            OPERATIONS_OWNER="placement-ops@apex.edu",
-            SECURITY_OWNER="security@apex.edu",
-            BACKUP_OWNER="platform@apex.edu",
-            INCIDENT_CONTACT="soc@apex.edu",
-        )
+        Settings(**VALID_PRODUCTION_CONFIG)
+
+
+def test_production_config_fails_if_clamav_adapter_unimplemented(monkeypatch):
+    """If ClamAV adapter flag is False, production configuration fails closed."""
+    import placementos.core.config
+    monkeypatch.setattr(placementos.core.config, "CLAMAV_ADAPTER_IMPLEMENTED", False)
+
+    with pytest.raises(ValueError, match="production ClamAV adapter is not implemented"):
+        Settings(**VALID_PRODUCTION_CONFIG)
+

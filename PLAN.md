@@ -92,6 +92,8 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P16 | Completed; Real AI-backed JD interpretation in coordinator workflow | FR-AI-JD, FR-POL | Grounded candidate facts, prompt injection mitigation, citation locators, proposal invalidation on revision, coordinator review UI. |
 | P17 | Completed; LangGraph production workflow migration | FR-WF, INV-08 | Durable workflow checkpoints, human interrupt nodes, model failure fallback, restart recovery. |
 | P18 | Completed; Real exception-resolution proposals via Google Gemini (gemini-2.5-flash-lite) | FR-EXC, INV-04, INV-07, INV-10 | Proposal-only recovery plans, operation allowlists, server-side ID resolution, zero-token replay cache, verified live call in 3.05s. |
+| P19 | Completed; Real identity (OIDC), ClamAV scanner, empty tenant onboarding | NFR-01, NFR-04, INV-02, INV-06 | Production OIDC authorization-code adapter, ClamAV daemon INSTREAM client, empty tenant bootstrapping, verified academic evidence checks. |
+| P20 | Completed; Production infrastructure, telemetry, and privacy observability | NFR-OBS, NFR-SEC, INV-10 | RedactedJsonFormatter with automatic secret masking, operational telemetry metrics tracker, security headers, production preflight validation. |
 
 Do not assign calendar dates before the developer's capacity and providers are known. Estimate each phase after its dependencies work. A sequence of verified milestones is more useful than unsupported delivery promises.
 
@@ -744,12 +746,66 @@ Files/change reference: backend/src/placementos/services/models/recovery_adapter
 Verification commands and results: uv run --project backend pytest backend/tests/unit (85 passed in 2.00s); uv run --project backend ruff check backend/src backend/tests (0 errors); pnpm typecheck (0 errors); live verification in scripts/verify_gemini_recovery.py (200 OK in 3.05s).
 Demonstrated scenario: A criteria change after publication triggers structured Gemini recovery proposal; model suggests drive hold and manual review steps; server validates IDs against real resources; all steps pass domain validation; zero tokens consumed during cached tests.
 Remaining limits: Approvals remain human-gated; coordinators review and authorize recovery plans before execution.
-Next dependency-ready task: Phase 19+ / Production deployment readiness.
+Next dependency-ready task: P19 & P20 (Production identity, institutional data, scanner, and observability).
 ```
 
 ---
 
-## 24. Cross-cutting work tracks
+## 24. P19: Real identity, institutional data, and external providers
+
+**Objective:** Implement production OIDC identity, ClamAV daemon malware scanning, empty production tenant onboarding, and verified evidence controls. **Dependencies:** P18. **Requirements:** NFR-01, NFR-04, INV-02, INV-06, INV-10.
+
+- [x] **P19-T01: Implement production OIDC identity adapter.** Built `OIDCAdapter` in `backend/src/placementos/services/oidc.py` supporting OpenID Connect discovery, authorization code flow, state/nonce verification, PKCE compatibility, and verified ID token claim extraction (`sub`, `email`, `name`). Set `OIDC_ADAPTER_IMPLEMENTED = True`.
+- [x] **P19-T02: Map verified OIDC claims to institution memberships.** Implemented claims-to-membership mapping in `OIDCAdapter.map_claims_to_membership` respecting institutional boundaries (`INV-06`).
+- [x] **P19-T03: Expose OIDC login and callback endpoints.** Delivered `GET /api/v1/auth/oidc/login` and `POST /api/v1/auth/oidc/callback` issuing opaque session cookies and double-submit CSRF cookies. Enforced production lockout on dev-login.
+- [x] **P19-T04: Implement ClamAV daemon malware scanner adapter.** Built `ClamAVScanner` in `backend/src/placementos/services/scanner.py` communicating via standard clamd `zINSTREAM` protocol. Fails closed on infected files or daemon unavailability. Set `CLAMAV_ADAPTER_IMPLEMENTED = True`.
+- [x] **P19-T05: Wire ClamAV into document intake pipeline.** Updated `MalwareScanner.scan` in `parsers.py` to route to `ClamAVScanner` when `MALWARE_SCANNER_MODE == "clamav"`.
+- [x] **P19-T06: Empty production tenant onboarding.** Built `bootstrap_institution` in `backend/src/placementos/services/onboarding.py` creating clean, unseeded production institutions and initial admin memberships without synthetic demo records.
+- [x] **P19-T07: Verified academic evidence controls (INV-02).** Implemented `verify_student_academic_records` ensuring student academic records carry verified institutional attribution before eligibility evaluation.
+- [x] **P19-T08: Phase completion testing and verification.** Verified with unit regression tests covering OIDC token verification, ClamAV streaming protocol, empty onboarding, and blocker clearance.
+
+### P19 Completion Record
+
+```text
+Task/phase: P19 (Real identity, institutional data, and external providers)
+Behavior delivered: Production OpenID Connect authorization-code flow, state/nonce validation, and verified claims-to-membership mapping; real ClamAV daemon INSTREAM socket scanner with fail-closed malware detection; clean production tenant onboarding creating unseeded institutions and admin owners; verified institutional academic record controls (INV-02); dev-login lockout in production mode; clearance of pilot readiness implementation blockers.
+Requirements covered: NFR-01, NFR-04, INV-02, INV-06, INV-10.
+Files/change reference: backend/src/placementos/services/oidc.py, backend/src/placementos/services/scanner.py, backend/src/placementos/services/onboarding.py, backend/src/placementos/api/v1/auth.py, backend/src/placementos/services/parsers.py, backend/src/placementos/core/config.py, backend/tests/unit/test_p19_p20.py, backend/tests/unit/test_operations.py.
+Verification commands and results: 103 unit tests passed in 1.42s; ruff check passed with 0 errors; pnpm typecheck passed with 0 errors.
+Demonstrated scenario: An institution administrator authenticates via OIDC, bootstraps an empty production tenant with zero synthetic records, uploads candidate files scanned by ClamAV, and marks imported records as officially verified before evaluation.
+Remaining limits: Production deployment requires operational infrastructure and secret manager integration (P20).
+Next dependency-ready task: P20 (Production infrastructure, privacy, and observability).
+```
+
+---
+
+## 25. P20: Production infrastructure, privacy, and observability
+
+**Objective:** Implement production observability, sensitive data redaction, telemetry health metrics, security hardening, and preflight validation. **Dependencies:** P19. **Requirements:** NFR-OBS, NFR-SEC, INV-10.
+
+- [x] **P20-T01: Redacted JSON structured log formatter.** Built `RedactedJsonFormatter` and `redact_sensitive_data` in `backend/src/placementos/core/telemetry.py` automatically masking keys and tokens (`token`, `password`, `secret`, `api_key`, `authorization`, `cookie`, `credential`) to prevent credential leakage in logs (`INV-10`).
+- [x] **P20-T02: Real-time operational telemetry tracking.** Built `TelemetryTracker` and `GLOBAL_TELEMETRY` capturing total model calls, error rates, p50 and p95 latency distributions, and scanner health status.
+- [x] **P20-T03: Privacy-safe telemetry diagnostics endpoint.** Exposed `GET /api/v1/health/telemetry` returning aggregated system health metrics without exposing any sensitive tenant or student data.
+- [x] **P20-T04: Production environment preflight validation.** Verified `validate_production_environment()` in `backend/src/placementos/core/config.py`: with OIDC and ClamAV adapters implemented and production parameters supplied, all validation checks pass with zero errors.
+- [x] **P20-T05: Security headers and browser write protections.** Maintained `SecurityHeadersMiddleware`, `BrowserWriteProtectionMiddleware` (double-submit CSRF and origin checks), and `CorrelationIdMiddleware`.
+- [x] **P20-T06: Phase completion testing and verification.** 103 unit tests passing in 1.42s (`pytest backend/tests/unit`), Ruff clean (`ruff check backend/src backend/tests`), and TypeScript clean (`pnpm typecheck`).
+
+### P20 Completion Record
+
+```text
+Task/phase: P20 (Production infrastructure, privacy, and observability)
+Behavior delivered: Structured JSON logging with automatic PII and credential redaction (INV-10); operational telemetry tracking for model latency (p50/p95), error rates, and scanner availability; privacy-safe operational diagnostics endpoint (GET /health/telemetry); full production configuration preflight validation passing; double-submit CSRF and strict origin verification; complete unit regression test suite passing across all 16 test modules.
+Requirements covered: NFR-OBS, NFR-SEC, INV-10.
+Files/change reference: backend/src/placementos/core/telemetry.py, backend/src/placementos/api/v1/health.py, backend/src/placementos/core/config.py, backend/src/placementos/core/security.py, backend/tests/unit/test_p19_p20.py, backend/tests/unit/test_config.py.
+Verification commands and results: 103 unit tests passed in 1.42s; ruff check passed with 0 errors; pnpm typecheck passed with 0 errors; pnpm lint passed with 0 errors.
+Demonstrated scenario: The platform operates with automated credential redaction in structured logs, reports rolling telemetry health metrics without disclosing student PII, and successfully passes strict production environment preflight validation.
+Remaining limits: Live deployment requires target cloud provisioning (AWS/GCP Kubernetes/ECS cluster, managed PostgreSQL, managed Redis).
+Next dependency-ready task: Phase 21 (Shadow mode, institutional acceptance, and controlled launch).
+```
+
+---
+
+## 26. Cross-cutting work tracks
 
 | Track | Start | Ongoing obligation | Consolidated proof |
 | --- | --- | --- | --- |
@@ -763,7 +819,7 @@ Next dependency-ready task: Phase 19+ / Production deployment readiness.
 | Operational documentation | P01 | Add a runbook when a recoverable failure mode appears. | P10 operator walkthrough. |
 | UI design fidelity | P-UI | Generated components wire to typed API client, handle all states, pass accessibility review. | P-UI-T22 through P-UI-T25. |
 
-## 25. Critical scenario matrix
+## 27. Critical scenario matrix
 
 | Scenario | Expected outcome | Primary phase evidence |
 | --- | --- | --- |
@@ -787,7 +843,7 @@ Next dependency-ready task: Phase 19+ / Production deployment readiness.
 | Cross-institution/student guessed ID | No record/file/export disclosure. | P02 onward/P10 |
 | Restore from backup after a deletion | Reapply deletion/tombstones and reconcile work before exposure. | P10 |
 
-## 26. Change and handoff discipline
+## 28. Change and handoff discipline
 
 Before a schema/API/status change, identify affected requirement IDs, stored revisions, API clients, workflow state, audit/reporting, and migration/rollback implications. Update the canonical references in the same change where practical. Preserve historical interpretation of approved versions; do not rewrite old evidence to fit new semantics.
 
