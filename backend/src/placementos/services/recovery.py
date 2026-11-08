@@ -1039,6 +1039,7 @@ async def create_recovery_plan(
         analysis.status = "stale"
         await session.commit()
         raise ConflictException("Impact analysis is stale; run it again before planning")
+    rationale = payload.rationale
     if payload.planner_mode == "fixture":
         if settings.ENVIRONMENT == "production" or settings.EXCEPTION_PLANNER_MODE != "fixture":
             raise ConflictException("Fixture exception planner is unavailable; use manual planning")
@@ -1047,6 +1048,22 @@ async def create_recovery_plan(
         planner_id = planner.planner_id
         planner_version = planner.version
         usage = {"provider": "deterministic_fixture", "calls": 1, "repair_attempts": 0}
+    elif payload.planner_mode == "model":
+        if settings.EXCEPTION_PLANNER_MODE == "disabled":
+            raise ConflictException("AI recovery planning is disabled; use manual planning")
+        from placementos.services.models.recovery_adapter import get_recovery_planner
+
+        ai_planner = get_recovery_planner("model")
+        raw_steps, ai_rationale, planner_id, planner_version, usage = ai_planner.propose(analysis)
+        if ai_rationale and (not rationale or rationale == "Propose recovery plan"):
+            rationale = ai_rationale
+    elif payload.planner_mode == "cached":
+        from placementos.services.models.recovery_adapter import CachedRecoveryPlanner
+
+        cached_planner = CachedRecoveryPlanner()
+        raw_steps, cached_rationale, planner_id, planner_version, usage = cached_planner.propose(analysis)
+        if cached_rationale and (not rationale or rationale == "Propose recovery plan"):
+            rationale = cached_rationale
     else:
         raw_steps = payload.manual_steps
         planner_id = "manual-coordinator"
@@ -1096,7 +1113,7 @@ async def create_recovery_plan(
             "analysis_id": str(analysis.id),
             "analysis_fingerprint": analysis.dependency_fingerprint,
             "revision_number": revision_number,
-            "rationale": payload.rationale,
+            "rationale": rationale,
             "steps": step_specs,
         }
     )
@@ -1110,7 +1127,7 @@ async def create_recovery_plan(
         planner_id=planner_id,
         planner_version=planner_version,
         status="draft",
-        rationale=payload.rationale,
+        rationale=rationale,
         canonical_hash=plan_hash,
         dependency_fingerprint=analysis.dependency_fingerprint,
         usage_metadata=usage,

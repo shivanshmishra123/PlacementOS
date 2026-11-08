@@ -74,7 +74,7 @@ class RecoveryStepCreate(BaseModel):
 
 
 class RecoveryPlanCreate(BaseModel):
-    planner_mode: Literal["fixture", "manual"]
+    planner_mode: Literal["fixture", "manual", "model", "cached"] = "model"
     rationale: str = Field(min_length=3, max_length=4000)
     manual_steps: list[RecoveryStepCreate] = Field(default_factory=list, max_length=10)
 
@@ -82,8 +82,8 @@ class RecoveryPlanCreate(BaseModel):
     def manual_mode_requires_steps(self) -> RecoveryPlanCreate:
         if self.planner_mode == "manual" and not self.manual_steps:
             raise ValueError("Manual recovery planning requires at least one typed step")
-        if self.planner_mode == "fixture" and self.manual_steps:
-            raise ValueError("Fixture planning does not accept caller-supplied steps")
+        if self.planner_mode in {"fixture", "model", "cached"} and self.manual_steps:
+            raise ValueError("Automated planning does not accept caller-supplied steps")
         return self
 
 

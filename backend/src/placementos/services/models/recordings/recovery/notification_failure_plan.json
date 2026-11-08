@@ -1,0 +1,17 @@
+{
+  "rationale": "Notification dispatch encountered an error or unknown provider response. Blind retry is prohibited; record manual reconciliation follow-up to investigate delivery status.",
+  "steps": [
+    {
+      "operation_type": "record_manual_followup",
+      "exact_payload": {
+        "note": "Reconcile provider delivery outcome with mail logs. Do not blindly retry unknown dispatches."
+      },
+      "dependencies": [],
+      "expected_effects": [
+        "Record the remaining coordinator review requirement"
+      ],
+      "approval_type": "manual_evidence",
+      "irreversible_effects": []
+    }
+  ]
+}

@@ -78,7 +78,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     MODEL_TIMEOUT_SECONDS: int = 30
     MODEL_DAILY_REQUEST_CAP: int = 50
-    EXCEPTION_PLANNER_MODE: Literal["fixture", "disabled"] = "fixture"
+    EXCEPTION_PLANNER_MODE: Literal["fixture", "disabled", "model", "cached"] = "fixture"
     MAX_UPLOAD_BYTES: int = 15 * 1024 * 1024
     MAX_PDF_PAGES: int = 50
     MAX_EXTRACTED_TEXT_CHARS: int = 2_000_000

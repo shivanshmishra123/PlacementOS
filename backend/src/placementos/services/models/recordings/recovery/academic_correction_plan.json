@@ -1,0 +1,44 @@
+{
+  "rationale": "Student academic revision was updated. Invalidate any pending proposals associated with previous evaluation, draft a clarification update for affected student, and record manual follow-up.",
+  "steps": [
+    {
+      "operation_type": "stale_pending_proposals",
+      "exact_payload": {
+        "proposal_ids": []
+      },
+      "dependencies": [],
+      "expected_effects": [
+        "Invalidate only listed pending proposals"
+      ],
+      "approval_type": "recovery_plan",
+      "irreversible_effects": []
+    },
+    {
+      "operation_type": "prepare_correction_draft",
+      "exact_payload": {
+        "student_profile_ids": [],
+        "communication_kind": "clarification"
+      },
+      "dependencies": [1],
+      "expected_effects": [
+        "Create an exact correction draft; sending still requires separate approval"
+      ],
+      "approval_type": "separate_action_approval",
+      "irreversible_effects": [
+        "A later approved send cannot be recalled"
+      ]
+    },
+    {
+      "operation_type": "record_manual_followup",
+      "exact_payload": {
+        "note": "Verify updated student academic revision with verified institutional records."
+      },
+      "dependencies": [1, 2],
+      "expected_effects": [
+        "Record the remaining coordinator review requirement"
+      ],
+      "approval_type": "manual_evidence",
+      "irreversible_effects": []
+    }
+  ]
+}

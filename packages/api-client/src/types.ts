@@ -843,7 +843,7 @@ export interface RecoveryPlanResponse {
   analysis_id: string;
   proposal_id: string | null;
   revision_number: number;
-  planner_mode: "fixture" | "manual";
+  planner_mode: "fixture" | "manual" | "model" | "cached";
   planner_id: string;
   planner_version: string;
   status: string;

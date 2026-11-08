@@ -1,0 +1,56 @@
+{
+  "rationale": "Criteria modified after drive publication. Place operational hold on drive to pause further registrations, invalidate pending action proposals, prepare clarification notice to notified students, and record manual followup for coordinator verification.",
+  "steps": [
+    {
+      "operation_type": "place_drive_hold",
+      "exact_payload": {
+        "reason": "Approved recovery plan: eligibility criteria changed after publication"
+      },
+      "dependencies": [],
+      "expected_effects": [
+        "Pause new consequential drive work without deleting registrations"
+      ],
+      "approval_type": "recovery_plan",
+      "irreversible_effects": []
+    },
+    {
+      "operation_type": "stale_pending_proposals",
+      "exact_payload": {
+        "proposal_ids": []
+      },
+      "dependencies": [1],
+      "expected_effects": [
+        "Invalidate only listed pending proposals"
+      ],
+      "approval_type": "recovery_plan",
+      "irreversible_effects": []
+    },
+    {
+      "operation_type": "prepare_correction_draft",
+      "exact_payload": {
+        "student_profile_ids": [],
+        "communication_kind": "clarification"
+      },
+      "dependencies": [1, 2],
+      "expected_effects": [
+        "Create an exact correction draft; sending still requires separate approval"
+      ],
+      "approval_type": "separate_action_approval",
+      "irreversible_effects": [
+        "A later approved send cannot be recalled"
+      ]
+    },
+    {
+      "operation_type": "record_manual_followup",
+      "exact_payload": {
+        "note": "Coordinator completes criteria reconciliation and verifies revised cohort eligibility."
+      },
+      "dependencies": [1, 2, 3],
+      "expected_effects": [
+        "Record the remaining coordinator review requirement"
+      ],
+      "approval_type": "manual_evidence",
+      "irreversible_effects": []
+    }
+  ]
+}

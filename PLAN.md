@@ -91,7 +91,7 @@ P11 and P12 can be independent after P10, except connector-specific exception ca
 | P15 | Completed; Model gateway, Pydantic structured output, and zero-token cache | FR-AI-JD, INV-01, INV-03 | Native structured output adapter, paragraph locators, zero-token replay cache, verified live call. |
 | P16 | Completed; Real AI-backed JD interpretation in coordinator workflow | FR-AI-JD, FR-POL | Grounded candidate facts, prompt injection mitigation, citation locators, proposal invalidation on revision, coordinator review UI. |
 | P17 | Completed; LangGraph production workflow migration | FR-WF, INV-08 | Durable workflow checkpoints, human interrupt nodes, model failure fallback, restart recovery. |
-| P18 | Ready; Real exception-resolution proposals | FR-EXC, INV-04 | Bounded model reasoning with operation allowlists, recovery plan proposals. |
+| P18 | Completed; Real exception-resolution proposals via Google Gemini (gemini-2.5-flash-lite) | FR-EXC, INV-04, INV-07, INV-10 | Proposal-only recovery plans, operation allowlists, server-side ID resolution, zero-token replay cache, verified live call in 3.05s. |
 
 Do not assign calendar dates before the developer's capacity and providers are known. Estimate each phase after its dependencies work. A sequence of verified milestones is more useful than unsupported delivery promises.
 
@@ -714,13 +714,42 @@ Requirements covered: FR-WF, INV-04, INV-05, INV-06, INV-07, INV-08.
 Files/change reference: backend/src/placementos/workflows/drive_lifecycle.py, backend/src/placementos/services/workflows.py, backend/src/placementos/api/v1/workflows.py, backend/tests/unit/test_workflows.py.
 Verification commands and results: uv run --project backend pytest backend/tests/unit (78 passed in 1.95s); pnpm typecheck (0 errors); pnpm lint (0 errors).
 Demonstrated scenario: Workflow initiates from intake, extracts criteria with AI model, pauses for human review, safely captures transient model errors in exception cases, and resumes only with authorized, hash-matching decision commands.
-Remaining limits: Advanced exception recovery planning currently uses the deterministic fixture; real proposal-only model reasoning is scheduled for P18.
+Remaining limits: Advanced exception recovery planning currently uses the deterministic fixture; real proposal-only model reasoning is delivered in P18.
 Next dependency-ready task: P18 (Real exception-resolution proposals).
 ```
 
 ---
 
-## 23. Cross-cutting work tracks
+## 23. P18: Real exception-resolution proposals
+
+**Objective:** Implement proposal-only AI reasoning for adaptive exception recovery via Google Gemini (`gemini-2.5-flash-lite`), bounded strictly to the 5 allowlisted operations with server-side ID resolution, zero student PII, and offline replay cache. **Dependencies:** P17. **Requirements:** FR-EXC-04 through FR-EXC-07, INV-04, INV-05, INV-07, INV-10.
+
+- [x] **P18-T01: Define LangChain structured output schema for Recovery Plan Proposals (`RecoveryPlanCandidate`).** Designed `RecoveryPlanCandidate` and `RecoveryPlanStepCandidate` in `backend/src/placementos/services/models/schemas.py` structured cleanly for Gemini constrained decoding.
+- [x] **P18-T02: Data minimization and privacy boundary in prompt builder (INV-10).** Only structural discrepancy summaries and resource IDs (proposals, mappings, student IDs) are passed; zero student names, emails, grades, or personal records are sent to Gemini. Untrusted fallback text is contained within `<untrusted_impact_data>`.
+- [x] **P18-T03: Server-side ID resolution and allowlist enforcement (INV-07).** `GeminiRecoveryPlanner._convert_candidate_steps` verifies candidate operations against `ALLOWLISTED_OPERATIONS` and strictly cross-references proposed IDs against server-side resources, eliminating any hallucinated UUIDs.
+- [x] **P18-T04: Zero-token cache and offline replay (`CachedRecoveryPlanner`).** Stored recorded golden recovery plan fixtures in `backend/src/placementos/services/models/recordings/recovery/` for all 4 exception categories (`criteria_change`, `academic_correction`, `deadline_schedule_change`, `notification_failure`), guaranteeing 0 external tokens consumed during routine testing.
+- [x] **P18-T05: Implement `GeminiRecoveryPlanner` with Gemini 2.5 Flash Lite.** Built LangChain structured output adapter bound to SHA-256 prompt hash (`recovery-plan-gemini-v1:997a9e13a30879b6`). Client token budgeting enforced via `GLOBAL_USAGE_TRACKER`.
+- [x] **P18-T06: Wire model and cached planners into recovery service.** Updated `create_recovery_plan` in `backend/src/placementos/services/recovery.py` to support `planner_mode: "model" | "cached" | "fixture" | "manual"` with canonical hash computation and fresh dependency validation.
+- [x] **P18-T07: Update configuration and API client contracts.** Configured `EXCEPTION_PLANNER_MODE` in `config.py` and updated `planner_mode` in `schemas/recovery.py` and `packages/api-client/src/types.ts`.
+- [x] **P18-T08: Live verification and latency measurement.** Executed live API call against Google AI Studio with Gemini 2.5 Flash Lite in `scripts/verify_gemini_recovery.py`: generated valid structured proposal with server-resolved IDs in 3.05 seconds.
+- [x] **P18-T09: Phase completion testing and verification.** 85 unit tests passing in 2.00s (`pytest backend/tests/unit`), Ruff clean (`ruff check backend/src backend/tests`), and TypeScript clean (`pnpm typecheck`).
+
+### P18 Completion Record
+
+```text
+Task/phase: P18 (Real exception-resolution proposals)
+Behavior delivered: Proposal-only AI recovery planning via Google Gemini 2.5 Flash Lite and LangChain; strict candidate schemas matching the 5 allowlisted operations; server-side ID resolution eliminating hallucinated IDs; complete student data minimization (zero PII sent to LLM); untrusted impact container resisting prompt injections; offline recording cache for zero-token regression testing; client-side daily and per-drive token budgeting; live verification against Google Gemini in 3.05s.
+Requirements covered: FR-EXC-04 through FR-EXC-07, INV-04, INV-05, INV-07, INV-10.
+Files/change reference: backend/src/placementos/services/models/recovery_adapter.py, backend/src/placementos/services/models/schemas.py, backend/src/placementos/services/recovery.py, backend/src/placementos/schemas/recovery.py, backend/src/placementos/core/config.py, backend/tests/unit/test_recovery.py, packages/api-client/src/types.ts, scripts/verify_gemini_recovery.py.
+Verification commands and results: uv run --project backend pytest backend/tests/unit (85 passed in 2.00s); uv run --project backend ruff check backend/src backend/tests (0 errors); pnpm typecheck (0 errors); live verification in scripts/verify_gemini_recovery.py (200 OK in 3.05s).
+Demonstrated scenario: A criteria change after publication triggers structured Gemini recovery proposal; model suggests drive hold and manual review steps; server validates IDs against real resources; all steps pass domain validation; zero tokens consumed during cached tests.
+Remaining limits: Approvals remain human-gated; coordinators review and authorize recovery plans before execution.
+Next dependency-ready task: Phase 19+ / Production deployment readiness.
+```
+
+---
+
+## 24. Cross-cutting work tracks
 
 | Track | Start | Ongoing obligation | Consolidated proof |
 | --- | --- | --- | --- |
@@ -734,7 +763,7 @@ Next dependency-ready task: P18 (Real exception-resolution proposals).
 | Operational documentation | P01 | Add a runbook when a recoverable failure mode appears. | P10 operator walkthrough. |
 | UI design fidelity | P-UI | Generated components wire to typed API client, handle all states, pass accessibility review. | P-UI-T22 through P-UI-T25. |
 
-## 24. Critical scenario matrix
+## 25. Critical scenario matrix
 
 | Scenario | Expected outcome | Primary phase evidence |
 | --- | --- | --- |
@@ -758,7 +787,7 @@ Next dependency-ready task: P18 (Real exception-resolution proposals).
 | Cross-institution/student guessed ID | No record/file/export disclosure. | P02 onward/P10 |
 | Restore from backup after a deletion | Reapply deletion/tombstones and reconcile work before exposure. | P10 |
 
-## 25. Change and handoff discipline
+## 26. Change and handoff discipline
 
 Before a schema/API/status change, identify affected requirement IDs, stored revisions, API clients, workflow state, audit/reporting, and migration/rollback implications. Update the canonical references in the same change where practical. Preserve historical interpretation of approved versions; do not rewrite old evidence to fit new semantics.
 

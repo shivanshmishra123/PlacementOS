@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -91,4 +93,61 @@ class JDExtractionResult(BaseModel):
     clarifications: list[ClarificationFinding] = Field(
         default_factory=list,
         description="Ambiguities or unverified details flagged for human coordinator clarification.",
+    )
+
+
+# ---------------------------------------------------------------------------
+# P18: Adaptive Exception Recovery Structured Candidate Schemas
+# ---------------------------------------------------------------------------
+
+RecoveryCandidateOperationType = Literal[
+    "place_drive_hold",
+    "stale_pending_proposals",
+    "prepare_correction_draft",
+    "mark_external_reconciliation",
+    "record_manual_followup",
+]
+
+
+class RecoveryPlanStepCandidate(BaseModel):
+    """Structured candidate for a single recovery plan step proposed by the model."""
+
+    operation_type: RecoveryCandidateOperationType = Field(
+        description="One of the 5 strictly allowlisted recovery operations: place_drive_hold, stale_pending_proposals, prepare_correction_draft, mark_external_reconciliation, record_manual_followup.",
+    )
+    reason_or_note: str | None = Field(
+        default=None,
+        description="Reason for hold or manual review note.",
+    )
+    target_ids: list[str] = Field(
+        default_factory=list,
+        description="List of target resource IDs (proposals, mappings, or student profiles) from available resources.",
+    )
+    dependencies: list[int] = Field(
+        default_factory=list,
+        description="1-based step indices that must succeed before this step executes.",
+    )
+    expected_effects: list[str] = Field(
+        default_factory=list,
+        description="Human-readable list of expected system effects.",
+    )
+    approval_type: str = Field(
+        default="recovery_plan",
+        description="Authority boundary: 'recovery_plan' for hold/stale/mapping; 'separate_action_approval' for messages; 'manual_evidence' for followup.",
+    )
+    irreversible_effects: list[str] = Field(
+        default_factory=list,
+        description="List of irreversible actions (e.g. sent emails).",
+    )
+
+
+class RecoveryPlanCandidate(BaseModel):
+    """Strict structured output contract for AI-backed recovery proposals."""
+
+    rationale: str = Field(
+        description="Clear, explainable reasoning describing why this recovery plan resolves the discrepancy.",
+    )
+    steps: list[RecoveryPlanStepCandidate] = Field(
+        default_factory=list,
+        description="Ordered sequence of typed recovery steps.",
     )
