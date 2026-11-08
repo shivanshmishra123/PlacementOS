@@ -18,7 +18,6 @@ interface AuthContextType {
   isCoordinator: boolean;
   isAdmin: boolean;
   login: (email: string, password?: string, institutionSlug?: string) => Promise<UserProfileResponse>;
-  loginAsPersona: (personaKey: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -83,22 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [client]
   );
 
-  const loginAsPersona = useCallback(
-    async (personaKey: string) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const resp = await client.devLogin({ persona: personaKey });
-        setUser(resp.user);
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Failed to sign in as persona");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [client]
-  );
-
   const logout = useCallback(async () => {
     setLoading(true);
     try {
@@ -147,7 +130,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isCoordinator,
         isAdmin,
         login,
-        loginAsPersona,
         logout,
         refreshUser,
       }}
