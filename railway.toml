@@ -1,0 +1,18 @@
+# =========================================================================
+# PlacementOS – Railway.app service configuration
+#
+# This applies to ALL Railway services in this repo.
+# Service-specific start commands are overridden per-service in Railway UI.
+# =========================================================================
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+# Runs ONCE after build, before the new instance receives traffic.
+# Runs DB migrations + LangGraph checkpoint schema creation.
+releaseCommand = "uv run --project backend alembic -c backend/alembic.ini upgrade head && uv run --project backend python scripts/setup_workflow_checkpoints.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

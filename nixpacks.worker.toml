@@ -1,0 +1,15 @@
+# =========================================================================
+# PlacementOS – Railway.app Celery Worker Nixpacks Config
+# Save in root as nixpacks.worker.toml and reference from Railway service.
+# =========================================================================
+
+[phases.setup]
+nixPkgs = ["python312", "uv"]
+
+[phases.install]
+cmds = [
+    "uv sync --project backend --frozen --no-dev"
+]
+
+[start]
+cmd = "uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=INFO --concurrency=2 --without-heartbeat"

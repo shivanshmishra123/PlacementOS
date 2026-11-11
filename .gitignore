@@ -49,3 +49,8 @@ logs/
 
 backend/celerybeat-schedule*
 celerybeat-schedule*
+
+# Deployment secrets (never commit real env files)
+.env.freetier
+.env.production
+.env.pilot

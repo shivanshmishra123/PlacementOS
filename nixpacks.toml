@@ -1,0 +1,28 @@
+# =========================================================================
+# PlacementOS – Nixpacks build configuration for Railway.app
+#
+# USAGE: Deploy the backend directory via Railway GitHub integration.
+# Railway will auto-detect this file at the repo root.
+#
+# Two Railway services needed:
+#   1. API Service         → start cmd: uvicorn (defined below)
+#   2. Worker Service      → override start cmd in Railway dashboard to celery
+#
+# Migrations run at start-up (not build time) so the DB is reachable.
+# =========================================================================
+
+[phases.setup]
+nixPkgs = ["python312"]
+
+[phases.install]
+cmds = [
+    "pip install uv --quiet",
+    "uv sync --project backend --frozen --no-dev"
+]
+
+# No build commands – migrations are deferred to the release command.
+
+[start]
+# Railway sets $PORT automatically. The release command runs DB migrations
+# before Uvicorn starts (see railway.toml releaseCommand).
+cmd = "uv run --project backend uvicorn placementos.main:app --host 0.0.0.0 --port $PORT --no-server-header"
