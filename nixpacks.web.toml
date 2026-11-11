@@ -1,0 +1,4 @@
+# Nixpacks config for the @placementos/web (Next.js) service.
+# Selected via the NIXPACKS_CONFIG_FILE=nixpacks.web.toml service variable.
+# Do not override setup/install: let Nixpacks auto-detect Node + pnpm from package.json / pnpm-lock.yaml.
+providers = ["node"]
