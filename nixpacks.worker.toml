@@ -13,3 +13,4 @@ cmds = [
 
 [start]
 cmd = "uv run --project backend celery -A placementos.workers.celery_app worker --loglevel=INFO --concurrency=2 --without-heartbeat"
+
